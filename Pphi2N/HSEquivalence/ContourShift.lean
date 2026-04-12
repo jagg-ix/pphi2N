@@ -60,25 +60,22 @@ differentiable on its interior, the boundary integral is zero.
 
 This is in `Mathlib.Analysis.Complex.CauchyIntegral`. -/
 
-/-- **Rectangle integral vanishes for holomorphic functions.**
+/-- **Rectangle integral vanishes (from Mathlib).**
 
-This is `HolomorphicOn.vanishesOnRectangle` from the PNT project,
-which wraps Mathlib's
-`integral_boundary_rect_eq_zero_of_continuousOn_of_differentiableOn`.
-
-For f holomorphic on a rectangle: the boundary integral is zero,
-i.e., the sum of the four sides (two horizontal + two vertical) = 0. -/
-axiom rectangle_integral_vanishes
+This is `integral_boundary_rect_eq_zero_of_differentiable_on_off_countable`
+from `Mathlib.Analysis.Complex.CauchyIntegral`, specialized to s = ∅. -/
+theorem rectangle_integral_vanishes
     (f : ℂ → ℂ) (z w : ℂ)
-    (hf : DifferentiableOn ℂ f
-      (Set.Ioo (min z.re w.re) (max z.re w.re) ×ℂ
-       Set.Ioo (min z.im w.im) (max z.im w.im)))
-    (hfc : ContinuousOn f
-      (Set.Icc z.re w.re ×ℂ Set.Icc z.im w.im)) :
-    (∫ x in Set.Icc z.re w.re, f (↑x + z.im * I)) -
-    (∫ x in Set.Icc z.re w.re, f (↑x + w.im * I)) +
-    I • (∫ y in Set.Icc z.im w.im, f (w.re + ↑y * I)) -
-    I • (∫ y in Set.Icc z.im w.im, f (z.re + ↑y * I)) = 0
+    (Hc : ContinuousOn f ([[z.re, w.re]] ×ℂ [[z.im, w.im]]))
+    (Hd : ∀ x ∈ Set.Ioo (min z.re w.re) (max z.re w.re) ×ℂ
+             Set.Ioo (min z.im w.im) (max z.im w.im),
+      DifferentiableAt ℂ f x) :
+    (∫ x in z.re..w.re, f (↑x + z.im * I)) -
+    (∫ x in z.re..w.re, f (↑x + w.im * I)) +
+    I • (∫ y in z.im..w.im, f (w.re + ↑y * I)) -
+    I • (∫ y in z.im..w.im, f (z.re + ↑y * I)) = 0 :=
+  sorry -- bridge to Mathlib's integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
+  -- The statement matches but set notation (×ℂ, [[·,·]]) needs alignment
 
 /-! ## Vertical contour shift (the key result)
 
