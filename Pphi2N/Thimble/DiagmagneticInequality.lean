@@ -382,13 +382,37 @@ theorem diamagnetic_diagonal (eigvals : n → ℝ) (h_pos : ∀ i, 0 < eigvals i
   by_cases h : x = y
   · subst h
     simp only [Matrix.diagonal_apply_eq, one_div]
-    -- Goal: ‖Ring.inverse(fun j => ↑(eigvals j) + ↑(v j) * I) x‖ ≤ (eigvals x)⁻¹
-    -- Mathlib gap: no `Ring.inverse_pi_apply` lemma to unfold
-    -- Ring.inverse on (n → ℂ) to pointwise Ring.inverse on ℂ.
-    -- The math is: Ring.inverse(f)(x) = (f x)⁻¹ for f : n → ℂ
-    -- with all f(j) ≠ 0, then ‖(f x)⁻¹‖ = ‖f x‖⁻¹ ≤ (eigvals x)⁻¹
-    -- by real_le_norm_add_mul_I + one_div_le_one_div_of_le.
-    sorry -- Mathlib gap: Ring.inverse on Pi types
+    -- Goal: ‖Ring.inverse(f) x‖ ≤ (eigvals x)⁻¹
+    -- where f = fun j => ↑(eigvals j) + ↑(v j) * I
+    -- Step 1: f is a unit in (n → ℂ) since each f j ≠ 0
+    let f := fun j => (↑(eigvals j) : ℂ) + ↑(v j) * I
+    have hf_ne : ∀ j, f j ≠ 0 := fun j => by
+      intro heq; have := congr_arg Complex.re heq
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+            Complex.ofReal_im, Complex.I_re, f] at this
+      linarith [h_pos j]
+    -- Ring.inverse on (n → ℂ) where each entry is nonzero:
+    -- For a DivisionRing, Ring.inverse a = a⁻¹ when a ≠ 0.
+    -- For Pi types, Ring.inverse = pointwise when IsUnit.
+    -- We use Ring.inverse_eq_inv' (for GroupWithZero = field ℂ)
+    -- applied pointwise.
+    -- Step 2: unfold Ring.inverse to pointwise inverse
+    -- For ℂ (a GroupWithZero), Ring.inverse a = a⁻¹ when a ≠ 0
+    -- For Pi (n → ℂ), IsUnit f → Ring.inverse f = ↑(f.unit⁻¹)
+    -- We need: Ring.inverse(f)(x) = (f x)⁻¹
+    -- Use: Ring.inverse_eq_inv' for each component
+    have hf_unit : IsUnit f := Pi.isUnit_iff.mpr (fun j =>
+      IsUnit.mk0 _ (hf_ne j))
+    -- Use Ring.inverse_unit to unfold, then Pi.inv_apply
+    conv_lhs => rw [show Ring.inverse f = (↑hf_unit.unit⁻¹ : n → ℂ) from by
+      have := Ring.inverse_unit hf_unit.unit
+      rwa [IsUnit.unit_spec] at this]
+    rw [Units.val_inv_eq_inv_val, Pi.inv_apply, IsUnit.unit_spec]
+    -- Goal: ‖(f x)⁻¹‖ ≤ (eigvals x)⁻¹
+    -- Goal should be: ‖(f x)⁻¹‖ ≤ (eigvals x)⁻¹
+    -- = ‖(↑(eigvals x) + ↑(v x) * I)⁻¹‖ ≤ (eigvals x)⁻¹
+    simp only [norm_inv, f]
+    exact inv_anti₀ (h_pos x) (real_le_norm_add_mul_I _ _ (h_pos x))
   · simp only [Matrix.diagonal_apply_ne _ h]
     simp
 
