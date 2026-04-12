@@ -1607,7 +1607,7 @@ The proof chains two axioms:
   (1/m_0^2)\,e^{-m_0\,\mathrm{dist}(x,y)}$.
 \end{enumerate}
 
-\subsection{What is proved (no axioms, no sorries)}
+\subsection{What is proved (no axioms; 1 sorry in diagonal case)}
 
 \begin{itemize}
 \item \textbf{HS identity}: from Mathlib's
@@ -1690,6 +1690,33 @@ The proof chains two axioms:
   manifold $\mathcal{M}_T$ for finite~$T$ sufficient for the
   proof, avoiding the need to characterize $\mathcal{J}_0$ globally?
 \end{enumerate}
+
+\subsection{Gap between this document and the Lean formalization}
+
+The Lean development mirrors the top-level proof architecture
+(Sections~\ref{sec:thimble}--\ref{sec:HJ_solution}) but does not
+yet formalize the detailed mathematics:
+\begin{itemize}
+\item The thimble geometry (Sections~\ref{sec:constant_shift}--\ref{sec:lagrangian}), Hamilton-Jacobi theory
+  (Section~\ref{sec:HJ}), and solution theory
+  (Section~\ref{sec:HJ_solution}) are documented but axiomatized
+  in Lean. The \texttt{quantum\_thimble\_exists} axiom packages
+  the IFT existence + BL variance bound.
+\item The ``trivial averaging'' argument (step~3 of the proof plan)
+  is not separately formalized; Lean packages the entire bridge
+  (HS + Cauchy + QHJ + FK + averaging) into the single axiom
+  \texttt{contour\_deformation}.
+\item The diamagnetic inequality has a proof structure
+  (\texttt{DiagmagneticInequality.lean}, 413 lines) but the
+  sub-steps (Trotter, heat kernel, Laplace transform) remain
+  axioms.
+\item The Green's function Fourier analysis
+  (\texttt{GreenDecay.lean}, 291 lines) has 12 proved theorems
+  but the sharp exponential rate is axiomatized.
+\end{itemize}
+The Lean development is a \textbf{coherent, compiling scaffold}
+for the proof strategy described in this document, not yet a
+complete formal derivation of the analytic steps.
 
 \begin{thebibliography}{99}
 \bibitem{BL76} H.~J.~Brascamp and E.~H.~Lieb,
