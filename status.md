@@ -19,7 +19,7 @@ with difficulty ratings and proof plans.
 The O(N) LSM interacting measure has `HasCorrelationDecay` with mass
 m₀ > 0 from the gap equation, uniform in lattice volume.
 
-Proved from 2 axioms: `thimble_bound` + `green_exponential_decay`.
+Proved from `correlator_le_thimble_avg` + `green_exponential_decay`.
 See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 
 | Result | File | Status |
@@ -48,7 +48,7 @@ See `docs/axiom_status.md` for detailed proof plans for each axiom.
 
 | Axiom | File | Content | Difficulty |
 |-------|------|---------|------------|
-| `thimble_bound` | MassGapProof.lean | HS+Cauchy+QHJ+FK→\|⟨φφ⟩\|≤M⁻¹ | research |
+| `correlator_le_thimble_avg` | MassGapProof.lean | HS+Cauchy+triangle→\|⟨φφ⟩\|≤E[G] | research |
 | `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} | medium |
 | `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist | medium |
 

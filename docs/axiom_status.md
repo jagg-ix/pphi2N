@@ -8,22 +8,23 @@ All axioms verified correct by Gemini deep think (2026-04-12).
 These are the axioms directly used in the proof of
 `ON_LSM_hasCorrelationDecay`.
 
-### 1. `thimble_bound`
+### 1. `correlator_le_thimble_avg`
 - **File:** `Thimble/MassGapProof.lean`
-- **Statement:** For the O(N) LSM measure `onInteractingMeasure`,
-  |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ M⁻¹(x,y) where M = -Δ + m₀².
-- **Packages:** HS identity + Cauchy contour shift + quantum HJ
-  (positive measure) + FK bound (uniform in u) + triangle inequality
-- **Difficulty:** Research-level. This is the central theorem of the
-  Lefschetz thimble approach.
-- **Proof plan:** Decompose into sub-steps:
+- **Statement:** For the O(N) LSM measure and a `ThimbleIntegralData T`,
+  |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ T.thimble_avg x y.
+- **Note:** `thimble_bound` (|⟨φφ⟩_c| ≤ M⁻¹) is now a THEOREM
+  proved from this axiom + T.fk_bound (inside ThimbleIntegralData).
+- **Packages** (ORDER MATTERS — Cauchy BEFORE triangle):
   (a) HS representation of the correlator (from HSIdentity, proved)
-  (b) Cauchy contour shift to quantum thimble (from vertical_contour_shift)
-  (c) Positive measure on thimble (from quantum_thimble_exists)
-  (d) FK bound uniform in u (from resolvent_complex_bound)
-  (e) Triangle inequality on positive measure (trivial)
-- **Dependencies:** resolvent_complex_bound, quantum_thimble_exists,
-  vertical_contour_shift
+  (b) Cauchy contour shift to quantum thimble (BEFORE absolute values!)
+  (c) Triangle inequality on POSITIVE thimble measure
+- **Difficulty:** Research-level. The Cauchy shift is the hard step.
+- **Proof plan:**
+  (a) Define σ-integral from algebraic HS identity (measure plumbing)
+  (b) Apply vertical_contour_shift site-by-site (Fubini + decay)
+  (c) On the thimble: measure positive (quantum_thimble_exists),
+      so triangle inequality is clean (no sign problem)
+- **Dependencies:** vertical_contour_shift, quantum_thimble_exists
 
 ### 2. `green_exponential_decay`
 - **File:** `Thimble/FKBoundShifted.lean`
@@ -221,4 +222,4 @@ These are porting targets from pphi2 and gaussian-field.
 7. **fderiv_log_det** (medium, chain rule + cofactor)
 8. **trotter_product_matrix** (medium, BCH remainder)
 9. **quantum_thimble_exists** (hard, IFT for quantum HJ)
-10. **thimble_bound** (research-level, the main bridge)
+10. **correlator_le_thimble_avg** (research-level, HS+Cauchy+triangle)
