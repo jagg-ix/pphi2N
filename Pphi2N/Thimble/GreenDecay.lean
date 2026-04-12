@@ -286,6 +286,60 @@ theorem greenFunction_norm_antitone (eigenval : ZMod L → ℝ)
     _ ≤ 1 / m1 := by
         apply div_le_div_of_nonneg_left (le_of_lt one_pos) hm1 hle
 
+/-! ## Characteristic equation for the 1D Green's function
+
+On Z/LZ with nearest-neighbor Laplacian, the Green's function
+G(n) = (-Δ+m²)⁻¹(n,0) satisfies the recurrence:
+
+  -G(n+1) + (2+m²)G(n) - G(n-1) = δ_{n,0}
+
+The characteristic equation r² - (2+m²)r + 1 = 0 has roots
+  r = ((2+m²) ± √((2+m²)²-4)) / 2
+For m² > 0: discriminant > 0, r₊ > 1 > r₋ > 0, and
+  G(n) ~ r₋ⁿ = e^{-n·log(1/r₋)}
+
+This gives exponential decay with rate α = log(1/r₋) > 0. -/
+
+/-- The characteristic polynomial for the 1D lattice recurrence:
+r² - (2+m²)r + 1 = 0. The smaller root r₋ determines the decay rate. -/
+def characteristicRoot (m_sq : ℝ) : ℝ :=
+  ((2 + m_sq) - Real.sqrt ((2 + m_sq) ^ 2 - 4)) / 2
+
+/-- The smaller characteristic root is positive for m² > 0. -/
+theorem characteristicRoot_pos (m_sq : ℝ) (hm : 0 < m_sq) :
+    0 < characteristicRoot m_sq := by
+  unfold characteristicRoot
+  apply div_pos _ two_pos
+  have h_disc : (2 + m_sq) ^ 2 - 4 > 0 := by nlinarith
+  have h_sqrt_lt : Real.sqrt ((2 + m_sq) ^ 2 - 4) < 2 + m_sq := by
+    calc Real.sqrt ((2 + m_sq) ^ 2 - 4)
+        < Real.sqrt ((2 + m_sq) ^ 2) := by
+          apply Real.sqrt_lt_sqrt (le_of_lt h_disc)
+          linarith
+      _ = 2 + m_sq := Real.sqrt_sq (by linarith)
+  linarith
+
+/-- The smaller characteristic root is less than 1 for m² > 0. -/
+theorem characteristicRoot_lt_one (m_sq : ℝ) (hm : 0 < m_sq) :
+    characteristicRoot m_sq < 1 := by
+  unfold characteristicRoot
+  rw [div_lt_one two_pos]
+  -- Need (2+m²) - √((2+m²)²-4) < 2, i.e., m² < √((2+m²)²-4)
+  have h_disc : (2 + m_sq) ^ 2 - 4 > 0 := by nlinarith
+  have : m_sq < Real.sqrt ((2 + m_sq) ^ 2 - 4) := by
+    have h1 : m_sq = Real.sqrt (m_sq ^ 2) := (Real.sqrt_sq (le_of_lt hm)).symm
+    rw [h1]
+    exact Real.sqrt_lt_sqrt (by positivity) (by nlinarith)
+  linarith
+
+/-- The decay rate α = -log(r₋) is positive for m² > 0. -/
+def decayRate (m_sq : ℝ) : ℝ := -Real.log (characteristicRoot m_sq)
+
+theorem decayRate_pos (m_sq : ℝ) (hm : 0 < m_sq) : 0 < decayRate m_sq := by
+  unfold decayRate
+  rw [neg_pos]
+  exact Real.log_neg (characteristicRoot_pos m_sq hm) (characteristicRoot_lt_one m_sq hm)
+
 end Pphi2N
 
 end
