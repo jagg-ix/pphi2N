@@ -381,15 +381,15 @@ theorem diamagnetic_diagonal (eigvals : n → ℝ) (h_pos : ∀ i, 0 < eigvals i
   rw [Matrix.inv_diagonal]
   by_cases h : x = y
   · subst h
-    simp only [Matrix.diagonal_apply_eq, Pi.inv_apply, one_div]
-    -- Need ‖(eigvals x + v x * I)⁻¹‖ ≤ (eigvals x)⁻¹
-    -- From real_le_abs_add_mul_I: eigvals x ≤ |eigvals x + v x * I|
-    -- So (eigvals x)⁻¹ ≥ |eigvals x + v x * I|⁻¹ = ‖(eigvals x + v x * I)⁻¹‖
-    -- ‖z⁻¹‖ = ‖z‖⁻¹ ≤ (eigvals x)⁻¹ from real_le_norm_add_mul_I
-    -- The goal involves Pi.inv_apply unfolding; API plumbing.
-    sorry -- from real_le_norm_add_mul_I + norm_inv + inv_anti
-  · -- Off-diagonal: (diagonal f)⁻¹ x y = 0 when x ≠ y
-    simp only [Matrix.diagonal_apply_ne _ h]
+    simp only [Matrix.diagonal_apply_eq, one_div]
+    -- Goal: ‖Ring.inverse(fun j => ↑(eigvals j) + ↑(v j) * I) x‖ ≤ (eigvals x)⁻¹
+    -- Mathlib gap: no `Ring.inverse_pi_apply` lemma to unfold
+    -- Ring.inverse on (n → ℂ) to pointwise Ring.inverse on ℂ.
+    -- The math is: Ring.inverse(f)(x) = (f x)⁻¹ for f : n → ℂ
+    -- with all f(j) ≠ 0, then ‖(f x)⁻¹‖ = ‖f x‖⁻¹ ≤ (eigvals x)⁻¹
+    -- by real_le_norm_add_mul_I + one_div_le_one_div_of_le.
+    sorry -- Mathlib gap: Ring.inverse on Pi types
+  · simp only [Matrix.diagonal_apply_ne _ h]
     simp
 
 /-! ## Summary of axiom dependencies
