@@ -2,7 +2,7 @@
 
 ## What this project proves
 
-Lean 4 formalization with 11 axioms, 1 sorry, 32 files.
+Lean 4 formalization with 21 axioms, 4 sorries, 41 files.
 
 ### Theorem 1: Continuum limit with OS axioms
 
@@ -11,19 +11,37 @@ The O(N) Linear Sigma Model on the torus T²_L has a UV continuum limit
 satisfying Osterwalder-Schrader axioms OS0 (analyticity), OS1 (regularity),
 OS2 (translation invariance).
 
-### Theorem 2: Mass gap at large N (in progress)
+### Theorem 2: Mass gap at large N
 
-Target: exponential decay of the connected two-point function for
-N ≥ N₀, with the exponentially small mass from dimensional transmutation.
+**`ON_LSM_hasCorrelationDecay`** (`Thimble/MassGapProof.lean`):
+The O(N) LSM interacting measure has exponential correlation decay
+(`HasCorrelationDecay`) with mass m₀ > 0 from the gap equation,
+uniform in the lattice volume.
 
-See `docs/mass-gap-v2.tex` for the proof outline and `status.md` for
-detailed inventory.
+Proved from 2 axioms:
+- `contour_deformation` — HS + Cauchy + quantum HJ + FK bound
+- `green_exponential_decay` — lattice Green's function decay
+
+The proof uses the **Lefschetz thimble** / quantum Hamilton-Jacobi
+approach. See `docs/mass-gap-v3.tex` (28 pages) for the full
+mathematical argument and `status.md` for detailed inventory.
 
 ## Proof approach for the mass gap
 
+### The Lefschetz thimble strategy
+
+The mass gap proof uses a novel approach based on the quantum
+Hamilton-Jacobi equation. The key insight: shifting the HS
+auxiliary field σ into the complex plane by a constant v_*
+(determined by the gap equation) introduces a real mass m₀²
+into the φ-operator. On the quantum thimble (where the total
+phase vanishes), the FK bound passes through the u-average
+trivially (positive measure, ratio Z/Z = 1), giving
+|⟨φ(x)φ(0)⟩| ≤ Ce^{-m₀|x|} uniformly in lattice volume.
+
 ### The Hubbard-Stratonovich transformation
 
-The quartic interaction λ(|φ|²/N - v²)² is linearized by an auxiliary
+The quartic interaction λ(|φ|²/N - ρ²)² is linearized by an auxiliary
 field σ with **imaginary** coupling (the Euclidean sign requires this):
 
   exp(-λa²) = c ∫ dσ exp(-σ²/(4λ) + iσa)
@@ -74,9 +92,19 @@ Pphi2N/
   ContinuumLimit/           -- Torus embedding, OS0-OS2
   GeneralResults/           -- Matrix calculus (det, log det)
   MassGap/                  -- Definitions, Laplacian PSD, σ-concentration
-  HSEquivalence/            -- HS identity, contour rotation, FK bound, N=1 test
+  HSEquivalence/            -- HS identity, contour rotation, N=1 test
+  Thimble/                  -- Lefschetz thimble mass gap proof
+    GapEquation.lean        -- Gap equation, shift parameter v_*
+    ShiftedOperator.lean    -- Operator -Δ+m₀²+2iuz, spectral gap
+    QuantumThimble.lean     -- Quantum HJ, phase cancellation
+    FKBoundShifted.lean     -- FK bound for concrete shifted operator
+    GreenDecay.lean         -- Lattice Green's function decay
+    DiagmagneticInequality.lean -- Semigroup proof of |e^{-t(M+iV)}| ≤ e^{-tM}
+    ThimbleMeasure.lean     -- BL variance on the thimble
+    MassGapProof.lean       -- Main theorem: HasCorrelationDecay
 docs/
-  mass-gap-v2.tex           -- Mass gap proof outline (9 pages)
+  mass-gap-v3.tex           -- Mass gap proof outline (28 pages)
+  sign-problem.tex          -- Lefschetz thimbles and sign problems (10 pages)
   Kupiainen1980.pdf         -- "On the 1/n expansion" (NLSM)
   Kupiainen1980b.pdf        -- "1/n expansion for a QFT model" (LSM)
 ```

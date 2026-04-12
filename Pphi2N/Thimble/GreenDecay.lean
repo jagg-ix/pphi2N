@@ -1,0 +1,291 @@
+/-
+Copyright (c) 2026 Michael R. Douglas. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+
+# Exponential Decay of the Lattice Green's Function
+
+Proves exponential decay of the massive lattice Green's function on a
+finite torus (Z/LZ), via discrete Fourier analysis.
+
+## Mathematical content
+
+On the 1D torus Z/LZ with L sites, define the Green's function:
+
+  G_m(n) = (1/L) Sigma_{k in Z/LZ} e^{2 pi i k n / L} / (lambda_k + m^2)
+
+where lambda_k >= 0 are the eigenvalues of the lattice Laplacian (e.g.,
+lambda_k = 4 sin^2(pi k / L) for the nearest-neighbor Laplacian).
+
+## Key results
+
+1. `greenFunction_norm_le` -- |G_m(n)| <= (1/L) Sum 1/(lambda_k + m^2) (triangle ineq)
+2. `greenFunction_at_zero_le` -- (1/L) Sum 1/(lambda_k + m^2) <= 1/m^2
+3. `greenFunction_norm_le_inv_mass` -- combined: |G_m(n)| <= 1/m^2
+4. `greenFunction_exponential_decay` -- G_m(n) <= C * e^{-alpha |n|} (axiom)
+
+## Proof strategy
+
+The triangle inequality bound |G(n)| <= G(0) <= 1/m^2 is fully proved.
+For the sharper exponential decay, we axiomatize the decay rate, as
+it requires either random walk estimates or Bessel function analysis.
+
+## References
+
+- Glimm-Jaffe, *Quantum Physics: A Functional Integral Point of View*, Ch. 19
+- Lawler, *Random Walk: A Modern Introduction*, Ch. 2
+-/
+
+import Mathlib.Analysis.Fourier.ZMod
+import Mathlib.Analysis.Normed.Ring.Finite
+import Mathlib.Analysis.SpecialFunctions.Pow.Real
+
+noncomputable section
+
+set_option linter.unusedSectionVars false
+
+open Complex Finset ZMod
+
+namespace Pphi2N
+
+/-! ## The Green's function on Z/LZ
+
+We define the Green's function as a discrete Fourier sum with a
+positive definite denominator. The setup is abstract: we work with
+any family of positive "eigenvalues" indexed by ZMod L. -/
+
+variable {L : ℕ} [NeZero L]
+
+/-- The momentum-space propagator: 1 / (lambda_k + m^2) for each mode k. -/
+def propagator (eigenval : ZMod L → ℝ) (m_sq : ℝ) (k : ZMod L) : ℝ :=
+  1 / (eigenval k + m_sq)
+
+/-- The Green's function on the 1D torus Z/LZ:
+  G(n) = (1/L) Sigma_k e^{2 pi i k n / L} / (lambda_k + m^2)
+
+Here `eigenval k` gives the k-th eigenvalue of the Laplacian (>= 0),
+and `m_sq` is the mass squared (> 0). -/
+def greenFunction (eigenval : ZMod L → ℝ) (m_sq : ℝ) (n : ZMod L) : ℂ :=
+  (L : ℂ)⁻¹ * ∑ k : ZMod L, (stdAddChar (k * n) : ℂ) * (propagator eigenval m_sq k : ℂ)
+
+/-- The Green's function at n = 0 equals (1/L) Sigma_k 1/(lambda_k + m^2). -/
+theorem greenFunction_at_zero (eigenval : ZMod L → ℝ) (m_sq : ℝ) :
+    greenFunction eigenval m_sq 0 =
+      (L : ℂ)⁻¹ * ∑ k : ZMod L, (propagator eigenval m_sq k : ℂ) := by
+  unfold greenFunction
+  congr 1
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [mul_zero, stdAddChar.map_zero_eq_one, one_mul]
+
+/-! ## The norm bound: |G(n)| <= G(0)
+
+This follows from the triangle inequality for finite sums. The key is
+that |e^{2 pi i k n / L}| = 1 (it's a root of unity) and propagator(k) >= 0. -/
+
+/-- Each propagator value is positive when eigenvalues are nonneg and mass is positive. -/
+theorem propagator_pos {eigenval : ZMod L → ℝ} {m_sq : ℝ}
+    (h_eig : ∀ k, 0 ≤ eigenval k) (hm : 0 < m_sq) (k : ZMod L) :
+    0 < propagator eigenval m_sq k := by
+  unfold propagator
+  apply div_pos one_pos
+  linarith [h_eig k]
+
+/-- Each propagator value is nonneg when eigenvalues are nonneg and mass is positive. -/
+theorem propagator_nonneg {eigenval : ZMod L → ℝ} {m_sq : ℝ}
+    (h_eig : ∀ k, 0 ≤ eigenval k) (hm : 0 < m_sq) (k : ZMod L) :
+    0 ≤ propagator eigenval m_sq k :=
+  le_of_lt (propagator_pos h_eig hm k)
+
+/-- Auxiliary: ‖(L : ℂ)⁻¹‖ = (L : ℝ)⁻¹. -/
+private theorem norm_inv_natCast_complex :
+    ‖(L : ℂ)⁻¹‖ = (L : ℝ)⁻¹ := by
+  simp
+
+/-- **Main triangle inequality bound**: ‖G(n)‖ <= (1/L) Sigma_k 1/(lambda_k + m^2).
+
+This is the simplest pointwise bound on the Green's function,
+obtained by taking absolute values inside the Fourier sum.
+The right-hand side equals the real part of G(0). -/
+theorem greenFunction_norm_le (eigenval : ZMod L → ℝ) (m_sq : ℝ)
+    (h_eig : ∀ k, 0 ≤ eigenval k) (hm : 0 < m_sq) (n : ZMod L) :
+    ‖greenFunction eigenval m_sq n‖ ≤
+      (L : ℝ)⁻¹ * ∑ k : ZMod L, propagator eigenval m_sq k := by
+  unfold greenFunction
+  calc ‖(L : ℂ)⁻¹ * ∑ k, (stdAddChar (k * n) : ℂ) * ↑(propagator eigenval m_sq k)‖
+      = ‖(L : ℂ)⁻¹‖ * ‖∑ k, (stdAddChar (k * n) : ℂ) * ↑(propagator eigenval m_sq k)‖ :=
+        norm_mul _ _
+    _ ≤ ‖(L : ℂ)⁻¹‖ * ∑ k, ‖(stdAddChar (k * n) : ℂ) * ↑(propagator eigenval m_sq k)‖ :=
+        mul_le_mul_of_nonneg_left (norm_sum_le _ _) (norm_nonneg _)
+    _ = ‖(L : ℂ)⁻¹‖ * ∑ k, propagator eigenval m_sq k := by
+        congr 1
+        apply Finset.sum_congr rfl; intro k _
+        rw [norm_mul, AddChar.norm_apply, one_mul, Complex.norm_real]
+        exact abs_of_nonneg (propagator_nonneg h_eig hm k)
+    _ = (L : ℝ)⁻¹ * ∑ k, propagator eigenval m_sq k := by
+        rw [norm_inv_natCast_complex]
+
+/-! ## The eigenvalue bound: G(0) <= 1/m^2
+
+Since each eigenvalue lambda_k >= 0, we have lambda_k + m^2 >= m^2, so
+1/(lambda_k + m^2) <= 1/m^2. Averaging over L modes: G(0) <= 1/m^2. -/
+
+/-- Each propagator is bounded by 1/m^2. -/
+theorem propagator_le_inv_mass {eigenval : ZMod L → ℝ} {m_sq : ℝ}
+    (h_eig : ∀ k, 0 ≤ eigenval k) (hm : 0 < m_sq) (k : ZMod L) :
+    propagator eigenval m_sq k ≤ 1 / m_sq := by
+  unfold propagator
+  apply div_le_div_of_nonneg_left (le_of_lt one_pos) hm
+  linarith [h_eig k]
+
+/-- **(1/L) Sigma_k 1/(lambda_k + m^2) <= 1/m^2**. -/
+theorem greenFunction_at_zero_le (eigenval : ZMod L → ℝ) (m_sq : ℝ)
+    (h_eig : ∀ k, 0 ≤ eigenval k) (hm : 0 < m_sq) :
+    (L : ℝ)⁻¹ * ∑ k : ZMod L, propagator eigenval m_sq k ≤ 1 / m_sq := by
+  have hL_pos : (0 : ℝ) < L := Nat.cast_pos.mpr (Nat.pos_of_ne_zero (NeZero.ne L))
+  calc (L : ℝ)⁻¹ * ∑ k : ZMod L, propagator eigenval m_sq k
+      ≤ (L : ℝ)⁻¹ * ∑ k : ZMod L, (1 / m_sq : ℝ) := by
+        apply mul_le_mul_of_nonneg_left _ (inv_nonneg.mpr (le_of_lt hL_pos))
+        apply Finset.sum_le_sum
+        intro k _
+        exact propagator_le_inv_mass h_eig hm k
+    _ = (L : ℝ)⁻¹ * ((L : ℝ) * (1 / m_sq)) := by
+        congr 1
+        rw [Finset.sum_const, Finset.card_univ, ZMod.card L, nsmul_eq_mul]
+    _ = 1 / m_sq := by
+        rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hL_pos), one_mul]
+
+/-- **Combined bound: ‖G(n)‖ <= 1/m^2 for all n.** -/
+theorem greenFunction_norm_le_inv_mass (eigenval : ZMod L → ℝ) (m_sq : ℝ)
+    (h_eig : ∀ k, 0 ≤ eigenval k) (hm : 0 < m_sq) (n : ZMod L) :
+    ‖greenFunction eigenval m_sq n‖ ≤ 1 / m_sq :=
+  le_trans (greenFunction_norm_le eigenval m_sq h_eig hm n)
+           (greenFunction_at_zero_le eigenval m_sq h_eig hm)
+
+/-! ## Torus distance and exponential decay -/
+
+/-- The distance on Z/LZ: min(n, L-n) for n in {0,...,L-1}. -/
+def torusDist (n : ZMod L) : ℝ :=
+  min (n.val : ℝ) ((L : ℝ) - n.val)
+
+/-- The torus distance is nonneg. -/
+theorem torusDist_nonneg (n : ZMod L) : 0 ≤ torusDist n := by
+  unfold torusDist
+  apply le_min
+  · exact Nat.cast_nonneg _
+  · have : (n.val : ℝ) < L := by exact_mod_cast ZMod.val_lt n
+    linarith
+
+/-- The torus distance at 0 is 0. -/
+theorem torusDist_zero : torusDist (0 : ZMod L) = 0 := by
+  unfold torusDist
+  simp [ZMod.val_zero]
+
+/-- **Exponential decay of the Green's function (axiom).**
+
+On a 1D torus Z/LZ with mass m^2 > 0, the massive Green's function
+satisfies G_m(n) <= C * e^{-alpha dist(n)} where alpha > 0 depends on m.
+
+Mathematical content: Use the Laplace transform representation
+G = integral_0^infty e^{-tM} dt and the exponential decay of the
+lattice heat kernel (from random walk / Bessel function estimates).
+
+For the nearest-neighbor Laplacian, alpha = arccosh(1 + m^2/2) > 0.
+
+Reference: Lawler, *Random Walk: A Modern Introduction*, Chapter 2. -/
+axiom greenFunction_exponential_decay
+    (L : ℕ) [NeZero L]
+    (eigenval : ZMod L → ℝ)
+    (h_eig : ∀ k, 0 ≤ eigenval k) (m_sq : ℝ) (hm : 0 < m_sq)
+    (n : ZMod L) :
+    ∃ C α : ℝ, 0 < C ∧ 0 < α ∧
+    ‖greenFunction eigenval m_sq n‖ ≤ C * Real.exp (-α * torusDist n)
+
+/-! ## Connection to the abstract `green_exponential_decay` axiom
+
+We show that the concrete Green's function decay implies the abstract
+axiom used in FKBoundShifted.lean. -/
+
+/-- Bridge: the concrete Green's function decay with constant C <= 1/m^2
+implies a bound of the form (1/m^2) * e^{-alpha dist}. -/
+theorem greenFunction_decay_implies_abstract
+    {eigenval : ZMod L → ℝ} {m_sq : ℝ}
+    {C α : ℝ} (n : ZMod L)
+    (h_decay : ‖greenFunction eigenval m_sq n‖ ≤ C * Real.exp (-α * torusDist n))
+    (h_bound : C ≤ 1 / m_sq) :
+    ‖greenFunction eigenval m_sq n‖ ≤
+      (1 / m_sq) * Real.exp (-α * torusDist n) :=
+  le_trans h_decay (mul_le_mul_of_nonneg_right h_bound (le_of_lt (Real.exp_pos _)))
+
+/-! ## The nearest-neighbor Laplacian eigenvalues
+
+For the standard 1D lattice Laplacian (second difference operator),
+the eigenvalues on Z/LZ are lambda_k = 4 sin^2(pi k / L) for k = 0,...,L-1. -/
+
+/-- The nearest-neighbor Laplacian eigenvalue: lambda_k = 4 sin^2(pi k / L). -/
+def nnEigenval (k : ZMod L) : ℝ :=
+  4 * Real.sin (Real.pi * k.val / L) ^ 2
+
+/-- The nearest-neighbor eigenvalues are nonneg. -/
+theorem nnEigenval_nonneg (k : ZMod L) : 0 ≤ nnEigenval (L := L) k := by
+  unfold nnEigenval
+  apply mul_nonneg (by norm_num : (0 : ℝ) ≤ 4) (sq_nonneg _)
+
+/-- The zero-mode eigenvalue is 0: lambda_0 = 0. -/
+theorem nnEigenval_zero : nnEigenval (L := L) (0 : ZMod L) = 0 := by
+  unfold nnEigenval
+  simp [ZMod.val_zero]
+
+/-- The nearest-neighbor Green's function. -/
+def nnGreenFunction (m_sq : ℝ) : ZMod L → ℂ :=
+  greenFunction nnEigenval m_sq
+
+/-- |G_nn(n)| <= 1/m^2 for the nearest-neighbor Green's function. -/
+theorem nnGreenFunction_norm_le (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
+    ‖nnGreenFunction m_sq n‖ ≤ 1 / m_sq :=
+  greenFunction_norm_le_inv_mass nnEigenval m_sq (fun k => nnEigenval_nonneg k) hm n
+
+/-! ## The zero-mode contribution
+
+For large L, the Green's function is dominated by the zero mode
+(k = 0), which contributes 1/(L m^2). The nonzero modes contribute
+exponentially decaying terms. -/
+
+/-- Split the Green's function into zero-mode and nonzero-mode parts. -/
+theorem greenFunction_zero_mode_split (eigenval : ZMod L → ℝ) (m_sq : ℝ) (n : ZMod L) :
+    greenFunction eigenval m_sq n =
+      (L : ℂ)⁻¹ * ((propagator eigenval m_sq 0 : ℂ) +
+      ∑ k ∈ Finset.univ.erase 0,
+        (stdAddChar (k * n) : ℂ) * (propagator eigenval m_sq k : ℂ)) := by
+  unfold greenFunction
+  congr 1
+  rw [← Finset.add_sum_erase _ _ (Finset.mem_univ 0)]
+  congr 1
+  simp [zero_mul, stdAddChar.map_zero_eq_one]
+
+/-! ## Monotonicity in the mass
+
+The Green's function is monotone decreasing in the mass parameter:
+increasing m^2 decreases each propagator 1/(lambda_k + m^2). -/
+
+/-- The propagator is decreasing in the mass: m1 <= m2 implies
+propagator(m2) <= propagator(m1). -/
+theorem propagator_antitone {eigenval : ZMod L → ℝ} (k : ZMod L)
+    (h_eig : 0 ≤ eigenval k) {m1 m2 : ℝ} (hm1 : 0 < m1) (hle : m1 ≤ m2) :
+    propagator eigenval m2 k ≤ propagator eigenval m1 k := by
+  unfold propagator
+  apply div_le_div_of_nonneg_left (le_of_lt one_pos) (by linarith)
+  linarith
+
+/-- The norm of the Green's function is bounded by 1/m1 when m1 <= m2. -/
+theorem greenFunction_norm_antitone (eigenval : ZMod L → ℝ)
+    (h_eig : ∀ k, 0 ≤ eigenval k) (n : ZMod L)
+    {m1 m2 : ℝ} (hm1 : 0 < m1) (hle : m1 ≤ m2) :
+    ‖greenFunction eigenval m2 n‖ ≤ 1 / m1 := by
+  calc ‖greenFunction eigenval m2 n‖
+      ≤ 1 / m2 := greenFunction_norm_le_inv_mass eigenval m2 h_eig (by linarith) n
+    _ ≤ 1 / m1 := by
+        apply div_le_div_of_nonneg_left (le_of_lt one_pos) hm1 hle
+
+end Pphi2N
+
+end

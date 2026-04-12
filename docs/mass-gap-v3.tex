@@ -20,6 +20,8 @@
 \newcommand{\Tr}{\mathrm{Tr}}
 \newcommand{\ph}{\varphi}
 \newcommand{\La}{\Lambda}
+\newcommand{\im}{\mathrm{Im}}
+\newcommand{\re}{\mathrm{Re}}
 
 \title{Mass Gap for the O($N$) Model: Analysis of the HS Approach}
 \author{M.~R.~Douglas}
@@ -39,9 +41,15 @@ real mass cancels after HS, and the mass gap must emerge from the
 oscillatory $\sigma$-average). A comparison across $d=0,1,2$ shows
 that the sign problem is specific to $d=2$: the logarithmic UV
 divergence of the Green's function promotes the self-energy from
-$O(1/N)$ to $O(1)$, causing dimensional transmutation and making
-the oscillatory cancellations essential. We discuss three proof
-strategies and the current status of the Lean formalization.
+$O(1/N)$ to $O(1)$, causing dimensional transmutation. We propose
+a proof strategy based on the \textbf{Lefschetz thimble}: a contour
+deformation to the steepest descent manifold through the dominant
+saddle, where the integrand becomes real, positive, and approximately
+log-concave. At large~$N$, a single thimble dominates (exponential
+suppression of competitors), eliminating the sign problem and
+enabling Brascamp-Lieb concentration and Feynman-Kac bounds. We
+compare four strategies and discuss the current status of the Lean
+formalization.
 \end{abstract}
 
 \tableofcontents
@@ -53,10 +61,10 @@ strategies and the current status of the Lean formalization.
 The O($N$) LSM action on $\La \subset \Z^2$:
 \begin{equation}
   S[\ph] = \tfrac{1}{2}\sum_i\langle\ph^i,(-\Delta)\ph^i\rangle
-    + N\sum_x\lambda\bigl(\tfrac{|\ph(x)|^2}{N}-v^2\bigr)^2.
+    + N\sum_x\lambda\bigl(\tfrac{|\ph(x)|^2}{N}-\rho^2\bigr)^2.
 \end{equation}
 The Boltzmann weight is $e^{-S}$. The quartic appears as
-$e^{-\lambda a^2}$ with $a = |\ph|^2/N - v^2$. The HS identity:
+$e^{-\lambda a^2}$ with $a = |\ph|^2/N - \rho^2$. The HS identity:
 \begin{equation}
 \label{eq:HS}
   e^{-\lambda a^2}
@@ -78,10 +86,10 @@ signature). A real coupling would give $e^{+\lambda a^2}$
 After applying~\eqref{eq:HS} at each site and integrating out $\ph$
 (Gaussian with complex mass), the partition function becomes:
 \begin{equation}
-\label{eq:Zsigma}
+\label{eq:f}
   Z = c\!\int_{\R^{|\La|}}\!
     \det\bigl(-\Delta + 2i\sigma z\bigr)^{-N/2}\,
-    e^{-\sum_x[\sigma(x)^2/(4\lambda)+i\sigma(x)v^2]}\,
+    e^{-\sum_x[\sigma(x)^2/(4\lambda)+i\sigma(x)\rho^2]}\,
     d^{|\La|}\sigma,
 \end{equation}
 where $z = N^{-1/2}$ and the $\det$ comes from the $\ph$-integral.
@@ -93,7 +101,7 @@ This integral \textbf{converges} on the real $\sigma$-axis:
   \le \det(-\Delta)^{-N/2}$ (bounded, since $|1+i\theta| \ge 1$
   for real~$\theta$).
 \end{itemize}
-But the integrand is \textbf{complex} (the det and the $e^{i\sigma v^2}$
+But the integrand is \textbf{complex} (the det and the $e^{i\sigma \rho^2}$
 factor oscillate). This is the sign problem.
 
 \section{The NLSM: Kupiainen's mass trick}
@@ -154,11 +162,11 @@ $\tfrac{1}{2}m_0^2|\ph|^2$ to the action and subtract it from
 the interaction:
 \begin{equation}
   S = \bigl[\tfrac{1}{2}\langle\ph,(-\Delta+m_0^2)\ph\rangle\bigr]
-    + \bigl[\lambda(u-v^2)^2 - \tfrac{1}{2}m_0^2 u\bigr],
-  \qquad u = |\ph|^2/N.
+    + \bigl[\lambda\bigl(\tfrac{|\ph|^2}{N}-\rho^2\bigr)^2
+      - \tfrac{1}{2}m_0^2\,\tfrac{|\ph|^2}{N}\bigr].
 \end{equation}
-Apply HS to $\lambda(u-v^2)^2$ only. The subtracted mass
-$-\tfrac{1}{2}m_0^2 u$ remains outside the HS. Computing the
+Apply HS to $\lambda(|\ph|^2/N-\rho^2)^2$ only. The subtracted mass
+$-\tfrac{1}{2}m_0^2\,|\ph|^2/N$ remains outside the HS. Computing the
 $\ph$-dependence:
 \begin{align}
   &-\tfrac{1}{2}\langle\ph,(-\Delta+m_0^2)\ph\rangle
@@ -187,7 +195,7 @@ imaginary).
   $|1/(-2i\sigma)| = 1/(2|\sigma|)$, independent of $|x|$.
 \item \textbf{Mass from $\sigma$-average only}: The exponential decay
   of $\langle\ph(x)\ph(0)\rangle$ must come \emph{entirely} from the
-  oscillatory cancellations in the $\sigma$-integral~\eqref{eq:Zsigma}.
+  oscillatory cancellations in the $\sigma$-integral~\eqref{eq:f}.
 \item \textbf{The FK bound fails}: The NLSM bound~\eqref{eq:NLSMbound}
   relies on the real mass $m_0^2$. Without it, $|G_\sigma| \le G_0$
   gives $G_0 = (-\Delta)^{-1}$ (massless propagator, no decay).
@@ -280,7 +288,7 @@ the same saddle-point analysis.
 \subsection{The gap equation}
 
 On the real $\sigma$-axis, the saddle of the exponent in
-\eqref{eq:Zsigma} is at $\sigma = 0$ (after absorbing the saddle
+\eqref{eq:f} is at $\sigma = 0$ (after absorbing the saddle
 value into $m_0^2$ for the NLSM, or into the gap equation for the LSM).
 The gap equation in both cases:
 \begin{equation}
@@ -358,99 +366,1144 @@ factors'' --- left as future work that was apparently never published.
   ``should'' transfer. But making this rigorous is nontrivial.
 \end{itemize}
 
-\section{Strategy: steepest descent contour}
+\section{Strategy: Lefschetz thimble}\label{sec:thimble}
 
 The right contour deformation is not a rotation to the imaginary
-axis (which diverges), but the \textbf{steepest descent contour}:
-the level set $\mathrm{Im}\,f = 0$ through the saddle $\sigma = 0$.
+axis (which diverges), but the \textbf{Lefschetz thimble}: the
+steepest descent manifold through the dominant saddle point.
+This connects our problem to a well-developed mathematical
+framework (Picard-Lefschetz theory) and a large recent literature
+on sign problems in lattice QFT. See \texttt{sign-problem.tex}
+for a general survey.
 
-\subsection{The steepest descent contour}
+\subsection{Lefschetz thimbles: definition}
 
-The exponent $f(\sigma)$ is complex-valued and analytic. The saddle
-$\sigma = 0$ has $f(0) = 0$ (real). The steepest descent contour
-$\Gamma$ is defined by:
-\begin{equation}
-  \Gamma = \{\sigma \in \C^{|\La|} : \mathrm{Im}\,f(\sigma) = 0,\;
-    \text{connected to } \sigma = 0\}.
+The exponent $f : \C^{|\La|} \to \C$ from~\eqref{eq:f} is
+holomorphic (away from the singularities of the $\log\det$).
+For each critical point $\sigma_*$ of~$f$, the
+\textbf{Lefschetz thimble} $\mathcal{J}_{\sigma_*}$ is the
+stable manifold of $\sigma_*$ under the anti-holomorphic
+gradient flow:
+\begin{equation}\label{eq:flow}
+  \frac{d\sigma}{dt} = \overline{\nabla f(\sigma)}, \qquad
+  \mathcal{J}_{\sigma_*} = \bigl\{\sigma(0) :
+    \lim_{t\to+\infty}\sigma(t) = \sigma_*\bigr\}.
 \end{equation}
-On $\Gamma$:
+Key properties:
+\begin{enumerate}
+\item $\mathcal{J}_{\sigma_*}$ is an $|\La|$-dimensional real
+  submanifold of~$\C^{|\La|}$.
+\item $\im\,f = \im\,f(\sigma_*)$ is \textbf{constant} on
+  $\mathcal{J}_{\sigma_*}$ (the flow preserves the imaginary part).
+\item $\re\,f$ is \textbf{maximized} at $\sigma_*$ on
+  $\mathcal{J}_{\sigma_*}$ (steepest descent from the saddle).
+\item The integrand $e^f$ restricted to $\mathcal{J}_{\sigma_*}$
+  is proportional to a \textbf{positive} function (constant
+  phase $e^{i\,\im f(\sigma_*)}$, positive amplitude
+  $e^{\re f}$).
+\end{enumerate}
+Our ``steepest descent contour'' $\Gamma = \{\im f = 0,\;
+\text{connected to } \sigma_* = 0\}$ is precisely the Lefschetz
+thimble $\mathcal{J}_0$ for the dominant saddle at
+$\sigma_* = 0$ (where $f(0)$ is real, so $\im f(\sigma_*) = 0$).
+
+\subsection{Thimble decomposition}
+
+By Picard-Lefschetz theory, the original integration cycle
+decomposes as:
+\begin{equation}\label{eq:decomp}
+  [\R^{|\La|}] = \sum_{\sigma_*} n_{\sigma_*}\,
+    [\mathcal{J}_{\sigma_*}],
+\end{equation}
+where $n_{\sigma_*} \in \Z$ are intersection numbers
+(of $\R^{|\La|}$ with the dual ascending manifolds
+$\mathcal{K}_{\sigma_*}$). Therefore:
+\begin{equation}
+  Z = \sum_{\sigma_*} n_{\sigma_*}\,e^{i\,\im f(\sigma_*)}\,
+    Z_{\sigma_*}, \qquad
+  Z_{\sigma_*} = \int_{\mathcal{J}_{\sigma_*}}
+    e^{\re f(\sigma) - \re f(\sigma_*)}\,|d\sigma| > 0.
+\end{equation}
+Each $Z_{\sigma_*}$ is \textbf{real and positive}: the sign
+problem is solved per-thimble. But different thimbles contribute
+different phases $e^{i\,\im f(\sigma_*)}$, creating a residual
+\emph{inter-thimble sign problem} if multiple thimbles contribute.
+
+\subsection{Single-thimble dominance at large $N$}
+
+The exponent scales as $f \sim N\cdot g(\sigma)$ for a function~$g$
+independent of~$N$ (since $f$ contains the $N/2$ prefactor of
+$\Tr\log$ and the $\sigma^2/(4\lambda)$ term scales with the
+gap equation). Therefore:
 \begin{itemize}
-\item $\mathrm{Im}\,f = 0$: the integrand $e^f$ is \textbf{real
-  and positive}. No oscillations!
-\item $\mathrm{Re}\,f$ decreases away from the saddle: the integral
-  \textbf{converges}.
-\item By Cauchy's theorem: $\int_\R e^f\,d\sigma = \int_\Gamma e^f\,d\sigma$
-  (provided $\Gamma$ avoids singularities of~$f$).
+\item The Hessian scales as $f'' \sim N$: saddle-point width
+  $\sim 1/\sqrt{N}$.
+\item At competing saddle points $\sigma'_*$:
+  $\re f(\sigma_*) - \re f(\sigma'_*) \sim N\cdot\Delta g > 0$
+  (the action gap grows linearly in~$N$).
+\item The dominant thimble contribution exceeds all others by
+  $e^{cN}$ for some $c > 0$.
 \end{itemize}
 
-\subsection{Shape of $\Gamma$ near the saddle}
+\textbf{Conclusion}: For $N$ sufficiently large, a single thimble
+captures~$Z$ up to exponentially small corrections:
+\begin{equation}
+  Z = n_0\,Z_0\,\bigl(1 + O(e^{-cN})\bigr).
+\end{equation}
+This eliminates both the intra-thimble sign problem (the integrand
+is positive on $\mathcal{J}_0$) and the inter-thimble sign problem
+(other thimbles are exponentially suppressed).
 
-Near $\sigma = 0$: $f \approx -\tfrac{1}{2}(\sigma,H\sigma)$ with
-$H = B^{-1} + 1/(2\lambda)\cdot I > 0$ (real, positive definite).
-So $\mathrm{Im}\,f = 0$ on the \textbf{real axis} locally. The
-steepest descent contour \emph{starts} on the real axis.
+\subsection{No topological obstruction for scalar fields}
 
-The cubic term $f''' \sim O(z) = O(1/\sqrt{N})$ introduces
-$\mathrm{Im}\,f \ne 0$ at order $\sigma^3$. The contour
-$\Gamma$ \emph{curves away} from the real axis to compensate,
-with deviation $O(\sigma^3/\sqrt{N})$.
+Lawrence-Yamauchi~\cite{LY24} proved that for 2D Abelian lattice
+gauge theory, the sign problem \emph{cannot} be removed by any
+contour deformation. The obstruction is topological: $\pi_1(U(1))=\Z$
+creates winding sectors with irreconcilable phases.
 
-At the saddle width $\sigma \sim 1/\sqrt{N}$: the deviation is
-$O(1/N^2)$ --- the contour is \textbf{nearly real} within the
-Gaussian peak.
+This obstruction does \textbf{not} apply to scalar field theories:
+the field space $\R^n$ is contractible ($\pi_k(\R^n) = 0$ for
+all~$k$), so there is no topological obstruction to deforming
+the contour. For the O($N$) model, the question of whether
+contour deformation solves the sign problem is \textbf{analytic}
+(singularity avoidance, decay at infinity), not topological.
 
-\subsection{Properties of the integral over $\Gamma$}
+\section{The constant shift and thimble geometry}
+\label{sec:constant_shift}
 
-On $\Gamma$, the measure $e^{f(\sigma)}\,d\sigma$ (with the
+The thimble has a remarkably simple leading-order form: a constant
+imaginary shift $v = v_*$. This section computes the thimble
+explicitly, first in $d = 0$, then at general $|\La|$, and
+establishes its key geometric property (Lagrangian submanifold).
+
+\subsection{The $d = 0$ computation}
+
+Consider one site ($|\La|=1$) with $N$ components of~$\ph$.
+After HS and integrating out~$\ph$:
+\begin{equation}\label{eq:f_d0}
+  f(\sigma) = -\frac{\sigma^2}{4\lambda} + i\sigma \rho^2
+    - \frac{N}{2}\log(i\sigma) + \text{const}.
+\end{equation}
+The saddle equation $f'(\sigma) = 0$ gives
+$\sigma^2 - 2i\lambda \rho^2\sigma + \lambda N = 0$, with solutions:
+\begin{equation}
+  \sigma_* = i\bigl[\lambda \rho^2 \mp \sqrt{\lambda^2 \rho^4 + \lambda N}\,\bigr].
+\end{equation}
+Both saddle points are \textbf{purely imaginary}: $\sigma_* = iv_*$
+with $v_* \in \R$.
+
+Writing $\sigma = u + iv$ ($u$ = real part, $v$ = imaginary part),
+$f(\sigma_*)$ is real (since $\sigma_*$ is purely imaginary), so
+$\im f(\sigma_*) = 0$. The thimble equation $\im f = 0$ becomes:
+\begin{equation}\label{eq:thimble_eq}
+  u\Bigl[-\frac{v}{2\lambda} + \rho^2\Bigr]
+    = \frac{N}{2}\arctan\!\Bigl(\frac{-u}{v}\Bigr).
+\end{equation}
+Expanding for small $u$: $\arctan(-u/v) \approx -u/v$, so
+dividing by~$u$:
+\begin{equation}
+  -\frac{v}{2\lambda} + \rho^2 = -\frac{N}{2v}
+  \quad\Longrightarrow\quad
+  v^2 - 2\lambda \rho^2 v - \lambda N = 0,
+\end{equation}
+which gives $v = v_*$ (the saddle value). Near the saddle,
+\textbf{the thimble is a horizontal line} $\sigma = u + iv_*$ ---
+a constant imaginary shift.
+
+\subsection{The operator on the shifted contour}
+
+On the constant-shift contour $\sigma = u + iv_*$
+(i.e., $v = v_*$ for all sites), with $v_*$ chosen via the
+gap equation so that $-2v_* z = m_0^2$, the $\ph$-operator becomes:
+\begin{equation}\label{eq:shifted_op}
+  -\Delta + 2i\sigma z = -\Delta + 2i(u + iv_*)z
+    = -\Delta + m_0^2 + 2iuz.
+\end{equation}
+(We write $\alpha \equiv v_*$ when convenient.)
+The constant shift introduces the \textbf{real mass}~$m_0^2$ into
+the operator. For each real field $u(x)$, the operator
+$-\Delta + m_0^2 + 2iuz$ has positive real part $-\Delta + m_0^2$,
+and the FK bound gives:
+\begin{equation}
+  \bigl|(-\Delta + m_0^2 + 2iuz)^{-1}(x,0)\bigr|
+    \le (-\Delta + m_0^2)^{-1}(x,0)
+    \sim e^{-m_0|x|}.
+\end{equation}
+\textbf{This is exactly Kupiainen's NLSM bound}, achieved by
+contour deformation rather than by the constraint.
+
+\subsection{The thimble unifies LSM and NLSM}
+
+The constant imaginary shift has a conceptual interpretation:
+\begin{itemize}
+\item For the \textbf{NLSM}: the constraint $|\ph|^2 = N\beta$
+  allows adding $m_0^2$ for free. No contour deformation needed.
+\item For the \textbf{LSM}: the add-subtract trick cancels $m_0^2$
+  on the real $\sigma$-axis ($v = 0$). But the \emph{thimble} passes
+  through $\sigma_* = iv_*$, and on the thimble, $m_0^2$ reappears
+  as the real part $-2v_* z$.
+\item The contour deformation $v = 0 \to v = v_*$
+  \textbf{does for the LSM what the constraint does for the NLSM}:
+  it introduces a real mass into the $\ph$-operator.
+\end{itemize}
+
+\subsection{The $N = \infty$ thimble is exactly flat}
+
+At the Gaussian (quadratic) level, the Hessian at the saddle is
+$H = -f''(\sigma_*)$, which is \textbf{real and positive definite}
+(since the operator at the saddle is $-\Delta + m_0^2$, real).
+Writing $\sigma = u + iv$ and expanding around $\sigma_* = iv_*$
+(so $\delta u = u$, $\delta v = v - v_*$):
+\begin{equation}
+  \im f = -(\delta u,\, H\,\delta v) \quad\text{(at quadratic order)}.
+\end{equation}
+Setting $\im f = 0$ with $H > 0$: this forces $\delta v = 0$,
+i.e., $v = v_*$ everywhere.
+The $N = \infty$ thimble is the hyperplane
+$\sigma(x) = u(x) + iv_*$, \textbf{exactly flat}.
+
+Since the Gaussian approximation is exact at $N = \infty$, the
+thimble is exactly the constant shift at leading order. Corrections
+come from the cubic and higher terms in~$f$, suppressed by
+$1/\sqrt{N}$.
+
+\subsection{The leading $1/N$ correction: explicit formula}
+\label{sec:1N_correction}
+
+The cubic term of $f$ at the saddle determines the first correction.
+Expanding $\Tr\log(A_0 + 2i\delta\sigma z)$ in powers of
+$\delta\sigma$:
+\begin{equation}
+  f'''_{xyz} = \frac{8i}{\sqrt{N}}\,G_0(x-y)\,G_0(y-z)\,G_0(z-x),
+\end{equation}
+where $G_0(k) = (k^2 + m_0^2)^{-1}$ is the massive propagator at
+the saddle. The cubic coefficient is \textbf{purely imaginary}
+(the factor $i$ comes from $(2iz)^3 = -8i/N^{3/2}$, and $G_0$ is
+real at the saddle). Writing $f''' = iR$ with
+$R_{xyz} = (8/\sqrt{N})\,G_0(x{-}y)\,G_0(y{-}z)\,G_0(z{-}x)$
+(the \textbf{triangle diagram}).
+
+The thimble $v = v(u)$ is parameterized as $v_i = \tfrac{1}{2}
+\sum_{jk} S_{ijk}\,u_j u_k$ (quadratic in~$u$, $S$ symmetric in
+$j,k$). The stable manifold invariance condition
+$D\Phi(u)\cdot\dot{u} = \dot{v}|_{v=\Phi(u)}$ (with
+$\dot{u} = -Hu$ at leading order, $\dot{v} = Hv - \tfrac{1}{2}R[u,u,\cdot]$)
+gives a linear equation for~$S$:
+\begin{equation}\label{eq:stable_manifold}
+  S(Hw_1, w_2) + S(w_1, Hw_2) + H\cdot S(w_1, w_2) = R(w_1, w_2)
+  \qquad \text{for all } w_1, w_2 \in \R^{|\La|},
+\end{equation}
+where the first two terms have $H$ acting on an \emph{input} of~$S$,
+and the third has $H$ acting on the \emph{output}.
+
+In Fourier space --- with $p, q$ the lattice momenta of the
+two $u$-inputs and $p{+}q$ the momentum of the $v$-output ---
+equation~\eqref{eq:stable_manifold} becomes algebraic:
+$\hat{S}(p,q)\,[\hat{H}(p) + \hat{H}(q) + \hat{H}(p{+}q)]
+= \hat{R}(p,q)$, giving:
+\begin{equation}\label{eq:S_fourier}
+  \boxed{\hat{S}(p,q) = \frac{\hat{R}(p,q)}
+    {\hat{H}(p) + \hat{H}(q) + \hat{H}(p+q)}}
+\end{equation}
+The denominator is the sum of three $\sigma$ inverse
+propagators at the three legs of the triangle vertex.
+The total symmetry in $p, q, -(p{+}q)$ confirms the Lagrangian
+property (Section~\ref{sec:lagrangian}). The ingredients:
+\begin{align}
+  \hat{H}(k) &= \frac{1}{2\lambda} + 2B(k),
+    &B(k) &= \frac{1}{|\La|}\sum_l G_0(l)\,G_0(k{-}l)
+    \quad\text{(bubble)}, \\
+  \hat{R}(p,q) &= \frac{8}{\sqrt{N}}\,T(p,q),
+    &T(p,q) &= \frac{1}{|\La|}\sum_l G_0(l)\,G_0(p{-}l)\,G_0(q{+}l)
+    \quad\text{(triangle)}.
+\end{align}
+The explicit thimble correction in Fourier space:
+\begin{equation}\label{eq:thimble_1N}
+  \hat{v}(k) = \frac{4}{\sqrt{N}\,|\La|}
+    \sum_{p+q=k}
+    \frac{T(p,q)}{\hat{H}(p)+\hat{H}(q)+\hat{H}(p{+}q)}\;
+    \hat{u}(p)\,\hat{u}(q).
+\end{equation}
+
+\subsection{Properties of the correction}
+
+\begin{enumerate}
+\item \textbf{Standard Feynman diagram}:
+  The kernel $T/(\hat{H}+\hat{H}+\hat{H})$ is the triangle
+  vertex dressed by three $\sigma$-propagators $\hat{H}^{-1}$.
+  This is a standard one-loop diagram in the $1/N$ expansion ---
+  the thimble shape \emph{is} the diagrammatic expansion.
+
+\item \textbf{No singularities}: The denominator
+  $\hat{H}(p) + \hat{H}(q) + \hat{H}(p{+}q)$ is strictly positive
+  (each $\hat{H}(k) > 0$), so $\hat{S}$ is smooth.
+
+\item \textbf{Locality}: In position space, the kernel
+  $K(x{-}y, x{-}z) \sim e^{-\min(m_0,M_\sigma)(|x-y|+|x-z|)}$
+  decays exponentially. The thimble correction at site~$x$
+  depends mainly on $u(y)$ for $|y-x| \lesssim 1/m_0$.
+
+\item \textbf{Ultra-local limit}: For zero momentum ($p = q = k = 0$):
+  $\hat{S}(0,0) = \hat{R}(0,0)/(3\hat{H}(0))$, recovering the
+  $d = 0$ result $v = u^2/(6\hat{H}(0)\sqrt{N})$.
+
+\item \textbf{Size at the saddle width}: The fluctuation
+  $u \sim 1/\sqrt{N}$, so:
+  \begin{center}
+  \begin{tabular}{|l|c|}
+  \hline
+  Quantity & Scale \\
+  \hline
+  $u(x)$ (real fluctuation) & $1/\sqrt{N}$ \\
+  $v(x)$ (thimble correction) & $1/N^{3/2}$ \\
+  $v/u$ ratio & $1/N$ \\
+  Residual $\im f$ on constant shift & $u^3/\sqrt{N} \sim 1/N^2$ per site \\
+  \hline
+  \end{tabular}
+  \end{center}
+  The thimble is very nearly flat within the Gaussian peak.
+\end{enumerate}
+
+\subsection{Multi-site: constant shift plus local corrections}
+
+For the multi-site case ($|\La| > 1$), the full thimble
+$\sigma = u + iv$ has:
+\begin{equation}
+  v(x) = v_* +
+    \frac{4}{\sqrt{N}}\sum_{y,z} K(x{-}y,\,x{-}z)\,u(y)\,u(z)
+    + O(1/N),
+\end{equation}
+where $K$ is the position-space kernel of $T/(\hat{H}+\hat{H}+\hat{H})$.
+The leading-order form is the \textbf{constant shift}
+$v = v_*$ (i.e., $\sigma = u + iv_*$); the correction is local,
+quadratic in~$u$, and suppressed by $1/\sqrt{N}$.
+
+\subsection{The thimble is a Lagrangian submanifold}
+\label{sec:lagrangian}
+
+The thimble $\mathcal{J}_0$ is a \textbf{Lagrangian submanifold}
+of $(\C^{|\La|},\omega)$, where
+$\omega = \sum_j du_j \wedge dv_j$ is the standard symplectic form
+on $\C^{|\La|} \cong \R^{2|\La|}$.
+
+\subsubsection{Proof}
+
+The anti-holomorphic gradient flow~\eqref{eq:flow}, written in
+real coordinates $\sigma = u + iv$, is:
+\begin{equation}
+  \frac{du}{dt} = \frac{\partial(\re f)}{\partial u}
+    = \frac{\partial(\im f)}{\partial v}, \qquad
+  \frac{dv}{dt} = \frac{\partial(\re f)}{\partial v}
+    = -\frac{\partial(\im f)}{\partial u},
+\end{equation}
+where the second equalities are Cauchy-Riemann. This is the
+\textbf{Hamiltonian flow} of $\im f$ with respect to~$\omega$.
+Hamiltonian flows preserve the symplectic form.
+
+Let $X, Y$ be tangent vectors to $\mathcal{J}_0$ at a point~$\sigma$.
+Under the flow, they remain tangent to $\mathcal{J}_0$
+(flow-invariance of the stable manifold). As $t \to +\infty$,
+both flow into the stable subspace at~$\sigma_*$, which is
+$\{v = 0\}$ (the real hyperplane). Since
+$\omega|_{\{v=0\}} = 0$:
+\begin{equation}
+  \omega(X,Y) = \omega(X(t),Y(t)) \;\xrightarrow{t\to\infty}\; 0.
+\end{equation}
+But $\omega(X(t),Y(t))$ is constant (Hamiltonian flow preserves
+$\omega$), so $\omega(X,Y) = 0$. \qed
+
+\subsubsection{Consequences}
+
+\begin{enumerate}
+\item \textbf{Generating functional}: Since $\mathcal{J}_0$ is
+  Lagrangian, the thimble correction satisfies
+  $v = \nabla_u \Phi$ for a single scalar functional
+  $\Phi : \R^{|\La|} \to \R$. The entire thimble is determined
+  by~$\Phi$.
+
+\item \textbf{Jacobian phase}: The induced volume form on a
+  Lagrangian graph $\{(u, \nabla\Phi(u))\}$ has Jacobian
+  $\det(I + i\nabla^2\Phi)$. Since $\nabla^2\Phi$ is symmetric
+  with real eigenvalues~$\lambda_j$:
+  \begin{equation}
+    |\det J| = \prod_j\sqrt{1+\lambda_j^2}, \qquad
+    \arg(\det J) = \sum_j \arctan(\lambda_j)
+      = \Tr\arctan(\nabla^2\Phi).
+  \end{equation}
+  The Jacobian phase is \textbf{not zero} in general: a real
+  symmetric matrix does not have $\pm$-paired eigenvalues.
+  For $\nabla^2\Phi \sim u/\sqrt{N}$
+  (from the leading thimble correction):
+  $\arg(\det J) \approx \Tr(\nabla^2\Phi) \sim |\La|/N$.
+  See Section~\ref{sec:quantum_HJ} for how to handle this.
+
+\item \textbf{Integrability of the $1/N$ correction}: The total
+  symmetry of $\hat{S}(p,q)$ in all three momenta $p, q, -(p{+}q)$
+  (from~\eqref{eq:S_fourier}) is precisely the condition
+  $\partial v_i/\partial u_j = \partial v_j/\partial u_i$, i.e.,
+  the existence of~$\Phi$.
+\end{enumerate}
+
+\section{The Hamilton-Jacobi equation}
+\label{sec:HJ}
+
+The Lagrangian property reduces the thimble to a single scalar
+functional $\Phi(u)$. This section derives the exact equation
+for~$\Phi$, its perturbative expansion, and the convergence theory.
+
+\subsection{The equation}
+
+The condition $\im f = 0$ on the thimble $v = \nabla\Phi$ gives a
+\textbf{single scalar equation} for a single scalar functional:
+\begin{equation}\label{eq:HJ}
+  \boxed{\im\,f\bigl(u + i\nabla_u\Phi(u)\bigr) = 0
+    \qquad\text{for all } u \in \R^{|\La|}.}
+\end{equation}
+This is a Hamilton-Jacobi equation: $u$ is the ``position,''
+$\nabla\Phi$ is the ``momentum,'' $\im f$ is the ``Hamiltonian,''
+and $\Phi$ is the ``action'' (generating function of the
+Lagrangian submanifold).
+
+\subsection{Concrete form: the arctan equation}
+
+Writing $\psi(x) = \partial\Phi/\partial u(x)$ for the thimble
+correction field, the imaginary part is $v(x) = v_* + \psi(x)$
+and $\sigma = u + iv$. The $\ph$-operator on the thimble is:
+\begin{equation}
+  -\Delta + 2i\sigma z
+    = \underbrace{(-\Delta + m_0^2 - \tfrac{2\psi}{\sqrt{N}})}_{M(\psi)}
+    \;+\; i\underbrace{\tfrac{2u}{\sqrt{N}}}_{V(u)},
+\end{equation}
+where $M(\psi)$ is a real Schr\"odinger operator (with potential
+$m_0^2 - 2\psi/\sqrt{N}$) and $V(u)$ is a real multiplication operator.
+Assuming $M > 0$ (the thimble stays above the spectral gap):
+\begin{equation}
+  \im\,\Tr\log(M + iV) = \Tr\arctan\bigl(M^{-1/2}\,V\,M^{-1/2}\bigr),
+\end{equation}
+where $\arctan$ acts on the operator $D = M^{-1/2}VM^{-1/2}$
+(self-adjoint, real eigenvalues $d_k$) by
+$\arctan(D) = \sum_k \arctan(d_k)\,|e_k\rangle\langle e_k|$.
+
+The exact HJ equation~\eqref{eq:HJ} becomes:
+\begin{equation}\label{eq:HJ_arctan}
+  \boxed{\frac{1}{2\lambda}\!\sum_x u(x)\bigl(v_*{+}\psi(x)\bigr)
+    + \frac{N}{2}\,\Tr\arctan\!\Bigl(
+      M(\psi)^{-1/2}\,\frac{2u}{\sqrt{N}}\,M(\psi)^{-1/2}\Bigr)
+    + \rho^2\!\sum_x u(x) = 0}
+\end{equation}
+for all $u \in \R^{|\La|}$, with $\psi = \nabla\Phi(u)$ and
+$M(\psi) = -\Delta + m_0^2 - 2\psi/\sqrt{N}$.
+
+\begin{remark}[Structure of the equation]
+Equation~\eqref{eq:HJ_arctan} is \textbf{exact at finite~$N$} ---
+no expansion in $1/N$. The three terms have clear roles:
+\begin{itemize}
+\item $\frac{1}{2\lambda}(u,v_*{+}\psi)$: the bare Gaussian
+  contribution to $\im f$.
+\item $\frac{N}{2}\Tr\arctan(\cdots)$: the determinantal
+  contribution from integrating out~$\ph$. The $\arctan$ is the
+  \textbf{phase} of $\det(M+iV)^{1/2}$ --- the argument of
+  the complex determinant.
+\item $\rho^2\sum u$: the linear coupling to the HS source.
+\end{itemize}
+At $\psi = 0$ (constant shift) and $u = 0$: the equation reduces to
+the \textbf{gap equation} for~$m_0$ (the $\arctan$ linearizes to
+$M_0^{-1}V$ and the trace gives $G_0(0)\sum u$).
+\end{remark}
+
+\subsection{Perturbative expansion}
+
+Expanding $\Phi = \Phi_3 + \Phi_4 + \cdots$ in powers of~$u$
+(equivalently, $1/\sqrt{N}$):
+\begin{align}
+  \Phi_3(u) &= \frac{1}{6}\sum_{ijk} S_{ijk}\,u_i u_j u_k
+    &\text{(triangle diagram, Section~\ref{sec:1N_correction})}, \\
+  \Phi_4(u) &= \frac{1}{24}\sum_{ijkl} S^{(4)}_{ijkl}\,
+    u_i u_j u_k u_l
+    &\text{(box diagram)}, \\
+  &\;\;\vdots \nonumber
+\end{align}
+There is no $\Phi_1$ or $\Phi_2$: $\Phi_1 = 0$ by the gap equation
+(the linear term in~\eqref{eq:HJ_arctan} vanishes at $u = 0$),
+and $\Phi_2 = 0$ because the Hessian $f''(\sigma_*)$ is real (the
+quadratic term in $\im f$ vanishes identically).
+Each $\Phi_n$ for $n \ge 3$ is determined by matching order $u^n$
+in~\eqref{eq:HJ_arctan}, giving $S^{(n)}$ in terms of $n$-loop
+Feynman diagrams and lower-order data.
+
+\subsection{Convergence of the $1/N$ expansion}
+
+\begin{proposition}[Analyticity of the thimble]
+For $|\La| < \infty$ and $m_0 > 0$, the generating functional
+$\Phi(u)$ is real-analytic in $u \in \R^{|\La|}$.
+The Taylor series $\Phi = \sum_{n \ge 3} \Phi_n$ converges
+in the \textbf{sup-norm} $\|u\|_\infty < r$ with radius:
+\begin{equation}\label{eq:radius}
+  r \;\ge\; c\,m_0\,N^{1/4},
+\end{equation}
+where $c > 0$ depends on $\lambda$ but \textbf{not} on $|\La|$
+or~$N$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+The thimble $\mathcal{J}_0$ is the stable manifold of~$\sigma_*$
+under the anti-holomorphic gradient flow~\eqref{eq:flow}. Since
+$f$ is holomorphic and the saddle is non-degenerate ($H > 0$),
+the \textbf{analytic stable manifold theorem} guarantees that
+$\Phi$ is real-analytic in~$u$.
+
+The radius is limited by the nearest singularity of~$\Phi$,
+which occurs when $M(\psi) = -\Delta + m_0^2 - 2\psi/\sqrt{N}$ hits
+zero eigenvalue. This requires $|\psi(x)| \ge m_0^2\sqrt{N}/2$
+\emph{at some site}~$x$ --- a \textbf{pointwise} (sup-norm)
+condition, independent of~$|\La|$. Since $p \sim u^2$, the
+singularity is at $\|u\|_\infty \sim m_0 N^{1/4}$.
+\end{proof}
+
+\subsection{The Jacobian phase and the order of limits}
+\label{sec:order_of_limits}
+
+\subsubsection{The residual phase problem}
+
+On any contour $\sigma = u + i\nabla\Phi(u)$, the integral
+acquires a Jacobian:
+\begin{equation}\label{eq:jacobian_phase}
+  \int_{\mathcal{J}_0} e^f\,d\sigma
+    = \int_{\R^{|\La|}} e^{f(u+i\nabla\Phi)}\,
+      \det(I + i\nabla^2\Phi)\,du.
+\end{equation}
+The total phase of the integrand is:
+\begin{equation}
+  \text{total phase} = \underbrace{\im f(u+i\nabla\Phi)}_{\text{action phase}}
+    \;+\; \underbrace{\Tr\arctan(\nabla^2\Phi)}_{\text{Jacobian phase}}.
+\end{equation}
+The classical HJ equation~\eqref{eq:HJ_arctan} sets the action
+phase to zero. But the Jacobian phase
+$\Tr\arctan(\nabla^2\Phi) \ne 0$: a real symmetric matrix does
+\emph{not} have $\pm$-paired eigenvalues, so $\arg\det J \ne 0$.
+
+For the leading correction $\nabla^2\Phi \sim u/\sqrt{N}$:
+$\Tr\arctan(\nabla^2\Phi) \approx \Tr(\nabla^2\Phi)
+\sim |\La|/N$, with variance $\sim |\La|/N^2$.
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Contour & Action phase & Jacobian phase \\
+\hline
+Constant shift ($v = v_*$) & $O(|\La|/N^2)$ & 0 (flat) \\
+Classical thimble ($\im f = 0$) & 0 & $O(|\La|/N^2)$ \\
+\hline
+\end{tabular}
+\end{center}
+Both have \textbf{the same total phase} $O(|\La|/N^2)$. The
+classical thimble moves the phase from the action to the Jacobian
+but does not eliminate it.
+
+\subsubsection{Consequence for the mass gap}
+
+The triangle inequality gives:
+$|Z^{-1}\!\int G_\sigma e^f\,d\sigma|
+  \le G_{m_0}(x,0) \cdot (\text{average sign})^{-1}$,
+where the average sign $\sim e^{-c|\La|/N^2}$. For
+$|\La| \to \infty$ at fixed~$N$, this bound diverges. The
+contour shift (or classical thimble) alone requires
+$N \gg \sqrt{|\La|}$.
+
+\subsubsection{The quantum Hamilton-Jacobi equation}
+\label{sec:quantum_HJ}
+
+To eliminate \emph{both} phases, we must solve the
+\textbf{quantum HJ equation}:
+\begin{equation}\label{eq:quantum_HJ}
+  \boxed{\im\,f\bigl(u + i\nabla\Phi\bigr)
+    + \Tr\arctan(\nabla^2\Phi) = 0
+    \qquad\text{for all } u \in \R^{|\La|}.}
+\end{equation}
+This incorporates the Jacobian measure into the phase condition.
+The integrand in~\eqref{eq:jacobian_phase} then has
+\textbf{exactly zero total phase}: $e^{f}\det J$ is real and
+positive on the quantum thimble.
+
+Equation~\eqref{eq:quantum_HJ} is a \textbf{second-order} PDE
+in~$\Phi$ (due to the $\nabla^2\Phi$ in the $\Tr\arctan$), in
+contrast to the first-order classical HJ
+equation~\eqref{eq:HJ_arctan}. Existence of solutions is more
+subtle: the classical thimble provides a natural starting point,
+with the quantum correction $\delta\Phi = O(1/N)$ absorbing
+the Jacobian phase.
+
+The quantum HJ equation has the same perturbative structure:
+$\Phi = \Phi_3 + \Phi_4 + \cdots$ with each order modified by
+$O(1/N)$ relative to the classical HJ solution.
+
+\subsubsection{Bounds-only approach to the quantum thimble}
+\label{sec:quantum_bounds}
+
+Just as for the classical HJ (Section~\ref{sec:HJ_solution}),
+we do not need to \emph{solve} the quantum HJ equation ---
+we need \textbf{existence} of a solution~$\Phi$ with
+\textbf{a priori bounds}. On the quantum thimble, the full
+integrand $e^f \det J$ is real and positive (both phases cancel
+by construction). Define the \textbf{effective potential}:
+\begin{equation}
+  V_{\rm eff}(u) = -\re\,f\bigl(u + i\nabla\Phi(u)\bigr)
+    - \log|\det(I + i\nabla^2\Phi(u))|.
+\end{equation}
+The BL measure is $e^{-V_{\rm eff}(u)}\,du$ --- real, positive,
+no residual phase. The three a priori bounds needed are:
+
+\begin{enumerate}
+\item \textbf{Proximity}: $|\psi(x)| \le C_1\|u\|_\infty^2/\sqrt{N}$
+  (same as classical --- the quantum correction is $O(1/N)$ smaller).
+\item \textbf{Spectral gap}: $M(\psi) \ge m_0^2/2 > 0$
+  (same bound, same proof).
+\item \textbf{Hessian of $V_{\rm eff}$}:
+  $\nabla^2 V_{\rm eff} \ge \kappa N$. This differs from the
+  classical case by the $\log|\det J|$ contribution, which
+  modifies the Hessian by $O(1)$ (from $\nabla^2\Tr\log
+  \sim \nabla^2\Tr(\nabla^2\Phi) \sim S'''$, the
+  triangle diagram derivative). For $N$ large, the
+  $\kappa N$ term dominates.
+\end{enumerate}
+
+The quantum $\Phi$ differs from the classical $\Phi$ by
+$O(1/N)$, so the bounds are the same to leading order. The
+key advantage: \textbf{zero total phase} means the average
+sign is exactly~1, and the mass gap bound is
+\textbf{uniform in~$|\La|$} without any $N \gg \sqrt{|\La|}$
+condition.
+
+\begin{proposition}[Existence of the quantum thimble]
+\label{prop:quantum_thimble}
+Define $F(\Phi)(u) = \im f(u + i\nabla\Phi) + \Tr\arctan(\nabla^2\Phi)$.
+For $N > N_0(m_0,\lambda)$ on a finite lattice~$\La$:
+\begin{enumerate}
+\item $F(0)(u) = O(\|u\|_\infty^3/\sqrt{N})$ per site
+  (the residual phase at the constant shift).
+\item The linearization $DF(0)$ is invertible: the leading term
+  is $\partial(\im f)/\partial\psi \cdot \nabla(\cdot) +
+  \Delta_u(\cdot)$, which is controlled by the Hessian $H > 0$.
+\item By the \textbf{implicit function theorem}: there exists
+  $\Phi$ with $F(\Phi) = 0$ and
+  $\|\nabla\Phi\|_\infty \le C\,\|u\|_\infty^2/\sqrt{N}$
+  (the proximity bound).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+$F$ is smooth (from the analyticity of $f$ and $\arctan$).
+$F(0)$ is explicitly computable and small: $\im f(u+iv_*)$ is
+$O(u^3/\sqrt{N})$ per site (the cubic term from the $\Tr\log$),
+and $\Tr\arctan(0) = 0$. The Fr\'echet derivative $DF(0)$ maps
+$\delta\Phi \mapsto \partial(\im f)/\partial v \cdot \nabla(\delta\Phi)
++ \Tr(\nabla^2(\delta\Phi))$. The first term involves the Hessian
+$H$ (positive definite), so $DF(0)$ is a bounded invertible operator
+on a space of smooth functionals. By the quantitative IFT:
+$\|\Phi\| \le C\,\|F(0)\|/\|DF(0)^{-1}\| = O(u^3/\sqrt{N})$.
+The spectral gap and Hessian bounds follow from proximity
+to the classical solution (which satisfies them).
+\end{proof}
+
+\begin{remark}[Lean formalization]
+For the initial formalization, we \textbf{axiomatize}
+Proposition~\ref{prop:quantum_thimble} (existence of $\Phi$
+with bounds). The IFT proof is a realistic future target:
+Mathlib has implicit function theorems, and the hypotheses
+(smoothness from \texttt{contDiffAt\_log\_det}, invertibility
+from $H > 0$) are available.
+\end{remark}
+
+\subsubsection{The transfer matrix resolution}
+\label{sec:transfer_matrix}
+
+A more robust approach avoids the spacetime phase problem
+entirely by reducing the mass gap to a \textbf{spectral gap}
+of the transfer matrix.
+
+On a lattice $\La = \La_s \times \{0,\ldots,T-1\}$ (spatial
+sites $\times$ time), the partition function factorizes via the
+transfer matrix~$\mathcal{T}$:
+\begin{equation}
+  Z = \Tr(\mathcal{T}^T), \qquad
+  \langle\ph(x,t)\ph(0,0)\rangle
+    = \frac{\Tr(\mathcal{T}^{T-t}\,\hat\ph(x)\,\mathcal{T}^t\,\hat\ph(0))}
+           {\Tr(\mathcal{T}^T)}.
+\end{equation}
+The mass gap is $m = \log(\mathrm{ev}_0/\mathrm{ev}_1)$, where
+$\mathrm{ev}_0 > \mathrm{ev}_1$ are the two largest eigenvalues
+of~$\mathcal{T}$. This is a property of $\mathcal{T}$ alone ---
+\textbf{independent of~$T$} (the time extent).
+
+The contour shift / thimble analysis is then applied to the
+\textbf{spatial} integral that defines~$\mathcal{T}$, which
+involves only $|\La_s|$ sites (the spatial volume). For a 2D
+theory: $|\La_s| = L/a$ (one spatial dimension), and
+$N \gg \sqrt{|\La_s|} = \sqrt{L/a}$ is a condition on $N$
+vs.\ the \emph{spatial} volume, not the full spacetime volume.
+
+\textbf{Key advantage}: The spectral gap of $\mathcal{T}$ is an
+intrinsic property of the one-step transfer matrix. The phase
+problem involves $|\La_s|$ sites (fixed for a given spatial
+lattice), not $|\La| = |\La_s| \times T$ (which grows with
+the time extent). The mass gap is then:
+\begin{enumerate}
+\item Proved on a fixed spatial lattice $\La_s$ with
+  $N \gg \sqrt{|\La_s|}$ (contour shift for the spatial
+  integral in~$\mathcal{T}$).
+\item Extended to $|\La_s| \to \infty$ by showing the spectral
+  gap is uniform (BL concentration + FK bound, both uniform in
+  $|\La_s|$ as argued in Sections~\ref{sec:HJ_solution}--\ref{sec:global_logconcave}).
+\item This is exactly the structure of Kupiainen's proof:
+  reflection positivity + transfer matrix + cluster expansion
+  (replaced here by BL).
+\end{enumerate}
+
+\begin{remark}[Three routes to the thermodynamic limit]
+\begin{enumerate}
+\item[(a)] \textbf{Transfer matrix + spatial contour shift}:
+  phase problem involves $|\La_s|$ only; $N \gg \sqrt{L/a}$.
+  This is the recommended approach.
+\item[(b)] \textbf{Quantum HJ equation}: eliminates phase
+  exactly; requires second-order PDE existence theory.
+\item[(c)] \textbf{Spacetime contour shift with}
+  $N \gg \sqrt{|\La|}$: simplest, but couples $N$ to the
+  full spacetime volume.
+\end{enumerate}
+\end{remark}
+
+\section{Solution theory and the mass gap proof}
+\label{sec:HJ_solution}
+
+This section establishes the a priori bounds on~$\Phi$ needed for
+the mass gap, addresses the technical issues (singularity avoidance,
+log-concavity, BL version), and assembles the proof.
+
+\subsection{Solution theory for the HJ equation}
+
+The HJ equation~\eqref{eq:HJ_arctan} is exact but highly nonlinear.
+We describe three approaches to its solution and the a priori
+bounds needed for the mass gap proof.
+
+\subsubsection{Method of characteristics}
+
+The HJ equation $H(u,\psi) = 0$ with ``Hamiltonian''
+$H(u,\psi) = \im f(u+i(v_*+\psi))$ has characteristic equations:
+\begin{equation}\label{eq:characteristics}
+  \frac{du}{ds} = \frac{\partial H}{\partial\psi}, \qquad
+  \frac{d\psi}{ds} = -\frac{\partial H}{\partial u}.
+\end{equation}
+Since the anti-holomorphic gradient flow~\eqref{eq:flow} preserves
+$\im f$, the characteristics~\eqref{eq:characteristics} are
+precisely the \textbf{projections of the gradient flow} onto
+$(u,\psi)$-space. In other words:
+
+\begin{center}
+\emph{Solving the HJ equation and solving the gradient flow are
+dual descriptions of the same object.}
+\end{center}
+
+The gradient flow constructs the thimble as a stable manifold
+(dynamical systems perspective); the HJ equation constructs it
+as a Lagrangian graph (symplectic geometry perspective). The
+duality means that any estimate proved via the flow automatically
+gives an estimate on~$\Phi$, and vice versa.
+
+\subsubsection{A priori bounds on $\Phi$}
+
+For the mass gap proof, we do not need the explicit form of $\Phi$
+--- we need three \textbf{a priori bounds}:
+
+\begin{proposition}[Thimble regularity]\label{prop:apriori}
+For $N > N_0$ and $\|u\|_\infty \le m_0 N^{1/4}/C$
+(inside the convergence disk):
+\begin{enumerate}
+\item \textbf{Proximity to constant shift}:
+  $\displaystyle |\psi(x)| = \Bigl|\frac{\partial\Phi}{\partial u(x)}\Bigr|
+    \le \frac{C_1}{\sqrt{N}}\,\|u\|_\infty^2$.
+\item \textbf{Spectral gap preservation}:
+  $M(\psi) = -\Delta + m_0^2 - 2\psi/\sqrt{N} \;\ge\; m_0^2/2 > 0$.
+\item \textbf{Hessian control}:
+  $\|\nabla^2\re f|_{\mathcal{J}_0} - H\|_{\mathrm{op}} \le C_2/N$,
+  so the Hessian of $\re f$ on the thimble is $H + O(1/N)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+\textbf{Bound (1)} follows from the convergent Taylor expansion:
+$\psi = \nabla\Phi$ starts at order $u^2$ with coefficient
+$O(1/\sqrt{N})$ (from the triangle diagram), and higher orders
+are controlled by the convergence of the series.
+
+\textbf{Bound (2)} follows from (1): the perturbation
+$2|\psi|/\sqrt{N} \le 2C_1\|u\|_\infty^2/N$, which is
+$\ll m_0^2$ within the saddle-point region
+$\|u\|_\infty \lesssim 1/\sqrt{N}$.
+
+\textbf{Bound (3)}: on the thimble $v = \nabla\Phi(u)$, the
+pullback of $\re f$ to $\R^{|\La|}$ (via $u \mapsto u+i\nabla\Phi$)
+has Hessian $H + O(1/N)$ corrections from the $\Phi$-dependent
+terms in $\re f$ (the cubic and higher terms contribute $O(1/N)$
+to the second derivative at the saddle width).
+\end{proof}
+
+\textbf{What these bounds give}:
+\begin{itemize}
+\item Bound (1) + (2): the FK bound applies on the thimble.
+  The operator $M(\psi) + iV(u) = -\Delta + m_0^2 + O(1/N) + iV$
+  has positive real part $\ge m_0^2/2$, giving
+  $|G_\sigma(x,0)| \le C\,e^{-m_0|x|/\sqrt{2}}$ for every
+  $u$-configuration on the thimble.
+\item Bound (3): Brascamp-Lieb applies on the thimble.
+  The measure $e^{\re f}\,du$ has Hessian $\ge \kappa N$
+  (with $\kappa > 0$ independent of~$|\La|$), giving
+  $\Var(u(x)) \le 1/(\kappa N)$.
+\end{itemize}
+
+\subsubsection{Fixed-point formulation}
+
+The HJ equation can be reformulated as a fixed-point problem.
+Define the map $\mathcal{T}$ by: given $\psi : \R^{|\La|} \to
+\R^{|\La|}$ (a candidate thimble correction), set
+\begin{equation}
+  (\mathcal{T}\psi)(x)
+    = -2\lambda\Bigl[\rho^2 + \frac{N}{2}\,
+      \frac{\partial}{\partial u(x)}
+      \Tr\arctan\bigl(M(\psi)^{-1/2}\,V(u)\,M(\psi)^{-1/2}\bigr)
+    \Bigr] - v_*.
+\end{equation}
+Then $\psi = \nabla\Phi$ solves the HJ equation if and only if
+$\psi$ is a fixed point of~$\mathcal{T}$.
+
+For $N$ sufficiently large: $\mathcal{T}$ is a contraction on the
+ball $\|\psi\|_\infty \le m_0^2\sqrt{N}/4$ in an appropriate
+function space (the $\arctan$ is Lipschitz with constant $< 1$
+when the spectral gap of~$M$ is large). The Banach fixed-point
+theorem then gives:
+\begin{enumerate}
+\item \textbf{Existence}: a unique solution $\psi = \nabla\Phi$
+  in the ball.
+\item \textbf{Constructive approximation}: the iterates
+  $\psi^{(n+1)} = \mathcal{T}\psi^{(n)}$ (starting from
+  $\psi^{(0)} = 0$, the constant shift) converge geometrically.
+\item \textbf{Quantitative bounds}: $\|\psi - \psi^{(n)}\| \le
+  C\,\theta^n$ with contraction rate $\theta < 1$.
+\end{enumerate}
+
+This provides an alternative to the Taylor expansion:
+a \textbf{non-perturbative}, constructive proof that the thimble
+exists and satisfies the a priori bounds of
+Proposition~\ref{prop:apriori}.
+
+\subsubsection{What the proof needs vs.\ what we compute}
+
+For the mass gap proof, the HJ equation plays the role of an
+\textbf{existence and regularity theorem}, not a computational
+tool. Specifically:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Step} & \textbf{What is needed from the HJ equation} \\
+\hline
+Positivity & $\im f = 0$ on the thimble (by construction) \\
+BL concentration & Hessian of $\re f \ge \kappa N$ (Bound 3) \\
+FK bound & $M(\psi) > 0$ on the thimble (Bound 2) \\
+Single-thimble dominance & Analyticity + action gap $\sim N$ \\
+\hline
+\end{tabular}
+\end{center}
+
+None of these require the explicit form of~$\Phi$ --- only
+bounds on $\Phi$ and its derivatives, all of which follow from
+the convergence of the expansion (or the fixed-point argument).
+
+\subsection{Properties of the integral over $\mathcal{J}_0$}
+
+On $\mathcal{J}_0$, the measure $e^{f(\sigma)}\,d\sigma$ (with the
 appropriate orientation) is:
 \begin{enumerate}
-\item \textbf{Real and positive} (since $\mathrm{Im}\,f = 0$
-  and $e^{\mathrm{Re}\,f} > 0$).
-\item \textbf{Log-concave near the saddle}: $\mathrm{Re}\,f
+\item \textbf{Real and positive} (since $\im\,f = 0$
+  and $e^{\re\,f} > 0$).
+\item \textbf{Log-concave near the saddle}: $\re\,f
   \approx -\tfrac{1}{2}(\sigma,H\sigma)$ (Gaussian, $H > 0$).
-\item \textbf{Decaying}: $\mathrm{Re}\,f \to -\infty$ along
-  $\Gamma$ away from the saddle (by the steepest descent property).
+\item \textbf{Decaying}: $\re\,f \to -\infty$ along
+  $\mathcal{J}_0$ away from the saddle (steepest descent property).
 \end{enumerate}
-This is exactly the setting where Brascamp-Lieb applies: a real,
-positive, log-concave measure.
 
-\subsection{Plan}
+We now address three technical issues in detail.
+
+\subsubsection{Singularity avoidance in the thermodynamic limit}
+
+The singularities of $f$ (where $\det(-\Delta+2i\sigma z) = 0$)
+occur at $\sigma = ik^2/(2z)$ --- purely imaginary, at distance
+$\ge m_0^2\sqrt{N}/2$ from the saddle. On the thimble,
+Bound~(2) of Proposition~\ref{prop:apriori} gives
+$M(\psi) \ge m_0^2/2 > 0$, so the thimble \emph{never reaches
+these singularities} within the convergence disk.
+
+For extreme fluctuations: BL concentration gives
+\begin{equation}
+  \Pr\bigl(\|u\|_\infty > t\bigr)
+    \le 2|\La|\,e^{-\kappa N t^2/2}.
+\end{equation}
+The singularity requires $|u| \sim m_0 N^{1/4}$ (the convergence
+radius). Substituting $t = m_0 N^{1/4}$:
+\begin{equation}
+  \Pr\bigl(\text{thimble reaches singularity}\bigr)
+    \le 2|\La|\,e^{-\kappa m_0^2 N^{3/2}/2}.
+\end{equation}
+This is \textbf{superexponentially small in~$N$}, uniformly
+in~$|\La|$ (since $e^{-cN^{3/2}}$ beats any polynomial in~$|\La|$
+for $N$ large). Singularity avoidance holds in the thermodynamic
+limit.
+
+\subsubsection{Global vs.\ local log-concavity}
+\label{sec:global_logconcave}
+
+The Hessian of $\re f$ on the thimble is $H + O(1/N)$
+(Bound~3) \emph{near the saddle}. Far from the saddle, the
+$\Tr\log$ term can introduce non-convexity. The question: does
+BL require \emph{global} log-concavity?
+
+\textbf{Answer}: For our application, \emph{local} log-concavity
+within the Gaussian peak suffices, for two reasons:
 
 \begin{enumerate}
-\item \textbf{Existence of $\Gamma$}: Show the level set
-  $\mathrm{Im}\,f = 0$ through $\sigma = 0$ is a smooth
-  $|\La|$-dimensional manifold in $\C^{|\La|}$.
-\item \textbf{Singularity avoidance}: $\Gamma$ stays away from
-  $\det(1-2izC\sigma) = 0$ (at distance $\ge m_0^2\sqrt{N}/2$
-  from the saddle).
-\item \textbf{Cauchy's theorem}: The deformation from $\R^{|\La|}$
-  to $\Gamma$ is valid (no singularities crossed).
-\item \textbf{BL on $\Gamma$}: The measure $e^{\mathrm{Re}\,f}$
-  restricted to $\Gamma$ is log-concave near the saddle. Apply
-  BL for $\sigma$-concentration.
-\item \textbf{FK bound}: On $\Gamma$, the $\ph$-propagator
-  $(-\Delta + m_0^2 + \text{potential from }\sigma)^{-1}$ has a
-  real potential (since $\sigma \in \Gamma$ makes $f$ real, the
-  coupling becomes real after the deformation). The sub-Gaussian
-  bound gives exponential decay.
-\item \textbf{Mass gap}: $m > 0$ for $N > N_0$.
+\item \textbf{The Gaussian dominates the tails}. The bare term
+  $-\|u\|^2/(4\lambda)$ in $\re f$ provides Gaussian decay.
+  The $\Tr\log$ correction to the Hessian is bounded by
+  $\|(\partial^2/\partial u^2)\Tr\log M\| \le C/m_0^4$
+  (from the resolvent bound $\|M^{-1}\| \le 2/m_0^2$).
+  The Gaussian Hessian $1/(2\lambda)$ dominates for
+  $\lambda < m_0^4/(2C)$ --- a condition on the coupling,
+  not the volume.
+
+\item \textbf{BL with a cutoff}. One can apply BL to the
+  measure restricted to the log-concave region
+  $\|u\|_\infty \le R$ (with $R \sim m_0 N^{1/4}/C$, the
+  convergence radius), and bound the contribution from
+  $\|u\|_\infty > R$ by the Gaussian tail. Since the tail
+  probability is $\le 2|\La|e^{-\kappa NR^2/2}
+  \sim e^{-cN^{3/2}}$, the correction is negligible.
 \end{enumerate}
 
-\begin{remark}
-The steepest descent contour $\Gamma$ is \emph{not} a simple
-geometric object (not a line, plane, or rotation of the real axis).
-It is a curved manifold determined by the global analytic structure
-of~$f$. Characterizing $\Gamma$ explicitly is a nontrivial problem
-in several complex variables. However, near the saddle, $\Gamma$
-is well-approximated by the real axis, and the curvature corrections
-are $O(1/N)$.
+In fact, for $\lambda$ small enough (weak coupling), $\re f$ on
+the thimble IS globally strictly convex: the Gaussian $1/(2\lambda)$
+term dominates the $\Tr\log$ curvature everywhere. The threshold
+is $\lambda < c\,m_0^4$, which is satisfied in the weak-coupling
+regime relevant to the continuum limit.
 
-For the $N = 1$ test case ($d = 0$): $\Gamma$ is a curve in $\C$,
-which can be computed explicitly and compared with the known
-P($\ph$)$_2$ mass gap.
+\subsubsection{Brascamp-Lieb: which version?}
+
+The measure $e^{\re f}\,du$ on the thimble is a probability
+measure on~$\R^{|\La|}$ (after normalization). For BL, we need:
+
+\begin{itemize}
+\item \textbf{Standard BL} (Brascamp-Lieb 1976~\cite{BL76}):
+  applies to $e^{-V(u)}\,du$ with $V$ strictly convex
+  ($\nabla^2 V \ge \kappa > 0$). This works on a finite
+  lattice if $V = -\re f$ is globally strictly convex ---
+  which holds for $\lambda < c\,m_0^4$ (see above).
+  \textbf{No extension needed} in this regime.
+
+\item \textbf{Conlon-Dabkowski extension}~\cite{CD24}:
+  applies to lattice field models with uniformly convex
+  \emph{gradient} action (weaker than strict convexity of~$V$).
+  This would be needed if $\lambda$ is not small, i.e., the
+  non-convex $\Tr\log$ tails are significant. Their result
+  is stated for lattice models in $d \ge 2$ and gives
+  near-Gaussian correlation bounds.
+
+\item \textbf{BL from markov-semigroups} (our Lean library):
+  the \texttt{brascampLieb\_poincare} theorem gives
+  $\Var(f) \le (1/(\kappa N))\,\E[\|\nabla f\|^2]$ for
+  $(\kappa N)$-log-concave measures. This is the version we
+  would formalize. It requires \texttt{LogConcaveMeasure}
+  with convexity parameter~$\kappa N$, which we construct
+  from the Hessian bound~$H \ge \kappa N$.
+\end{itemize}
+
+\subsubsection{Uniformity and the infinite-volume limit}
+\label{sec:uniformity}
+
+The mass gap is the spectral gap of the transfer matrix
+$\mathcal{T}$ (Section~\ref{sec:transfer_matrix}). The contour
+shift / BL analysis is applied to the \textbf{spatial} integral
+defining~$\mathcal{T}$, which involves $|\La_s|$ sites.
+
+The proof requires $N \gg \sqrt{|\La_s|}$ to control the
+residual phase. For a fixed spatial lattice (e.g.,
+$|\La_s| = L/a$ in 2d), this is a \textbf{fixed} condition
+$N > N_0(L/a, m_0, \lambda)$ independent of the time extent.
+
+\textbf{Taking $|\La_s| \to \infty$ (spatial thermodynamic limit)}:
+The spectral gap of $\mathcal{T}$ must be shown uniform in~$|\La_s|$.
+This is a stronger statement requiring either:
+\begin{itemize}
+\item[(a)] The quantum HJ equation~\eqref{eq:quantum_HJ}
+  (eliminating the phase), or
+\item[(b)] A direct proof that the spectral gap of $\mathcal{T}$
+  is controlled by the per-site BL + FK bounds (which are
+  volume-independent), without passing through the phase.
+\end{itemize}
+Kupiainen's proof uses option~(b) via a cluster expansion.
+The BL approach should give the same result: the FK bound is
+per-configuration (volume-independent), and BL concentration
+holds with $\kappa$ independent of~$|\La_s|$ (the Hessian
+$\hat{H}(k) = 1/(2\lambda) + 2B(k)$ has a spectral gap
+converging to a finite limit as $|\La_s| \to \infty$).
+
+The remaining issue is the \textbf{phase control} in the spatial
+integral. For the transfer matrix, the relevant phase is
+$O(|\La_s|/N^2)$, which vanishes for $N \gg \sqrt{|\La_s|}$.
+In the continuum limit $a \to 0$ (so $|\La_s| = L/a \to \infty$),
+this requires $N \gg \sqrt{L/a}$ --- coupling $N$ to the
+UV cutoff.
+
+\begin{remark}[The continuum limit is weak coupling]
+\label{rmk:weak_coupling}
+The global log-concavity condition $\lambda < c\,m_0^4$ might
+appear restrictive, since $m_0 \sim \La\,e^{-c/g^2}$ is
+exponentially small. But the \textbf{continuum limit is
+automatically in the weak-coupling regime}: the renormalized
+coupling runs as $g^2(a) \sim 1/\log(\La/m_0) \to 0$ as
+$a \to 0$. The bare coupling $\lambda \sim g^2/N$, while
+$m_0^4 \sim \La^4\,e^{-4c/g^2}$, so:
+\begin{equation}
+  \frac{\lambda}{m_0^4}
+    \;\sim\; \frac{g^2}{N\La^4\,e^{-4c/g^2}}
+    \;\to\; 0
+    \qquad\text{as } a \to 0.
+\end{equation}
+The condition $\lambda < c\,m_0^4$ is satisfied with
+\textbf{enormous margin} in the continuum limit. Global
+log-concavity is a consequence of asymptotic freedom, not an
+extra assumption.
+
+The Conlon-Dabkowski extension~\cite{CD24} would be needed for
+strong coupling (fixed lattice spacing, $\lambda$ not small) or
+for $N$ close to the threshold~$N_0$. Neither is relevant for
+the initial proof, which targets the continuum limit at
+large~$N$.
+\end{remark}
+
+\subsection{The flowed manifold alternative}
+
+Instead of characterizing the exact thimble $\mathcal{J}_0$
+(a global object determined by the full analytic structure of~$f$),
+one can work with the \textbf{flowed manifold}:
+\begin{equation}
+  \mathcal{M}_T = \bigl\{\sigma(T) : \sigma(0) \in \R^{|\La|},\;
+    \dot\sigma = \overline{\nabla f(\sigma)}\bigr\},
+\end{equation}
+obtained by flowing the real domain along~\eqref{eq:flow} for
+time~$T$. Properties:
+\begin{itemize}
+\item $\mathcal{M}_0 = \R^{|\La|}$ (the original domain).
+\item $\mathcal{M}_T$ is diffeomorphic to $\R^{|\La|}$ for all
+  finite~$T$ (no topology change).
+\item $\mathcal{M}_T \to \bigcup_{\sigma_*}\mathcal{J}_{\sigma_*}$
+  as $T \to \infty$.
+\item The residual sign problem on $\mathcal{M}_T$ is bounded by
+  $e^{-c(T)N}$ for a function $c(T)$ increasing in~$T$.
+\end{itemize}
+\textbf{Advantage}: No need to identify critical points or compute
+intersection numbers. The flow~\eqref{eq:flow} is a well-posed ODE
+system. For a rigorous proof, take $T$ large enough that the residual
+oscillations are smaller than the mass gap signal.
+
+This approach was developed computationally by
+Fukuma et al.~\cite{Fukuma20,Fukuma23} (``Worldvolume HMC''),
+now extended to gauge theories~\cite{Fukuma26} and the Hubbard
+model~\cite{Fukuma25b}.
+
+\subsection{Proof plan (using the constant shift)}
+
+The constant-shift form of the thimble
+(Section~\ref{sec:constant_shift}) simplifies the proof plan
+considerably:
+
+\begin{enumerate}
+\item \textbf{Contour shift}: Shift from $v = 0$ to $v = v_*$,
+  where $v_*$ is determined by the gap equation so that
+  $-2v_* z = m_0^2$. This is a flat contour --- Cauchy's theorem
+  for the shift is elementary (the integrand is entire in each
+  $\sigma(x)$ except for the $\log\det$ singularities, which are at
+  $\sigma = ik^2/(2z)$, far from the shifted contour for
+  $|v_*| < k_{\min}^2/(2z)$, which is satisfied by construction).
+
+\item \textbf{Real mass in the operator}: On the shifted contour,
+  the $\ph$-operator is $-\Delta + m_0^2 + 2i\sigma z$ with
+  $\sigma \in \R$ (the shifted variable). The FK bound gives
+  $|G_\sigma(x,0)| \le G_{m_0}(x,0) \sim e^{-m_0|x|}$ for
+  \textbf{every} $\sigma$-value.
+
+\item \textbf{Residual sign problem}: On the constant-shift contour,
+  $\im\,f \ne 0$ (unlike the exact thimble). The residual imaginary
+  part is $O(\sigma^3/\sqrt{N})$ per site. The shifted partition
+  function is:
+  \begin{equation}
+    Z = c\int_{\R^{|\La|}} e^{\re f(u+iv_*)}\cdot
+      e^{i\,\im f(u+iv_*)}\,d\sigma.
+  \end{equation}
+  The real part $e^{\re f}$ is a well-behaved (approximately
+  log-concave) measure. The phase $e^{i\,\im f}$ is the residual
+  sign problem.
+
+\item \textbf{BL for $\sigma$-concentration}: The real part
+  $\re\,f(u+iv_*)$ has positive definite Hessian
+  $\sim N\cdot H$ near $\sigma = 0$. Apply BL to the measure
+  $e^{\re f}\,d\sigma$ (real, positive, log-concave near saddle)
+  for concentration: $\Var(\sigma(x)) \le 1/(\kappa N)$.
+
+\item \textbf{Phase control}: The residual phase $e^{i\,\im f}$
+  is controlled by BL concentration. Since $\im\,f$ is $O(\sigma^3)$
+  and the measure concentrates at width $O(1/\sqrt{N})$:
+  $|\im\,f| \lesssim |\La|/N^2$ (total over all sites).
+  For $N \gg \sqrt{|\La|}$: the phase is close to~1.
+
+\item \textbf{FK bound + concentration $\to$ mass gap}: Combine
+  the per-$\sigma$ FK bound (step~2) with $\sigma$-concentration
+  (step~4) and phase control (step~5):
+  \begin{equation}
+    \E_\sigma\bigl[G_\sigma(x,0)\bigr]
+      \approx G_{m_0}(x,0)\cdot(1+O(1/N))
+      \sim e^{-m_0|x|}.
+  \end{equation}
+  Mass gap $m \ge m_0(1 - O(1/N)) > 0$ for $N > N_0$.
+\end{enumerate}
+
+\begin{remark}[Comparison with exact thimble]
+The constant-shift proof plan avoids the need to characterize the
+exact thimble $\mathcal{J}_0$ globally. The price is the residual
+sign problem (step~5), which must be controlled perturbatively.
+Using the exact thimble would eliminate the residual sign problem
+entirely ($\im\,f = 0$), but requires the global analysis of
+Section~\ref{sec:thimble}. For large~$N$, the constant-shift
+approach should suffice: the residual phase is $O(|\La|/N^2)$,
+negligible for $N \gg \sqrt{|\La|}$.
+\end{remark}
+
+\begin{remark}
+The leading-order thimble is a \textbf{constant imaginary shift}
+$v = 0 \to v = v_*$ (Section~\ref{sec:constant_shift}).
+This is a flat manifold --- the simplest possible contour deformation.
+The exact thimble has $O(1/N)$ curvature corrections from higher-order
+terms in~$f$.
+
+For a rigorous proof, one can work with the \emph{exact} constant
+shift (Cauchy's theorem for a flat contour is elementary) and treat
+the difference between the constant shift and the exact thimble
+as a perturbation. The residual $\im\,f$ on the constant-shift
+contour is $O(u^3/\sqrt{N})$ per site --- small within the
+saddle-point width but requiring control in the tails.
 \end{remark}
 
 \section{Other strategies for comparison}
+
+Section~\ref{sec:thimble} describes what we call \textbf{Strategy~D}
+(Lefschetz thimble). For context, we compare with three alternatives.
 
 \subsection{Strategy A: NLSM (Kupiainen)}
 
@@ -463,22 +1516,25 @@ decay). Cluster expansion + RP control the $\sigma$-average.
 \textbf{Threshold}: $N > C\,m_0^{-a_2}$ with $a_2 = O(d^2)$
 (Kupiainen Thm.~1).
 
-\subsection{Strategy B: LSM saddle-point}
+\subsection{Strategy B: LSM saddle-point (real axis)}
 
-Work with the LSM. No real mass in the operator, but the saddle-point
-Gaussian on the real $\sigma$-axis IS log-concave.
+Work with the LSM on the \emph{real} $\sigma$-axis. The saddle-point
+Gaussian is log-concave (real, positive), but the full integrand has
+oscillatory corrections away from the saddle.
 
-\textbf{Idea}: Apply BL to the saddle-point Gaussian (log-concave,
-real, positive) and control the oscillatory corrections as a
-perturbation.
+\textbf{Idea}: Apply BL to the saddle-point Gaussian and control the
+oscillatory corrections as a perturbation.
 
 \textbf{Challenge}: The mass gap comes entirely from the $\sigma$-average
 (no single-$\sigma$ decay). Need to show the oscillatory corrections
 don't destroy the saddle-point mass.
 
 \textbf{Advantage}: Avoids cluster expansion (BL for the Gaussian).\\
-\textbf{Disadvantage}: No FK bound; need new estimates for the
-oscillatory $\sigma$-average.
+\textbf{Disadvantage}: No FK bound; the sign problem is addressed
+by perturbative control, not eliminated.\\
+\textbf{Comparison with D}: Strategy~D \emph{eliminates} the
+oscillations by deforming the contour; Strategy~B tries to
+\emph{control} them on the real axis.
 
 \subsection{Strategy C: LSM $\to$ NLSM equivalence}
 
@@ -490,6 +1546,32 @@ then use Strategy~A.
 from the LSM formulation.\\
 \textbf{Disadvantage}: Proving IR equivalence rigorously is itself
 a major result.
+
+\subsection{Strategy comparison}
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+& A (NLSM) & B (real axis) & C (equivalence) & D (thimble) \\
+\hline
+Sign problem & avoided & controlled & avoided & reduced/eliminated \\
+Real mass $m_0^2$ & from constraint & none & from constraint & from contour shift \\
+FK bound & yes & no & yes & yes \\
+BL needed & no & yes & no & yes \\
+Cluster exp.\ & yes & no & yes & no \\
+Proved & yes (K80) & no & no & no \\
+\hline
+\end{tabular}
+\end{center}
+
+Strategy~D with the constant shift (Section~\ref{sec:constant_shift})
+achieves the same operator structure as Strategy~A ($-\Delta+m_0^2$
+in the real part) without the constraint. The key insight: \emph{the
+thimble does for the LSM what the constraint does for the NLSM}.
+The residual sign problem on the constant-shift contour is
+$O(|\La|/N^2)$, controlled perturbatively for $N \gg \sqrt{|\La|}$.
+This avoids both the cluster expansion (Strategy~A) and the
+uncontrolled oscillations (Strategy~B).
 
 \section{The $N = 2$ obstruction}
 
@@ -528,23 +1610,69 @@ no BKT.
 \subsection{Open questions}
 
 \begin{enumerate}
-\item Can Strategy~B work? Is BL on the saddle-point Gaussian
-  sufficient to control the oscillatory corrections?
-\item What is the threshold $N_0$ for each strategy?
-\item Can the N=1 test case (P($\ph$)$_2$) validate Strategy~B?
+\item \textbf{Singularity avoidance}: Can we prove $\mathcal{J}_0$
+  avoids $\det(-\Delta+2i\sigma z) = 0$? The zeros are purely
+  imaginary ($\sigma = ik^2/(2z)$), at distance $\ge m_0^2/(2z)
+  = m_0^2\sqrt{N}/2$ from the saddle. For large~$N$ this should
+  be straightforward.
+\item \textbf{Global log-concavity}: Is $\re\,f$ concave on all
+  of $\mathcal{J}_0$, or only near the saddle? The $\Tr\log$ term
+  introduces non-convexity far from the saddle. For BL: we need
+  convexity within the $O(1/\sqrt{N})$-width peak, which holds by
+  the Hessian computation.
+\item \textbf{Intersection numbers}: Can we verify $n_0 = 1$?
+  For the dominant saddle on the real axis with $f''$ positive
+  definite, homotopy arguments should give $n_0 = 1$.
+\item \textbf{Threshold $N_0$}: What is the minimal $N$ for
+  single-thimble dominance? Kupiainen's threshold for Strategy~A
+  is $N > C\,m_0^{-25}$ (very large). Can Strategy~D improve this?
+\item \textbf{$N = 1$ test case}: In $d = 0$ (one site),
+  $\mathcal{J}_0$ is a curve in~$\C$ that can be computed
+  explicitly. Does the thimble analysis reproduce the known
+  P($\ph$)$_2$ mass gap?
+\item \textbf{Flowed manifold vs.\ exact thimble}: Is the flowed
+  manifold $\mathcal{M}_T$ for finite~$T$ sufficient for the
+  proof, avoiding the need to characterize $\mathcal{J}_0$ globally?
 \end{enumerate}
 
 \begin{thebibliography}{99}
 \bibitem{BL76} H.~J.~Brascamp and E.~H.~Lieb,
   J.~Funct.~Anal.~\textbf{22} (1976) 366--389.
+\bibitem{CD24} J.~G.~Conlon and J.~Dabkowski,
+  ``Extensions of the Brascamp-Lieb inequality and the dipole gas,''
+  arXiv:2412.05122 (2024).
+\bibitem{DG25} P.~Dario and C.~Garban,
+  Comm.~Math.~Phys.~(2025); arXiv:2311.16546.
+\bibitem{Fukuma20} M.~Fukuma and N.~Matsumoto,
+  ``Worldvolume approach to the tempered Lefschetz thimble method,''
+  PTEP (2021); arXiv:2012.08468.
+\bibitem{Fukuma23} M.~Fukuma,
+  ``Simplified algorithm for the Worldvolume HMC,''
+  arXiv:2311.10663 (2023).
+\bibitem{Fukuma25b} M.~Fukuma and N.~Namekawa,
+  ``Worldvolume HMC for the Hubbard model,''
+  arXiv:2507.23748 (2025).
+\bibitem{Fukuma26} M.~Fukuma,
+  ``Worldvolume HMC for lattice gauge theories,''
+  arXiv:2603.28629 (2026).
+\bibitem{GJS74} J.~Glimm, A.~Jaffe, and T.~Spencer,
+  Ann.~Math.~\textbf{100} (1974) 585--632.
 \bibitem{Kupiainen80} A.~Kupiainen,
   Comm.~Math.~Phys.~\textbf{73} (1980) 273--294.
 \bibitem{Kupiainen80b} A.~Kupiainen,
   Comm.~Math.~Phys.~\textbf{74} (1980) 199--222.
-\bibitem{DG25} P.~Dario and C.~Garban,
-  Comm.~Math.~Phys.~(2025); arXiv:2311.16546.
-\bibitem{GJS74} J.~Glimm, A.~Jaffe, and T.~Spencer,
-  Ann.~Math.~\textbf{100} (1974) 585--632.
+\bibitem{Lin24} Y.-H.~Lin,
+  ``The Bayes principle and Segal axioms for P($\ph$)$_2$,''
+  arXiv:2403.12804 (2024).
+\bibitem{ABBPL18} A.~Alexandru, P.~F.~Bedaque, H.~Lamm, and S.~Lawrence,
+  ``Finite-density Monte Carlo calculations on sign-optimized manifolds,''
+  Phys.~Rev.~D~\textbf{97} (2018) 094510; arXiv:1804.00697.
+\bibitem{LY24} S.~Lawrence and S.~Yamauchi,
+  ``Convex optimization and contour deformations,''
+  Phys.~Rev.~D~\textbf{110} (2024); arXiv:2311.13002.
+\bibitem{Witten10} E.~Witten,
+  ``A new look at the path integral of quantum mechanics,''
+  in \emph{Surveys in Differential Geometry XV} (2010); arXiv:1009.6032.
 \end{thebibliography}
 
 \end{document}

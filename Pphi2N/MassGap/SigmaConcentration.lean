@@ -276,13 +276,13 @@ Both depend on the lattice parameters but are explicit. -/
 def LSMParams.toSigmaConvexityData (L : LSMParams)
     (Λ : Type*) [Fintype Λ]
     (hconv : L.lam > 0)  -- simplified: just need λ > 0 for the structure
-    (hsigma : 0 < L.vsq) -- v² > 0
+    (hsigma : 0 < L.rho_sq) -- ρ² > 0
     : SigmaConvexityData Λ where
   N := L.N
   hN := L.hN
   kappa := L.lam  -- simplified: κ ≈ 2λ for large λ
   hkappa := hconv
-  sigma_star := L.vsq  -- simplified: σ* ≈ v² for large λ
+  sigma_star := L.rho_sq  -- simplified: σ* ≈ ρ² for large λ
   hsigma_star := hsigma
 
 end Pphi2N

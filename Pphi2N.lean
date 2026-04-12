@@ -18,3 +18,12 @@ import Pphi2N.MassGap.HubbardStratonovich
 import Pphi2N.MassGap.MassGapDef
 import Pphi2N.MassGap.LatticeOperator
 import Pphi2N.HSEquivalence.N1Test
+import Pphi2N.Thimble.GapEquation
+import Pphi2N.Thimble.ShiftedOperator
+import Pphi2N.Thimble.QuantumThimble
+import Pphi2N.Thimble.QuantumHJExplicit
+import Pphi2N.Thimble.FKBoundShifted
+import Pphi2N.Thimble.DiagmagneticInequality
+import Pphi2N.Thimble.ThimbleMeasure
+import Pphi2N.Thimble.MassGapProof
+import Pphi2N.Thimble.GreenDecay

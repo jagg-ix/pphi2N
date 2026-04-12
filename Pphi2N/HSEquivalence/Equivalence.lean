@@ -8,10 +8,10 @@ The Hubbard-Stratonovich identity gives an EXACT equivalence:
 
   Z_{P(φ)₂} = c · ∫Dσ ∫dφ exp(-S_HS(φ,σ))
 
-where S_HS(φ,σ) = ½⟨φ,(-Δ)φ⟩ + Σ[σ²/(4λ) + iσ(φ²-v²)].
+where S_HS(φ,σ) = ½⟨φ,(-Δ)φ⟩ + Σ[σ²/(4λ) + iσ(φ²-ρ²)].
 
 Proof: integrate out σ first (inverse HS identity at each site)
-to recover exp(-Σλ(φ²-v²)²). No complex Gaussian integral needed.
+to recover exp(-Σλ(φ²-ρ²)²). No complex Gaussian integral needed.
 
 This is the foundation of the mass gap proof:
 - The joint (σ,φ) measure gives a "random potential" interpretation
@@ -39,21 +39,21 @@ namespace Pphi2N
 
 For N=1 with φ : Λ → ℝ and σ : Λ → ℝ:
 
-S_original(φ) = ½⟨φ,(-Δ)φ⟩ + Σ_x λ(φ(x)²-v²)²
+S_original(φ) = ½⟨φ,(-Δ)φ⟩ + Σ_x λ(φ(x)²-ρ²)²
 
-S_HS(φ,σ) = ½⟨φ,(-Δ)φ⟩ + Σ_x [σ(x)²/(4λ) + iσ(x)(φ(x)²-v²)]
+S_HS(φ,σ) = ½⟨φ,(-Δ)φ⟩ + Σ_x [σ(x)²/(4λ) + iσ(x)(φ(x)²-ρ²)]
 
 Note: S_HS is quadratic in φ (degree 2!) but has imaginary coupling. -/
 
 /-- The original P(φ)₂ action at a single site:
-λ(φ²-v²)² = λφ⁴ - 2λv²φ² + λv⁴ -/
-def siteAction_original (lam vsq φ : ℝ) : ℝ :=
-  lam * (φ ^ 2 - vsq) ^ 2
+λ(φ²-ρ²)² = λφ⁴ - 2λρ²φ² + λv⁴ -/
+def siteAction_original (lam rho_sq φ : ℝ) : ℝ :=
+  lam * (φ ^ 2 - rho_sq) ^ 2
 
 /-- The HS-transformed action at a single site:
-σ²/(4λ) + iσ(φ²-v²) -/
-def siteAction_HS (lam vsq φ σ : ℝ) : ℂ :=
-  (σ ^ 2 / (4 * lam) : ℝ) + I * σ * (φ ^ 2 - vsq)
+σ²/(4λ) + iσ(φ²-ρ²) -/
+def siteAction_HS (lam rho_sq φ σ : ℝ) : ℂ :=
+  (σ ^ 2 / (4 * lam) : ℝ) + I * σ * (φ ^ 2 - rho_sq)
 
 /-! ## The key identity: integrating out σ recovers the quartic
 
@@ -62,17 +62,17 @@ At each site: ∫ dσ exp(-siteAction_HS(φ,σ)) = c · exp(-siteAction_original
 This is the INVERSE of the HS identity. -/
 
 /-- **Inverse HS at one site:**
-  ∫ dσ exp(-σ²/(4λ) - iσ(φ²-v²)) = √(4πλ) · exp(-λ(φ²-v²)²)
+  ∫ dσ exp(-σ²/(4λ) - iσ(φ²-ρ²)) = √(4πλ) · exp(-λ(φ²-ρ²)²)
 
-Proof: this IS the HS identity with a = φ²-v². -/
-theorem inverse_HS_one_site (lam : ℝ) (hlam : 0 < lam) (φ vsq : ℝ) :
-    ∫ σ : ℝ, cexp (-(siteAction_HS lam vsq φ σ)) =
-    (4 * ↑π * ↑lam) ^ (1/2 : ℂ) * cexp (-(↑(siteAction_original lam vsq φ))) := by
+Proof: this IS the HS identity with a = φ²-ρ². -/
+theorem inverse_HS_one_site (lam : ℝ) (hlam : 0 < lam) (φ rho_sq : ℝ) :
+    ∫ σ : ℝ, cexp (-(siteAction_HS lam rho_sq φ σ)) =
+    (4 * ↑π * ↑lam) ^ (1/2 : ℂ) * cexp (-(↑(siteAction_original lam rho_sq φ))) := by
   -- Unfold and apply the HS identity
-  -- Apply hs_identity_combined with a = φ²-vsq.
+  -- Apply hs_identity_combined with a = φ²-rho_sq.
   -- The proof reduces to matching complex arithmetic:
-  -- -(σ²/(4λ) + iσ(φ²-v²)) = iσ(φ²-v²) - σ²/(4λ) (rearrange negation)
-  -- -(lam·(φ²-v²)²) = -(lam·(φ²-v²)²) (trivial)
+  -- -(σ²/(4λ) + iσ(φ²-ρ²)) = iσ(φ²-ρ²) - σ²/(4λ) (rearrange negation)
+  -- -(lam·(φ²-ρ²)²) = -(lam·(φ²-ρ²)²) (trivial)
   -- Both are routine ℝ→ℂ cast + ring, tedious in Lean.
   sorry
 
@@ -91,12 +91,12 @@ the partition function. The original integral over φ with quartic
 interaction equals the joint integral over (φ,σ) with the
 HS-transformed (quadratic + imaginary) interaction. -/
 theorem hs_equivalence_principle
-    (lam : ℝ) (hlam : 0 < lam) (vsq : ℝ) :
+    (lam : ℝ) (hlam : 0 < lam) (rho_sq : ℝ) :
     -- For any fixed φ, the σ-integral recovers the quartic:
     ∀ φ : ℝ,
-      ∫ σ : ℝ, cexp (-(siteAction_HS lam vsq φ σ)) =
-      (4 * ↑π * ↑lam) ^ (1/2 : ℂ) * cexp (-(↑(siteAction_original lam vsq φ))) :=
-  fun φ => inverse_HS_one_site lam hlam φ vsq
+      ∫ σ : ℝ, cexp (-(siteAction_HS lam rho_sq φ σ)) =
+      (4 * ↑π * ↑lam) ^ (1/2 : ℂ) * cexp (-(↑(siteAction_original lam rho_sq φ))) :=
+  fun φ => inverse_HS_one_site lam hlam φ rho_sq
 
 /-! ## Consequence: the joint measure interpretation
 

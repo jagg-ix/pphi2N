@@ -10,10 +10,10 @@ auxiliary field σ, reducing the polynomial degree from 4 to 2.
 
 ## The equivalence
 
-For N=1, φ : Λ → ℝ, u = φ², and the quartic λ(φ²-v²)² is a P(φ)₂
+For N=1, φ : Λ → ℝ, u = φ², and the quartic λ(φ²-ρ²)² is a P(φ)₂
 polynomial. The HS identity:
 
-  exp(-λ(φ²-v²)²) = c ∫ dσ exp(-σ²/(4λ) + iσ(φ²-v²))
+  exp(-λ(φ²-ρ²)²) = c ∫ dσ exp(-σ²/(4λ) + iσ(φ²-ρ²))
 
 makes the φ-action quadratic: ½⟨φ,(-Δ+iσ)φ⟩. Integrating out φ
 gives det(-Δ+iσ)^{-1/2}.
@@ -47,7 +47,7 @@ For N=1: the O(N) model IS the scalar P(φ)₂ theory.
 The field φ : Λ → ℝ has a single component, and
 u(x) = |φ(x)|²/N = φ(x)² (since N=1). -/
 
-/-- N=1 LSM parameters: a P(φ)₂ theory with P(t) = λ(t-v²)². -/
+/-- N=1 LSM parameters: a P(φ)₂ theory with P(t) = λ(t-ρ²)². -/
 def n1Params (lam : ℝ) (hlam : 0 < lam) (Rsq : ℝ) (hRsq : 0 < Rsq)
     (mass : ℝ) (hmass : 0 < mass) : LSMParams where
   N := 1
@@ -106,7 +106,7 @@ theorem hs_identity_n1 (lam : ℝ) (hlam : 0 < lam) (a : ℝ) :
 /-! ## The gap equation for N=1
 
 At N=1, the gap equation is:
-  ½ G(x,x; m₀²) + 2λ(m₀² - v²) = 0
+  ½ G(x,x; m₀²) + 2λ(m₀² - ρ²) = 0
 
 where G(x,x) is the Green's function diagonal (Wick constant).
 This is exactly the Wick mass renormalization for P(φ)₂:
@@ -118,13 +118,13 @@ The gap equation determines the physical mass from the bare parameters. -/
 /-- The gap equation for N=1 on a finite lattice.
 The saddle point σ* = m₀² satisfies:
 
-  m₀² = v² - G(x,x; m₀²)/(4λ)
+  m₀² = ρ² - G(x,x; m₀²)/(4λ)
 
 where G(x,x; m²) = (1/|Λ|) Σ_k 1/(eigenvalue_k + m²)
 is the lattice Green's function diagonal. -/
 def gapEquation_n1 {d M : ℕ} [NeZero M]
-    (lam v_sq : ℝ) (m_sq : ℝ) : Prop :=
-  m_sq = v_sq - (1 / (4 * lam)) *
+    (lam rho_sq : ℝ) (m_sq : ℝ) : Prop :=
+  m_sq = rho_sq - (1 / (4 * lam)) *
     ((1 : ℝ) / Fintype.card (FinLatticeSites d M)) *
       ∑ k : FinLatticeSites d M,
         (massEigenvalues d M 1 (Real.sqrt m_sq) k)⁻¹
@@ -141,7 +141,7 @@ pphi2N construction (HS auxiliary field). -/
 
 /-- The N=1 interacting measure IS a P(φ)₂ measure.
 
-For N=1, the O(N) interacting measure with P(t) = λ(t-v²)²
+For N=1, the O(N) interacting measure with P(t) = λ(t-ρ²)²
 is exactly the P(φ)₂ interacting measure with the same
 polynomial (after identifying Fin 1 → FinLatticeField with
 FinLatticeField). -/

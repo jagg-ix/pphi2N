@@ -1,6 +1,6 @@
 # pphi2N Status
 
-**1 sorry, 11 axioms, 32 files, 0 errors.**
+**4 sorries, 21 axioms, 41 files, 0 errors.**
 
 ## Main results
 

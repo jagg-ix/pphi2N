@@ -1,0 +1,573 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Tr}{\mathrm{Tr}}
+\newcommand{\ph}{\varphi}
+\newcommand{\La}{\Lambda}
+\newcommand{\im}{\mathrm{Im}}
+\newcommand{\re}{\mathrm{Re}}
+
+\title{Complex Actions, Sign Problems, and Contour Deformations in QFT}
+\author{M.~R.~Douglas}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We survey the sign problem in Euclidean lattice QFT and the
+contour deformation methods used to address it, with emphasis on
+the Lefschetz thimble decomposition and its application to the
+O($N$) model at large~$N$. We connect the steepest descent contour
+strategy of \texttt{mass-gap-v3} to the broader thimble literature,
+identify the key mathematical steps needed for a rigorous proof,
+and discuss both positive results and fundamental obstructions.
+\end{abstract}
+
+\tableofcontents
+
+%% ============================================================
+\section{The sign problem in Euclidean QFT}
+%% ============================================================
+
+\subsection{General setup}
+
+A lattice QFT partition function has the form
+\begin{equation}\label{eq:Z}
+  Z = \int_{\R^n} e^{-S(\phi)}\,d\phi,
+\end{equation}
+where $\phi \in \R^n$ is the field configuration ($n = N|\La|$ for
+$N$-component fields on lattice~$\La$) and $S : \R^n \to \R$ is the
+Euclidean action. When $S$ is real, $e^{-S} > 0$ and the integrand
+defines a probability measure (after normalization). Observables are
+expectations under this measure.
+
+The \textbf{sign problem} arises when a change of variables or
+auxiliary field introduces a \emph{complex} action $S : \R^n \to \C$,
+so $e^{-S}$ is complex-valued. The integrand is no longer a positive
+measure, and Monte Carlo methods fail because importance sampling
+requires positive weights.
+
+\subsection{Sources of complex actions}
+
+Complex actions arise in several settings:
+\begin{itemize}
+\item \textbf{Finite density}: Chemical potential $\mu$ gives
+  $\det(D+\mu\gamma_0)$ which is complex for QCD.
+\item \textbf{Real-time evolution}: The Minkowski action $iS_M$ is
+  purely imaginary.
+\item \textbf{Hubbard-Stratonovich transformation}: The HS identity
+  for the Euclidean quartic $e^{-\lambda a^2}$ requires imaginary
+  coupling $e^{i\sigma a}$ (Section~\ref{sec:HS}).
+\item \textbf{Topological terms}: The $\theta$-term $e^{i\theta Q}$
+  is complex for $\theta \ne 0$.
+\item \textbf{Fermion determinant}: $\det(D)$ can be complex for
+  chiral or finite-density theories.
+\end{itemize}
+
+\subsection{Why contour deformation?}
+
+Since $S(\phi)$ extends to a holomorphic (or meromorphic) function
+$S : \C^n \to \C$, the integral~\eqref{eq:Z} can be deformed from
+$\R^n$ to any $n$-dimensional cycle $\Gamma \subset \C^n$ in the
+same homology class, provided $\Gamma$ avoids singularities and the
+integrand decays at infinity:
+\begin{equation}
+  Z = \int_\Gamma e^{-S(\sigma)}\,d^n\sigma.
+\end{equation}
+The goal is to choose $\Gamma$ so that $e^{-S}$ is as close to
+positive (non-oscillatory) as possible on~$\Gamma$.
+
+%% ============================================================
+\section{The HS sign problem}\label{sec:HS}
+%% ============================================================
+
+\subsection{The Euclidean quartic requires imaginary coupling}
+
+For the O($N$) LSM, the quartic interaction enters as $e^{-\lambda a^2}$
+with $a = |\ph|^2/N - v^2$. The HS identity:
+\begin{equation}
+  e^{-\lambda a^2}
+    = \frac{1}{\sqrt{4\pi\lambda}}\int_{-\infty}^{\infty}
+      e^{-\sigma^2/(4\lambda)\;+\;i\sigma a}\,d\sigma.
+\end{equation}
+The coupling $i\sigma a$ is \textbf{imaginary} because $e^{-\lambda a^2}$
+is a Gaussian in $a$ (not $e^{+\lambda a^2}$). This is forced by
+Euclidean signature.
+
+\subsection{The $\sigma$-effective action}
+
+After applying HS at each site and integrating out $\ph$:
+\begin{equation}\label{eq:f}
+  Z = c\int_{\R^{|\La|}} e^{f(\sigma)}\,d\sigma, \qquad
+  f(\sigma) = -\sum_x\frac{\sigma(x)^2}{4\lambda}
+    - \frac{N}{2}\Tr\log(-\Delta+2i\sigma z)
+    - iv^2\sum_x\sigma(x),
+\end{equation}
+where $z = 1/\sqrt{N}$. This integral converges on $\R^{|\La|}$ (the
+Gaussian factor provides decay, and $|\det(-\Delta+2i\sigma z)^{-1}|
+\le \det(-\Delta)^{-1}$), but the integrand is \textbf{complex}.
+
+\subsection{Comparison: NLSM vs LSM}
+
+For the NLSM (nonlinear sigma model with constraint $|\ph|^2 = N\beta$),
+a real mass $m_0^2$ can be added to the GFF for free (it is constant
+on the constraint surface). The operator $-\Delta + m_0^2 - 2i\alpha z$
+has positive real part, and the FK bound gives single-$\sigma$ decay
+$|G_\sigma(x,0)| \le G_{m_0}(x,0) \sim e^{-m_0|x|}$.
+
+For the LSM: the add-subtract trick cancels the real mass, leaving
+$-\Delta - 2i\sigma$ with \textbf{no real part} beyond the kinetic
+term. The mass gap comes entirely from the oscillatory
+$\sigma$-average. See \texttt{mass-gap-v3.tex}, Sections~3--4.
+
+%% ============================================================
+\section{Lefschetz thimbles}
+%% ============================================================
+
+\subsection{Morse theory for complex integrals}
+
+Consider a holomorphic function $f : \C^n \to \C$ (the exponent
+in the partition function). The critical points of $f$ are the
+solutions of $\partial f/\partial\sigma_i = 0$. For each critical
+point $\sigma_*$, the \textbf{Lefschetz thimble} $\mathcal{J}_{\sigma_*}$
+is the union of gradient flow lines of $\re\,f$ that flow \emph{into}
+$\sigma_*$ as $t \to +\infty$:
+\begin{equation}
+  \mathcal{J}_{\sigma_*} = \Bigl\{\sigma(0) :
+    \frac{d\sigma}{dt} = \overline{\nabla f(\sigma)},\;
+    \lim_{t\to+\infty}\sigma(t) = \sigma_*\Bigr\}.
+\end{equation}
+
+Key properties of $\mathcal{J}_{\sigma_*}$:
+\begin{enumerate}
+\item $\mathcal{J}_{\sigma_*}$ is an $n$-dimensional (real)
+  submanifold of~$\C^n$.
+\item $\im\,f = \im\,f(\sigma_*)$ is \textbf{constant} on
+  $\mathcal{J}_{\sigma_*}$ (the flow preserves the imaginary part).
+\item $\re\,f$ is \textbf{maximized} at $\sigma_*$ on
+  $\mathcal{J}_{\sigma_*}$ (steepest descent from the saddle).
+\item The integrand $e^{f(\sigma)}$ is proportional to a
+  \textbf{real positive} function times the constant phase
+  $e^{i\,\im f(\sigma_*)}$ on~$\mathcal{J}_{\sigma_*}$.
+\end{enumerate}
+
+\subsection{Thimble decomposition}
+
+The original integration cycle $\R^n$ can be decomposed:
+\begin{equation}\label{eq:thimble_decomp}
+  [\R^n] = \sum_{\sigma_*} n_{\sigma_*}\,[\mathcal{J}_{\sigma_*}],
+\end{equation}
+where $n_{\sigma_*} \in \Z$ are \textbf{intersection numbers}
+(the intersection of $\R^n$ with the \emph{dual} thimble
+$\mathcal{K}_{\sigma_*}$, defined by the ascending gradient flow).
+Therefore:
+\begin{equation}
+  Z = \sum_{\sigma_*} n_{\sigma_*} \int_{\mathcal{J}_{\sigma_*}}
+    e^{f(\sigma)}\,d\sigma
+  = \sum_{\sigma_*} n_{\sigma_*}\,e^{i\,\im f(\sigma_*)}\,
+    Z_{\sigma_*},
+\end{equation}
+where $Z_{\sigma_*} = \int_{\mathcal{J}_{\sigma_*}}
+e^{\re f(\sigma) - \re f(\sigma_*)}\,|d\sigma| > 0$ is
+\textbf{real and positive}.
+
+\subsection{When is the sign problem solved?}
+
+The sign problem is eliminated on a single thimble (since the integrand
+is proportional to a positive function). But the \emph{inter-thimble}
+sign problem remains if multiple thimbles contribute with different
+phases $e^{i\,\im f(\sigma_*)}$.
+
+The sign problem is fully solved when:
+\begin{enumerate}
+\item[(a)] Only one thimble has $n_{\sigma_*} \ne 0$, or
+\item[(b)] All contributing thimbles have the same phase
+  $\im f(\sigma_*)$, or
+\item[(c)] One thimble dominates exponentially:
+  $\re f(\sigma_*) \gg \re f(\sigma'_*)$ for all other
+  contributing critical points~$\sigma'_*$.
+\end{enumerate}
+
+\subsection{Stokes phenomenon}
+
+As parameters (coupling constants, volume) vary, the thimble
+decomposition~\eqref{eq:thimble_decomp} can jump: when two critical
+points have $\im f(\sigma_*) = \im f(\sigma'_*)$, a gradient flow
+line connects them, and the intersection numbers change. These
+\textbf{Stokes walls} are codimension-1 surfaces in parameter space.
+
+Cao-Santachiara-Usciati~\cite{CSU23} found infinitely many Stokes
+walls for lattice Liouville theory as $c \to (-\infty,1]$, showing
+the thimble structure can be very intricate.
+
+%% ============================================================
+\section{Contour deformation methods in lattice QFT}
+%% ============================================================
+
+\subsection{Exact thimble methods}
+
+The pioneering work of Cristoforetti-Scorzato et al.\ proposed
+Monte Carlo sampling directly on a Lefschetz thimble. The main
+challenge: computing the \textbf{residual phase} (the Jacobian
+of the map from $\R^n$ to $\mathcal{J}_{\sigma_*}$), which is
+expensive ($O(n^3)$ per configuration).
+
+\subsection{Generalized thimble / gradient flow}
+
+Instead of the exact thimble, one can use the \textbf{flowed
+manifold}:
+\begin{equation}
+  \mathcal{M}_T = \bigl\{\sigma(T) : \sigma(0) \in \R^n,\;
+    \dot\sigma = \overline{\nabla f(\sigma)}\bigr\},
+\end{equation}
+obtained by flowing the real domain along the anti-holomorphic
+gradient of $f$ for time~$T$. As $T \to \infty$:
+$\mathcal{M}_T \to \bigcup_{\sigma_*} \mathcal{J}_{\sigma_*}$.
+For finite~$T$: $\mathcal{M}_T$ is a smooth deformation of $\R^n$
+that already reduces the sign problem.
+
+\textbf{Advantage}: No need to identify critical points or compute
+intersection numbers. The flow is a well-posed ODE.
+
+\subsection{Worldvolume HMC (Fukuma et al.)}
+
+Fukuma and collaborators~\cite{Fukuma20,Fukuma23,Fukuma25,Fukuma26}
+developed the most systematic computational approach:
+\begin{enumerate}
+\item Foliate $\C^n$ by a continuum family of integration surfaces
+  $\{\mathcal{M}_T\}_{T \ge 0}$.
+\item Introduce a symplectic structure on the tangent bundle of
+  each~$\mathcal{M}_T$.
+\item Perform HMC (Hamiltonian Monte Carlo) on $\mathcal{M}_T$,
+  treating the surface as a Riemannian manifold.
+\end{enumerate}
+No Jacobian computation is needed for configuration generation
+(only for reweighting). Extended to group manifolds (gauge theories)
+in~\cite{Fukuma26}. Tested on the Hubbard model~\cite{Fukuma25b}
+with severe sign problem.
+
+\subsection{Constant contour shifts}
+
+The simplest contour deformation: $\sigma \to \sigma + i\delta$
+(constant imaginary shift). Ostmeyer et al.~\cite{Ostmeyer23}
+proved this completely eliminates the sign problem in the Hubbard
+model at large chemical potential. Gaentgen et al.~\cite{Gaentgen24}
+applied this to C$_{20}$ and C$_{60}$ fullerenes.
+
+\subsection{Fundamental limitations}
+
+Lawrence-Yamauchi~\cite{LY24} proved that for 2D Abelian lattice
+gauge theory, the sign problem is \textbf{exponential} and
+\textbf{cannot be removed by any contour deformation}. The
+obstruction is topological: the compact gauge group $U(1)$ has
+$\pi_1(U(1)) = \Z$, creating nontrivial winding sectors that
+contribute with different phases.
+
+\begin{remark}
+This negative result does \textbf{not} apply to scalar field theories
+like the O($N$) model. The field space $\R^n$ is contractible
+($\pi_k(\R^n) = 0$ for all~$k$), so there is no topological
+obstruction to contour deformation. The question for scalar theories
+is analytic (singularity avoidance, decay at infinity), not topological.
+\end{remark}
+
+%% ============================================================
+\section{Application to the O($N$) model at large $N$}
+%% ============================================================
+
+\subsection{The exponent and its critical points}
+
+The exponent~\eqref{eq:f} extends to a holomorphic function
+$f : \C^{|\La|} \to \C$ (away from the singularities of the
+log~det). The critical point equation $\partial f/\partial\sigma(x) = 0$
+gives:
+\begin{equation}\label{eq:gap}
+  \frac{\sigma_*(x)}{2\lambda}
+    = -iNz\,(-\Delta+2i\sigma_* z)^{-1}(x,x) - iv^2.
+\end{equation}
+For the translation-invariant saddle $\sigma_* = \sigma_0$
+(constant), this becomes the \textbf{gap equation}:
+\begin{equation}
+  \frac{\sigma_0}{2\lambda} = -iz\bigl[N\,C_{\sigma_0}(x,x) + v^2\bigr],
+  \qquad C_{\sigma_0} = (-\Delta+2i\sigma_0 z)^{-1}.
+\end{equation}
+At $\sigma_0 = 0$ this reads $0 = -iz[NC_0(0,0)+v^2]$, which
+determines $v^2$ (or equivalently, the bare coupling).
+
+\subsection{Single-thimble dominance at large $N$}
+
+The exponent scales as $f \sim N\cdot g(\sigma)$ for a function~$g$
+independent of~$N$. Therefore:
+\begin{itemize}
+\item The Hessian scales as $f'' \sim N$, giving saddle-point
+  width $\sim 1/\sqrt{N}$.
+\item At competing saddle points $\sigma'_*$: the action difference
+  $\re f(\sigma_*) - \re f(\sigma'_*) \sim N\cdot\Delta g > 0$ grows
+  linearly in~$N$.
+\item By condition~(c) of Section~3.3: the dominant thimble
+  contribution exceeds all others by a factor $e^{cN}$ for some $c > 0$.
+\end{itemize}
+
+\textbf{Conclusion}: For $N$ sufficiently large, the single thimble
+$\mathcal{J}_{\sigma_*}$ through the dominant saddle captures $Z$
+up to exponentially small corrections:
+\begin{equation}
+  Z = n_{\sigma_*}\,e^{i\,\im f(\sigma_*)}\,Z_{\sigma_*}
+    \bigl(1 + O(e^{-cN})\bigr).
+\end{equation}
+
+\subsection{Properties of the dominant thimble}
+
+On $\mathcal{J}_{\sigma_*}$:
+\begin{enumerate}
+\item The integrand $e^{f(\sigma)}$ is proportional to a
+  \textbf{positive} function (Section~3.1, property~4).
+\item Near $\sigma_*$: $f \approx f(\sigma_*) - \tfrac{1}{2}
+  (\delta\sigma,\,H\,\delta\sigma)$ with $H = -f''(\sigma_*) > 0$
+  (positive definite Hessian). The measure is \textbf{log-concave}
+  near the saddle.
+\item The $\ph$-coupling becomes effectively \textbf{real} on the
+  thimble (since $\im f = \text{const}$ constrains the imaginary
+  parts of $\sigma$). This is needed for the FK bound.
+\end{enumerate}
+
+\subsection{The proof strategy}
+
+Combining the thimble structure with the Brascamp-Lieb and
+Feynman-Kac ingredients:
+
+\begin{enumerate}
+\item \textbf{Thimble existence}: Show $\mathcal{J}_{\sigma_*}$ is a
+  smooth $|\La|$-dimensional manifold avoiding the singularities
+  $\det(-\Delta+2i\sigma z) = 0$.
+\item \textbf{Single-thimble dominance}: For $N > N_0$, the
+  intersection number $n_{\sigma_*} = 1$ and all other thimbles
+  are suppressed by $e^{-cN}$.
+\item \textbf{Cauchy's theorem}: The deformation from $\R^{|\La|}$
+  to $\mathcal{J}_{\sigma_*}$ is valid (no singularities crossed,
+  boundary terms vanish).
+\item \textbf{Brascamp-Lieb on the thimble}: The measure
+  $e^{\re f}|_{\mathcal{J}_{\sigma_*}}$ is log-concave (at least
+  near the saddle). Apply BL for $\sigma$-concentration:
+  $\Var(\sigma(x)) \le 1/(\kappa N)$.
+  Here Conlon-Dabkowski~\cite{CD24} extends BL to lattice field
+  models with convex gradient action, which is the relevant setting.
+\item \textbf{Real coupling on the thimble}: On
+  $\mathcal{J}_{\sigma_*}$, the constraint $\im f = \text{const}$
+  makes the $\ph$-operator $-\Delta + V(\sigma)$ have a \textbf{real}
+  potential $V$. The FK bound / Borell sub-Gaussian estimate gives
+  exponential decay.
+\item \textbf{Mass gap}: Combine BL concentration + FK bound to
+  get $m > 0$ for $N > N_0$.
+\end{enumerate}
+
+\subsection{The flowed manifold alternative}
+
+Instead of the exact thimble, one can work with the flowed manifold
+$\mathcal{M}_T$ for large but finite~$T$. Advantages:
+\begin{itemize}
+\item No need to identify all critical points.
+\item $\mathcal{M}_T$ is diffeomorphic to $\R^{|\La|}$ (no topology
+  change).
+\item The sign problem is reduced (not eliminated) but the residual
+  oscillations are bounded by $e^{-c(T)N}$ for a function $c(T)$
+  increasing in~$T$.
+\end{itemize}
+For a rigorous proof: take $T$ large enough that the residual
+oscillations are smaller than the mass gap signal.
+
+%% ============================================================
+\section{Related approaches and results}
+%% ============================================================
+
+\subsection{Complex Langevin}
+
+Complex Langevin (CL) dynamics extends stochastic quantization to
+complex actions by complexifying the field variables and evolving
+with a complex drift. CL avoids the sign problem by construction
+but can converge to \textbf{wrong} results.
+
+Boguslavski-Hotzy-Muller~\cite{BHM25} showed that CL converges
+correctly when there is a \textbf{single dominant compact thimble}.
+Multiple thimbles with different phases cause CL to fail. This
+connects CL to the thimble picture and suggests that single-thimble
+dominance (which holds at large~$N$) implies CL correctness.
+
+Cai-Dong-Kuang~\cite{CDK20} gave the first rigorous mathematical
+analysis of CL, proving that localized probability densities do not
+exist for general compact groups, explaining CL instability for
+gauge theories.
+
+\subsection{Brascamp-Lieb extensions}
+
+Conlon-Dabkowski~\cite{CD24} extended BL to lattice field models
+in $d \ge 2$ with uniformly convex gradient action. They proved
+charge-charge correlations in the Coulomb dipole gas are close to
+Gaussian, going beyond Dimock-Hurd and Conlon-Spencer. The key
+observation: the sine-Gordon measure is invariant for a stochastic
+dynamics, allowing a dynamical proof of correlation decay.
+
+This is directly relevant to the BL step on the thimble: the
+$\sigma$-measure on $\mathcal{J}_{\sigma_*}$ has a convex gradient
+action near the saddle, and Conlon-Dabkowski's extension handles
+precisely this setting.
+
+\subsection{P($\ph$)$_2$ via Segal axioms}
+
+Lin~\cite{Lin24} constructed the P($\ph$)$_2$ Gibbs state on
+infinite-volume periodic surfaces and proved the mass gap using
+Segal's axioms and a ``Bayes principle'' for conditional
+probabilities. This is the first construction of an interacting QFT
+on surfaces of infinite genus with a mass gap.
+
+This provides an alternative approach to the $N = 1$ test case
+(P($\ph$)$_2$ mass gap), complementing the HS/thimble strategy
+and the classical Glimm-Jaffe-Spencer approach.
+
+\subsection{Constructive RG}
+
+Giuliani-Mastropietro-Rychkov-Scola~\cite{GMRS24} continued the
+rigorous constructive RG program, constructing scale-invariant
+response functions at a non-trivial fixed point for fermionic
+$\psi^4_d$ (using convergent tree expansion). While the model
+differs from ours, the convergent expansion techniques are
+potentially applicable to the $1/N$ expansion.
+
+%% ============================================================
+\section{Open questions}
+%% ============================================================
+
+\begin{enumerate}
+\item \textbf{Singularity avoidance}: Can we prove the dominant
+  thimble $\mathcal{J}_{\sigma_*}$ avoids $\det(-\Delta+2i\sigma z)=0$?
+  The zeros are at $\sigma$ such that $-2iz\sigma$ is an eigenvalue
+  of $-\Delta$, i.e., $\sigma = ik^2/(2z)$ (purely imaginary,
+  distance $\ge m_0^2/(2z)$ from the real saddle). For large~$N$
+  ($z = 1/\sqrt{N}$ small), these are far from the saddle.
+
+\item \textbf{Global log-concavity}: Is $\re f$ concave on
+  \emph{all} of $\mathcal{J}_{\sigma_*}$, or only near the saddle?
+  The $\Tr\log$ term introduces non-convexity far from the saddle.
+  For BL: we need convexity at least within the
+  $O(1/\sqrt{N})$-width peak, which holds by the Hessian computation.
+
+\item \textbf{Intersection numbers}: Can we compute $n_{\sigma_*}$
+  rigorously? For the dominant saddle on the real axis with $f''$
+  positive definite, homotopy arguments should give $n_{\sigma_*}=1$.
+
+\item \textbf{N=1 test case}: In $d = 0$ (one site), $f$ is a
+  function of one complex variable. The thimble is a curve in~$\C$
+  that can be computed explicitly. Does the thimble analysis
+  reproduce the known P($\ph$)$_2$ mass gap?
+
+\item \textbf{Comparison with Kupiainen}: Kupiainen's NLSM proof
+  uses the constraint trick (real mass for free) and avoids contour
+  deformation entirely. Can the thimble approach give a simpler
+  proof of the NLSM mass gap? Or a proof of the \textbf{LSM} mass
+  gap (which Kupiainen did not prove)?
+
+\item \textbf{Threshold $N_0$}: What is the minimal $N$ for
+  single-thimble dominance? Kupiainen's threshold is
+  $N > C\,m_0^{-25}$ (very large). Can the thimble approach
+  improve this?
+\end{enumerate}
+
+%% ============================================================
+\section{Summary}
+%% ============================================================
+
+The Lefschetz thimble decomposition provides a natural framework
+for the steepest descent contour strategy of \texttt{mass-gap-v3}.
+The key facts:
+
+\begin{itemize}
+\item The ``steepest descent contour'' $\Gamma = \{\im f = 0\}$
+  through the saddle is exactly a Lefschetz thimble.
+\item On each thimble, the integrand is proportional to a positive
+  function --- the sign problem is solved per-thimble.
+\item At large~$N$, a single thimble dominates (saddle-point
+  sharpness), so the inter-thimble sign problem is also controlled.
+\item The Lawrence-Yamauchi obstruction (for gauge theories) does
+  not apply to scalar models: the field space $\R^n$ is contractible.
+\item On the thimble, the $\sigma$-measure is real, positive, and
+  approximately log-concave --- BL and FK bounds apply.
+\item The flowed manifold approach (Fukuma) offers a more robust
+  alternative that avoids identifying exact thimbles.
+\end{itemize}
+
+The main mathematical challenges are: (1) proving singularity
+avoidance, (2) establishing log-concavity on the thimble, and
+(3) making the FK bound work with the effective real potential.
+These are the subjects of ongoing work in \texttt{mass-gap-v3}
+and the Lean formalization.
+
+\begin{thebibliography}{99}
+\bibitem{BHM25} K.~Boguslavski, P.~Hotzy, D.~M\"uller,
+  ``Lefschetz thimble-inspired weight regularizations for complex
+  Langevin,'' arXiv:2412.02396 (2024).
+\bibitem{CD24} J.~G.~Conlon and J.~Dabkowski,
+  ``Extensions of the Brascamp-Lieb inequality and the dipole gas,''
+  arXiv:2412.05122 (2024).
+\bibitem{CDK20} Z.~Cai, Y.~Dong, Y.~Kuang,
+  ``On the validity of complex Langevin method for path integral
+  computations,'' arXiv:2007.10198 (2020).
+\bibitem{CSU23} Y.~Cao, R.~Santachiara, R.~Usciati,
+  ``On the analytical continuation of lattice Liouville theory,''
+  arXiv:2301.07454 (2023).
+\bibitem{Fukuma20} M.~Fukuma, N.~Matsumoto,
+  ``Worldvolume approach to the tempered Lefschetz thimble method,''
+  arXiv:2012.08468 (2020).
+\bibitem{Fukuma23} M.~Fukuma,
+  ``Simplified algorithm for the Worldvolume HMC,''
+  arXiv:2311.10663 (2023).
+\bibitem{Fukuma25} M.~Fukuma, N.~Namekawa,
+  ``Enhancing the ergodicity of Worldvolume HMC,''
+  arXiv:2508.02659 (2025).
+\bibitem{Fukuma25b} M.~Fukuma, N.~Namekawa,
+  ``Worldvolume HMC for the Hubbard model,''
+  arXiv:2507.23748 (2025).
+\bibitem{Fukuma26} M.~Fukuma,
+  ``Worldvolume HMC for lattice gauge theories,''
+  arXiv:2603.28629 (2026).
+\bibitem{Gaentgen24} M.~Gaentgen et al.,
+  ``Reducing the sign problem with simple contour deformations,''
+  arXiv:2407.06896 (2024).
+\bibitem{GMRS24} A.~Giuliani, V.~Mastropietro, S.~Rychkov, G.~Scola,
+  ``Non-trivial fixed point of $\psi^4_d$, II,''
+  arXiv:2404.14904 (2024).
+\bibitem{Kupiainen80} A.~Kupiainen,
+  Comm.~Math.~Phys.~\textbf{73} (1980) 273--294.
+\bibitem{Kupiainen80b} A.~Kupiainen,
+  Comm.~Math.~Phys.~\textbf{74} (1980) 199--222.
+\bibitem{Lin24} Y.-H.~Lin,
+  ``The Bayes principle and Segal axioms for P($\ph$)$_2$,''
+  arXiv:2403.12804 (2024).
+\bibitem{LY24} S.~Lawrence, S.~Yamauchi,
+  ``Convex optimization and contour deformations,''
+  arXiv:2311.13002 (2023).
+\bibitem{Ostmeyer23} J.~Ostmeyer et al.,
+  ``Fermionic sign problem minimization by constant contour shifts,''
+  arXiv:2307.06785 (2023).
+\bibitem{UA24} M.~Ulybyshev, F.~F.~Assaad,
+  ``Beyond the instanton gas approach: dominant thimbles for the
+  Hubbard model,'' arXiv:2407.09452 (2024).
+\end{thebibliography}
+
+\end{document}

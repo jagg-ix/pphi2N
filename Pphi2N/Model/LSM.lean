@@ -63,8 +63,8 @@ namespace LSMParams
 
 variable (L : LSMParams)
 
-/-- v² = R²/N (the per-component squared radius). -/
-def vsq : ℝ := L.Rsq / L.N
+/-- ρ² = R²/N (the per-component squared radius). -/
+def rho_sq : ℝ := L.Rsq / L.N
 
 /-- The NLSM coupling: g² = N/R² = 1/(N v²). -/
 def nlsmCoupling : ℝ := L.N / L.Rsq
@@ -82,7 +82,7 @@ def toONModel : ONModel where
     -- Coefficients: a₀ = λv⁴, a₁ = -2λv²; leading = λ (normalized to 1/2)
     -- P(t) = λ(t - v²)² - λv⁴ = λt² - 2λv²t (vacuum energy subtracted)
     coeff := fun m => if m.val = 0 then 0
-                      else if m.val = 1 then -2 * L.lam * L.vsq
+                      else if m.val = 1 then -2 * L.lam * L.rho_sq
                       else 0
     coeff_zero_nonpos := by simp
   }
@@ -104,7 +104,7 @@ def sigmaEffective (σ : ℕ → ℝ) -- σ on lattice sites
   -- Placeholder: schematic form using site-independent σ
   let s := σ 0
   L.N / 2 * Real.log (laplacianEigenvalues 0 + s) +
-  L.N * L.lam * (s - L.vsq) ^ 2
+  L.N * L.lam * (s - L.rho_sq) ^ 2
 
 /-- The gap equation: the saddle-point equation for σ*.
 
@@ -117,7 +117,7 @@ Solving: σ* = v² - (1/4λ) G(x,x; σ*) -/
 def gapEquationRHS (sigma_star : ℝ)
     (wickConstant : ℝ → ℝ) -- c(σ) = G(x,x; σ) = Σ_k 1/(ε_k + σ)
     : ℝ :=
-  L.vsq - wickConstant sigma_star / (4 * L.lam)
+  L.rho_sq - wickConstant sigma_star / (4 * L.lam)
 
 /-- The gap equation: σ* = gapEquationRHS(σ*). -/
 def isSaddlePoint (sigma_star : ℝ) (wickConstant : ℝ → ℝ) : Prop :=
@@ -127,15 +127,15 @@ def isSaddlePoint (sigma_star : ℝ) (wickConstant : ℝ → ℝ) : Prop :=
 theorem saddlePoint_pos (sigma_star : ℝ)
     (wickConstant : ℝ → ℝ)
     (h_saddle : L.isSaddlePoint sigma_star wickConstant)
-    (h_wick_bound : wickConstant sigma_star < 4 * L.lam * L.vsq)
+    (h_wick_bound : wickConstant sigma_star < 4 * L.lam * L.rho_sq)
     : 0 < sigma_star := by
   -- σ* = v² - c(σ*)/(4λ). Since c(σ*) < 4λv² (strict), σ* > 0.
-  rw [h_saddle]; unfold gapEquationRHS vsq
+  rw [h_saddle]; unfold gapEquationRHS rho_sq
   have hlam := L.hlam
   have hRsq := L.hRsq
   have hN_pos : (0 : ℝ) < L.N := Nat.cast_pos.mpr (Nat.pos_of_ne_zero
     (Nat.one_le_iff_ne_zero.mp L.hN))
-  -- Need: Rsq/N - c/(4λ) > 0, i.e., c/(4λ) < Rsq/N = vsq
+  -- Need: Rsq/N - c/(4λ) > 0, i.e., c/(4λ) < Rsq/N = rho_sq
   -- From h_wick_bound: c < 4λ · Rsq/N, so c/(4λ) < Rsq/N
   have h4lam_pos : (0 : ℝ) < 4 * L.lam := by positivity
   -- Goal: 0 < L.Rsq / ↑L.N - wickConstant sigma_star / (4 * L.lam)
@@ -143,7 +143,7 @@ theorem saddlePoint_pos (sigma_star : ℝ)
   rw [div_lt_div_iff₀ h4lam_pos hN_pos]
   -- Goal: wickConstant sigma_star * ↑L.N < L.Rsq * (4 * L.lam)
   -- From h_wick_bound: c < 4λ · Rsq/N, so c · N < 4λ · Rsq
-  unfold vsq at h_wick_bound
+  unfold rho_sq at h_wick_bound
   -- h_wick_bound : wickConstant sigma_star < 4 * L.lam * (L.Rsq / ↑L.N)
   -- Goal: wickConstant sigma_star * ↑L.N < L.Rsq * (4 * L.lam)
   have hN_pos' : (L.N : ℝ) > 0 := hN_pos
