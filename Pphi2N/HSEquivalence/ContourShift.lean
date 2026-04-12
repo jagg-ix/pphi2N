@@ -30,7 +30,7 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 noncomputable section
 
-open Complex MeasureTheory
+open Complex MeasureTheory Set
 
 namespace Pphi2N
 
@@ -66,7 +66,7 @@ This is `integral_boundary_rect_eq_zero_of_differentiable_on_off_countable`
 from `Mathlib.Analysis.Complex.CauchyIntegral`, specialized to s = ∅. -/
 theorem rectangle_integral_vanishes
     (f : ℂ → ℂ) (z w : ℂ)
-    (Hc : ContinuousOn f ([[z.re, w.re]] ×ℂ [[z.im, w.im]]))
+    (Hc : ContinuousOn f (Set.uIcc z.re w.re ×ℂ Set.uIcc z.im w.im))
     (Hd : ∀ x ∈ Set.Ioo (min z.re w.re) (max z.re w.re) ×ℂ
              Set.Ioo (min z.im w.im) (max z.im w.im),
       DifferentiableAt ℂ f x) :
@@ -74,8 +74,9 @@ theorem rectangle_integral_vanishes
     (∫ x in z.re..w.re, f (↑x + w.im * I)) +
     I • (∫ y in z.im..w.im, f (w.re + ↑y * I)) -
     I • (∫ y in z.im..w.im, f (z.re + ↑y * I)) = 0 :=
-  sorry -- bridge to Mathlib's integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
-  -- The statement matches but set notation (×ℂ, [[·,·]]) needs alignment
+  Complex.integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
+    f z w ∅ (Set.countable_empty) Hc
+    (fun x hx => Hd x (by rwa [Set.diff_empty] at hx))
 
 /-! ## Vertical contour shift (the key result)
 
