@@ -180,41 +180,8 @@ theorem torusDist_zero : torusDist (0 : ZMod L) = 0 := by
   unfold torusDist
   simp [ZMod.val_zero]
 
-/-- **Exponential decay of the Green's function (axiom).**
-
-On a 1D torus Z/LZ with mass m^2 > 0, the massive Green's function
-satisfies G_m(n) <= C * e^{-alpha dist(n)} where alpha > 0 depends on m.
-
-Mathematical content: Use the Laplace transform representation
-G = integral_0^infty e^{-tM} dt and the exponential decay of the
-lattice heat kernel (from random walk / Bessel function estimates).
-
-For the nearest-neighbor Laplacian, alpha = arccosh(1 + m^2/2) > 0.
-
-Reference: Lawler, *Random Walk: A Modern Introduction*, Chapter 2. -/
-axiom greenFunction_exponential_decay
-    (L : ℕ) [NeZero L]
-    (eigenval : ZMod L → ℝ)
-    (h_eig : ∀ k, 0 ≤ eigenval k) (m_sq : ℝ) (hm : 0 < m_sq)
-    (n : ZMod L) :
-    ∃ C α : ℝ, 0 < C ∧ 0 < α ∧
-    ‖greenFunction eigenval m_sq n‖ ≤ C * Real.exp (-α * torusDist n)
-
-/-! ## Connection to the abstract `green_exponential_decay` axiom
-
-We show that the concrete Green's function decay implies the abstract
-axiom used in FKBoundShifted.lean. -/
-
-/-- Bridge: the concrete Green's function decay with constant C <= 1/m^2
-implies a bound of the form (1/m^2) * e^{-alpha dist}. -/
-theorem greenFunction_decay_implies_abstract
-    {eigenval : ZMod L → ℝ} {m_sq : ℝ}
-    {C α : ℝ} (n : ZMod L)
-    (h_decay : ‖greenFunction eigenval m_sq n‖ ≤ C * Real.exp (-α * torusDist n))
-    (h_bound : C ≤ 1 / m_sq) :
-    ‖greenFunction eigenval m_sq n‖ ≤
-      (1 / m_sq) * Real.exp (-α * torusDist n) :=
-  le_trans h_decay (mul_le_mul_of_nonneg_right h_bound (le_of_lt (Real.exp_pos _)))
+-- The exponential decay axiom is placed after the definitions of
+-- nnGreenFunction, characteristicRoot, and decayRate (at end of file).
 
 /-! ## The nearest-neighbor Laplacian eigenvalues
 
@@ -339,6 +306,40 @@ theorem decayRate_pos (m_sq : ℝ) (hm : 0 < m_sq) : 0 < decayRate m_sq := by
   unfold decayRate
   rw [neg_pos]
   exact Real.log_neg (characteristicRoot_pos m_sq hm) (characteristicRoot_lt_one m_sq hm)
+
+/-! ## Sharp exponential decay (axiom with explicit rate) -/
+
+/-- **Exponential decay with the explicit characteristic root rate.**
+
+‖G(n)‖ ≤ (1/m²) · r₋^dist(n) where r₋ = characteristicRoot(m²) ∈ (0,1).
+
+The rate -log(r₋) = decayRate(m²) > 0 is INDEPENDENT of L.
+The constant 1/m² is also independent of L.
+
+Natural number torus distance: min(n.val, L - n.val). -/
+def torusDistNat (n : ZMod L) : ℕ := min n.val (L - n.val)
+
+axiom greenFunction_exponential_decay
+    {L : ℕ} [NeZero L]
+    (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
+    ‖nnGreenFunction (L := L) m_sq n‖ ≤
+      (1 / m_sq) * (characteristicRoot m_sq) ^ torusDistNat n
+
+/-- Convert from r₋^n form to exp(-α·n) form.
+r₋^n = exp(n·log(r₋)) = exp(-n·decayRate). -/
+theorem characteristicRoot_pow_eq_exp (m_sq : ℝ) (hm : 0 < m_sq) (n : ℕ) :
+    (characteristicRoot m_sq) ^ n =
+      Real.exp (-(decayRate m_sq) * n) := by
+  -- r₋^n = exp(n·log(r₋)) = exp(-n·decayRate)
+  induction n with
+  | zero => simp [decayRate]
+  | succ n ih =>
+    rw [pow_succ, ih]
+    rw [show characteristicRoot m_sq = Real.exp (Real.log (characteristicRoot m_sq))
+      from (Real.exp_log (characteristicRoot_pos m_sq hm)).symm]
+    rw [← Real.exp_add]
+    congr 1
+    unfold decayRate; push_cast; ring
 
 end Pphi2N
 
