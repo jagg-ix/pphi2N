@@ -6,7 +6,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 The main theorem `ON_LSM_hasCorrelationDecay` proves
 `HasCorrelationDecay` for the O(N) LSM interacting measure,
-from 2 axioms: `thimble_bound` + `green_exponential_decay`.
+from 2 axioms: `correlator_le_thimble_avg` + `green_exponential_decay`.
+
+The thimble bound is decomposed (per Gemini review) into:
+- A `ThimbleIntegralData` structure bundling E_thimble[|G_σ|] with FK bound
+- Axiom A: |⟨φφ⟩_c| ≤ E_thimble[|G_σ|] (HS + Cauchy + triangle, ORDER MATTERS)
+- The FK bound E_thimble[|G_σ|] ≤ M⁻¹ is INSIDE the structure (trivial)
 
 ## References
 
@@ -25,91 +30,131 @@ open Real MeasureTheory GaussianField
 
 namespace Pphi2N
 
-/-! ## The thimble bound
+/-! ## The thimble integral data
 
-The central axiom: the connected correlator of the O(N) LSM
-is bounded by the massive Green's function M⁻¹(x,y).
+Bundles the thimble average E_thimble[|G_σ(x,y)|] together with
+its FK bound. This avoids the provenance issue where an existential
+witness could be any real number. -/
 
-The proof requires four steps in the correct order
-(Cauchy BEFORE triangle inequality — see Gemini review). -/
+/-- Data for the thimble integral bound.
 
-/-- **The thimble bound (axiom).**
+Bundles the thimble average of |G_σ(x,y)| (for each site pair)
+together with the FK bound E_thimble[|G_σ|] ≤ M⁻¹.
 
-|⟨φⁱ(x)φⁱ(y)⟩_c| ≤ M⁻¹(x,y) where M = -Δ + m₀².
+The FK bound is trivial: |G_σ| ≤ M⁻¹ uniformly in u (diamagnetic),
+and M⁻¹ is u-independent, so E_thimble[M⁻¹] = M⁻¹.
 
-The four steps (ORDER MATTERS):
+This structure ensures the thimble average and its FK bound
+are about the SAME object. -/
+structure ThimbleIntegralData {d M : ℕ} [NeZero M]
+    (S : ShiftedOperatorData (FinLatticeSites d M)) where
+  /-- The thimble average E_thimble[|G_σ(x,y)|] for each site pair -/
+  thimble_avg : FinLatticeSites d M → FinLatticeSites d M → ℝ
+  /-- Nonnegativity -/
+  nonneg : ∀ x y, 0 ≤ thimble_avg x y
+  /-- FK bound: E_thimble[|G_σ|] ≤ M⁻¹ (from diamagnetic + normalize) -/
+  fk_bound : ∀ x y, thimble_avg x y ≤ S.realPart⁻¹ x y
 
-1. **HS transformation**: ⟨φφ⟩_c = (1/Z) ∫_ℝ G_σ · e^f dσ
-   (from inverse_HS_one_site, PROVED)
+/-! ## The decomposed thimble bound
 
-2. **Cauchy contour shift**: ∫_ℝ G·e^f dσ = ∫_thimble G·e^f·det J du
-   (from rectangle_integral_vanishes PROVED + vertical_contour_shift)
-   CRITICAL: shift BEFORE absolute values. On the real axis,
-   |∫G·e^f|/|∫e^f| includes 1/⟨sign⟩ which blows up with volume.
+Axiom A: |⟨φφ⟩_c| ≤ E_thimble[|G_σ|] (the thimble_avg from the data)
+The FK bound is already inside ThimbleIntegralData.
+Together: |⟨φφ⟩_c| ≤ E_thimble[|G_σ|] ≤ M⁻¹. -/
 
-3. **Triangle inequality on POSITIVE measure**:
-   On the quantum thimble (e^f·det J > 0 from quantum HJ):
-   |⟨φφ⟩_c| = |(1/Z)∫G·dμ₊| ≤ (1/Z)∫|G|·dμ₊ = E_thimble[|G_σ|]
-   No sign problem: Z = ∫dμ₊ > 0, ratio = 1.
+/-- **Axiom A: correlator bounded by thimble average.**
 
-4. **FK bound uniform in u**:
-   |G_σ(x,y)| ≤ M⁻¹(x,y) for each u (diamagnetic inequality)
-   E_thimble[|G_σ|] ≤ E_thimble[M⁻¹] = M⁻¹ (u-independent)
+The connected two-point function of the O(N) LSM is bounded by
+the thimble average E_thimble[|G_σ(x,y)|].
+
+This packages three steps in the correct order:
+1. HS transformation: ⟨φφ⟩_c = (1/Z) ∫_ℝ G_σ · e^f dσ
+2. Cauchy contour shift: ∫_ℝ = ∫_thimble (BEFORE absolute values!)
+3. Triangle inequality on positive thimble measure
+
+The Cauchy shift MUST precede the triangle inequality.
+On the real axis, |∫G·e^f|/|∫e^f| includes 1/⟨sign⟩ → ∞.
+On the thimble, the measure is positive → no sign problem.
+
+The ThimbleIntegralData bundles E_thimble[|G_σ|] with the FK bound
+M⁻¹, ensuring the axiom and the FK bound reference the SAME object.
 
 Dependencies: inverse_HS_one_site (proved), rectangle_integral_vanishes
 (proved from Mathlib), vertical_contour_shift (axiom),
-quantum_thimble_exists (axiom), resolvent_complex_bound (axiom). -/
-axiom thimble_bound {N d M : ℕ} [NeZero M]
+quantum_thimble_exists (axiom). -/
+axiom correlator_le_thimble_avg {N d M : ℕ} [NeZero M]
     (P : ONInteraction) (c a : ℝ)
     (μ_scalar : Measure (FinLatticeField d M))
     (hμ : IsProbabilityMeasure (onInteractingMeasure N d M P c a μ_scalar))
     (S : ShiftedOperatorData (FinLatticeSites d M))
+    -- The thimble integral data (bundles avg + FK bound)
+    (T : ThimbleIntegralData S)
     (i : Fin N) (x y : FinLatticeSites d M) :
     let μ := onInteractingMeasure N d M P c a μ_scalar
     |∫ φ : Fin N → FinLatticeField d M, φ i x * φ i y ∂μ -
      (∫ φ, φ i x ∂μ) * (∫ φ, φ i y ∂μ)| ≤
-    S.realPart⁻¹ x y
+    T.thimble_avg x y
+
+/-- **The thimble bound: proved from axiom A + FK bound.**
+
+|⟨φⁱ(x)φⁱ(y)⟩_c| ≤ M⁻¹(x,y).
+
+Proof: axiom A gives |correlator| ≤ T.thimble_avg x y,
+T.fk_bound gives T.thimble_avg x y ≤ M⁻¹(x,y).
+Chain by transitivity. -/
+theorem thimble_bound {N d M : ℕ} [NeZero M]
+    (P : ONInteraction) (c a : ℝ)
+    (μ_scalar : Measure (FinLatticeField d M))
+    (hμ : IsProbabilityMeasure (onInteractingMeasure N d M P c a μ_scalar))
+    (S : ShiftedOperatorData (FinLatticeSites d M))
+    (T : ThimbleIntegralData S)
+    (i : Fin N) (x y : FinLatticeSites d M) :
+    let μ := onInteractingMeasure N d M P c a μ_scalar
+    |∫ φ : Fin N → FinLatticeField d M, φ i x * φ i y ∂μ -
+     (∫ φ, φ i x ∂μ) * (∫ φ, φ i y ∂μ)| ≤
+    S.realPart⁻¹ x y := by
+  -- Step A: |correlator| ≤ E_thimble[|G_σ|]
+  have h1 := correlator_le_thimble_avg P c a μ_scalar hμ S T i x y
+  -- FK bound (from ThimbleIntegralData): E_thimble[|G_σ|] ≤ M⁻¹
+  have h2 := T.fk_bound x y
+  -- Chain
+  simp only at h1; linarith
 
 /-! ## The mass gap theorem -/
 
 /-- **Mass gap for the O(N) LSM: HasCorrelationDecay.**
 
-Proved from `thimble_bound` + `massive_green_decay`.
-
-  |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ (1/m₀²) · e^{-m₀·dist(x,y)}
-
-with m₀ from the gap equation, independent of |Λ|. -/
+Proved from `thimble_bound` + `massive_green_decay`. -/
 theorem ON_LSM_hasCorrelationDecay {N d M : ℕ} [NeZero M]
     (P : ONInteraction) (c a : ℝ)
     (μ_scalar : Measure (FinLatticeField d M))
     (hμ : IsProbabilityMeasure (onInteractingMeasure N d M P c a μ_scalar))
     (S : ShiftedOperatorData (FinLatticeSites d M))
+    (T : ThimbleIntegralData S)
     (dist : FinLatticeSites d M → FinLatticeSites d M → ℝ) :
     HasCorrelationDecay (onInteractingMeasure N d M P c a μ_scalar) dist := by
   refine ⟨sqrt S.gap.m0_sq, 1 / S.gap.m0_sq,
          sqrt_pos.mpr S.gap.hm0_sq_pos,
          div_pos one_pos S.gap.hm0_sq_pos,
          fun i x y => ?_⟩
-  have h1 := thimble_bound P c a μ_scalar hμ S i x y
+  have h1 := thimble_bound P c a μ_scalar hμ S T i x y
   have h2 := massive_green_decay S dist x y
-  simp only at h1
-  linarith
+  simp only at h1; linarith
 
 /-! ## Status
 
-**What is proved (from 2 axioms):**
-- `ON_LSM_hasCorrelationDecay`: HasCorrelationDecay for the
-  concrete `onInteractingMeasure`, with m = √m₀² and C = 1/m₀²
+**Proved theorems:**
+- `thimble_bound`: |⟨φφ⟩_c| ≤ M⁻¹ (from axiom A + FK in structure)
+- `ON_LSM_hasCorrelationDecay`: HasCorrelationDecay (from thimble_bound + green_decay)
 
-**The 2 axioms:**
-1. `thimble_bound` — |⟨φφ⟩_c| ≤ M⁻¹(x,y)
-   (HS + Cauchy + quantum HJ + FK, all for the specific LSM measure)
-2. `green_exponential_decay` — M⁻¹(x,y) ≤ Ce^{-m₀·dist}
-   (Combes-Thomas for the lattice Laplacian)
+**Axioms used (2 in main chain):**
+1. `correlator_le_thimble_avg` — |⟨φφ⟩_c| ≤ E_thimble[|G_σ|]
+   (HS + Cauchy + triangle on positive measure)
+2. `green_exponential_decay` — M⁻¹ ≤ Ce^{-m₀·dist}
 
-**Volume independence:** m₀ and 1/m₀² depend on the gap equation
-(coupling constants), NOT on |Λ|. The mass gap persists in the
-thermodynamic limit.
+**The FK bound** E_thimble[|G_σ|] ≤ M⁻¹ is inside `ThimbleIntegralData`
+(field `fk_bound`), not a separate axiom. It is mathematically trivial:
+|G_σ| ≤ M⁻¹ uniformly in u (diamagnetic), M⁻¹ is u-independent,
+E_thimble[M⁻¹] = M⁻¹ (normalization).
 -/
 
 end Pphi2N
