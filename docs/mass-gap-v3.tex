@@ -1462,15 +1462,25 @@ remarkably simple proof of the mass gap:
   with $m_0 > 0$ from the gap equation, independent of~$|\La|$.
 \end{enumerate}
 
-\begin{remark}[Why BL is not needed for the leading mass gap]
-The BL concentration bound $\Var(u(x)) \le 1/(\kappa N)$ is
-\textbf{not needed} for the leading mass gap. The FK bound is
+\begin{remark}[The role of BL in the mass gap proof]
+The BL variance bound $\Var(u(x)) \le 1/(\kappa N)$ is not
+used in the mass gap chain (steps 2--4): the FK bound is
 uniform in~$u$, so the average is controlled by the triangle
-inequality alone (step~3). BL is needed for the $1/N$
-\textbf{corrections}: the actual mass is $m_0 + O(1/N)$, and
-BL controls the correction terms. But the existence of a
-positive mass gap $m \ge m_0 > 0$ follows from FK + positivity
-alone.
+inequality on the positive measure.
+
+However, BL enters \emph{indirectly}: the quantum thimble
+existence (step~1) requires the Hessian spectral gap $\kappa > 0$
+via the implicit function theorem. The Hessian bound IS the
+BL convexity parameter. So the logical dependencies are:
+\begin{center}
+Hessian $\kappa > 0$ $\;\xrightarrow{\text{IFT}}\;$
+quantum thimble exists $\;\xrightarrow{\text{positive measure}}\;$
+FK bound averages trivially $\;\to\;$ mass gap.
+\end{center}
+The Hessian bound $\hat{H}(k) = 1/(2\lambda) + 2B(k) \ge \kappa > 0$
+is uniform in~$|\La|$ (the spectral gap converges to a finite
+limit). So the quantum thimble exists for all finite~$|\La|$
+simultaneously, and the mass gap is uniform in volume.
 \end{remark}
 
 \begin{remark}[Volume independence]
