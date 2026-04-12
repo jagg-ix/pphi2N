@@ -359,11 +359,20 @@ This is the base case that the spectral theorem reduces the general
 Hermitian case to (modulo the similarity transform).
 
 Helper: a ≤ |a + bi| for a > 0 (1D diamagnetic inequality). -/
--- a ��� ‖a + bi‖ for a > 0 (the 1D diamagnetic inequality).
--- Proof: ��a + bi‖² = a² + b² ≥ a², take sqrt.
+-- a ≤ ‖a + bi‖ for a > 0 (the 1D diamagnetic inequality).
+-- Proof: ‖a + bi‖² = a² + b² ≥ a², take sqrt.
 theorem real_le_norm_add_mul_I (a b : ℝ) (ha : 0 < a) :
     a ≤ ‖(↑a + ↑b * I : ℂ)‖ := by
-  sorry -- ‖a+bi‖² = a²+b�� ≥ a²; Mathlib Complex norm API
+  -- ‖z‖ = √(normSq z) and normSq(a+bi) = a²+b²
+  -- So ‖a+bi‖ = √(a²+b²) ≥ √(a²) = a
+  have h_sq : a ^ 2 ≤ ‖(↑a + ↑b * I : ℂ)‖ ^ 2 := by
+    rw [Complex.sq_norm]
+    simp only [Complex.normSq_apply, Complex.add_re, Complex.ofReal_re,
+               Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+               Complex.I_re, Complex.I_im, Complex.add_im, Complex.ofReal_im,
+               Complex.mul_im, mul_zero, mul_one, zero_mul, sub_zero, zero_add]
+    nlinarith [sq_nonneg b]
+  nlinarith [norm_nonneg (↑a + ↑b * I : ℂ), sq_nonneg (‖(↑a + ↑b * I : ℂ)‖ - a)]
 
 theorem diamagnetic_diagonal (eigvals : n → ℝ) (h_pos : ∀ i, 0 < eigvals i)
     (v : n → ℝ) (x y : n) :
@@ -376,9 +385,12 @@ theorem diamagnetic_diagonal (eigvals : n → ℝ) (h_pos : ∀ i, 0 < eigvals i
     -- Need ‖(eigvals x + v x * I)⁻¹‖ ≤ (eigvals x)⁻¹
     -- From real_le_abs_add_mul_I: eigvals x ≤ |eigvals x + v x * I|
     -- So (eigvals x)⁻¹ ≥ |eigvals x + v x * I|⁻¹ = ‖(eigvals x + v x * I)⁻¹‖
-    sorry -- needs inv_anti for complex norm; straightforward from helper
-  · -- Off-diagonal: diagonal⁻¹ is diagonal, so both sides are 0
-    sorry -- off-diagonal of diagonal inverse; type coercion ℝ vs ℂ
+    -- ‖z⁻¹‖ = ‖z‖⁻¹ ≤ (eigvals x)⁻¹ from real_le_norm_add_mul_I
+    -- The goal involves Pi.inv_apply unfolding; API plumbing.
+    sorry -- from real_le_norm_add_mul_I + norm_inv + inv_anti
+  · -- Off-diagonal: (diagonal f)⁻¹ x y = 0 when x ≠ y
+    simp only [Matrix.diagonal_apply_ne _ h]
+    simp
 
 /-! ## Summary of axiom dependencies
 

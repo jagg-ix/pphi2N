@@ -68,13 +68,17 @@ Proof: this IS the HS identity with a = φ²-ρ². -/
 theorem inverse_HS_one_site (lam : ℝ) (hlam : 0 < lam) (φ rho_sq : ℝ) :
     ∫ σ : ℝ, cexp (-(siteAction_HS lam rho_sq φ σ)) =
     (4 * ↑π * ↑lam) ^ (1/2 : ℂ) * cexp (-(↑(siteAction_original lam rho_sq φ))) := by
-  -- Unfold and apply the HS identity
-  -- Apply hs_identity_combined with a = φ²-rho_sq.
-  -- The proof reduces to matching complex arithmetic:
-  -- -(σ²/(4λ) + iσ(φ²-ρ²)) = iσ(φ²-ρ²) - σ²/(4λ) (rearrange negation)
-  -- -(lam·(φ²-ρ²)²) = -(lam·(φ²-ρ²)²) (trivial)
-  -- Both are routine ℝ→ℂ cast + ring, tedious in Lean.
-  sorry
+  -- Step 1: Match the integrand with hs_identity_combined
+  have hLHS : ∀ σ : ℝ, -(siteAction_HS lam rho_sq φ σ) =
+      I * ↑(-(φ ^ 2 - rho_sq)) * ↑σ - (1 / (4 * ↑lam)) * ↑σ ^ 2 := by
+    intro σ; unfold siteAction_HS; push_cast; ring
+  simp_rw [hLHS]
+  -- Step 2: Apply hs_identity_combined with a = -(φ²-ρ²)
+  rw [hs_identity_combined lam hlam (-(φ ^ 2 - rho_sq))]
+  -- Step 3: Match the RHS
+  congr 1
+  unfold siteAction_original
+  push_cast; ring
 
 /-! ## The equivalence theorem
 

@@ -1,38 +1,74 @@
-\contentsline {section}{\numberline {1}The HS identity and the sign problem}{2}{section.1}%
-\contentsline {subsection}{\numberline {1.1}The Euclidean quartic requires imaginary coupling}{2}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}The $\sigma $-integral on the real axis}{3}{subsection.1.2}%
-\contentsline {section}{\numberline {2}The NLSM: Kupiainen's mass trick}{3}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Adding $m_0^2$ for free}{3}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}The NLSM operator has real mass}{3}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Kupiainen's proof structure}{4}{subsection.2.3}%
-\contentsline {section}{\numberline {3}The LSM: the mass cancels}{4}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Add-subtract fails}{4}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Consequences}{4}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Comparison}{5}{subsection.3.3}%
-\contentsline {section}{\numberline {4}Comparison across dimensions}{5}{section.4}%
-\contentsline {subsection}{\numberline {4.1}$d = 0$ (matrix model)}{5}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}$d = 1$ (quantum mechanics)}{5}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}$d = 2$ (QFT)}{5}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Summary}{6}{subsection.4.4}%
-\contentsline {section}{\numberline {5}The saddle-point structure}{6}{section.5}%
-\contentsline {subsection}{\numberline {5.1}The gap equation}{6}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}The saddle-point Gaussian}{6}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}The oscillatory corrections}{6}{subsection.5.3}%
-\contentsline {section}{\numberline {6}What Kupiainen proved}{7}{section.6}%
-\contentsline {subsection}{\numberline {6.1}NLSM (1980a): mass gap}{7}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}LSM (1980b): pressure only}{7}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Implications}{7}{subsection.6.3}%
-\contentsline {section}{\numberline {7}Strategy: steepest descent contour}{7}{section.7}%
-\contentsline {subsection}{\numberline {7.1}The steepest descent contour}{8}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Shape of $\Gamma $ near the saddle}{8}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Properties of the integral over $\Gamma $}{8}{subsection.7.3}%
-\contentsline {subsection}{\numberline {7.4}Plan}{8}{subsection.7.4}%
-\contentsline {section}{\numberline {8}Other strategies for comparison}{9}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Strategy A: NLSM (Kupiainen)}{9}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Strategy B: LSM saddle-point}{9}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Strategy C: LSM $\to $ NLSM equivalence}{9}{subsection.8.3}%
-\contentsline {section}{\numberline {9}The $N = 2$ obstruction}{10}{section.9}%
-\contentsline {section}{\numberline {10}Current status}{10}{section.10}%
-\contentsline {subsection}{\numberline {10.1}What is proved (in Lean)}{10}{subsection.10.1}%
-\contentsline {subsection}{\numberline {10.2}What is axiomatized}{10}{subsection.10.2}%
-\contentsline {subsection}{\numberline {10.3}Open questions}{10}{subsection.10.3}%
+\contentsline {section}{\numberline {1}The HS identity and the sign problem}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}The Euclidean quartic requires imaginary coupling}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}The $\sigma $-integral on the real axis}{4}{subsection.1.2}%
+\contentsline {section}{\numberline {2}The NLSM: Kupiainen's mass trick}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Adding $m_0^2$ for free}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The NLSM operator has real mass}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Kupiainen's proof structure}{5}{subsection.2.3}%
+\contentsline {section}{\numberline {3}The LSM: the mass cancels}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Add-subtract fails}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Consequences}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Comparison}{6}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Comparison across dimensions}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}$d = 0$ (matrix model)}{6}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}$d = 1$ (quantum mechanics)}{6}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}$d = 2$ (QFT)}{6}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Summary}{7}{subsection.4.4}%
+\contentsline {section}{\numberline {5}The saddle-point structure}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}The gap equation}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}The saddle-point Gaussian}{7}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}The oscillatory corrections}{7}{subsection.5.3}%
+\contentsline {section}{\numberline {6}What Kupiainen proved}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}NLSM (1980a): mass gap}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}LSM (1980b): pressure only}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Implications}{8}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Strategy: Lefschetz thimble}{8}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Lefschetz thimbles: definition}{9}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Thimble decomposition}{9}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Single-thimble dominance at large $N$}{9}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}No topological obstruction for scalar fields}{10}{subsection.7.4}%
+\contentsline {section}{\numberline {8}The constant shift and thimble geometry}{10}{section.8}%
+\contentsline {subsection}{\numberline {8.1}The $d = 0$ computation}{10}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}The operator on the shifted contour}{11}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}The thimble unifies LSM and NLSM}{11}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}The $N = \infty $ thimble is exactly flat}{11}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}The leading $1/N$ correction: explicit formula}{12}{subsection.8.5}%
+\contentsline {subsection}{\numberline {8.6}Properties of the correction}{12}{subsection.8.6}%
+\contentsline {subsection}{\numberline {8.7}Multi-site: constant shift plus local corrections}{13}{subsection.8.7}%
+\contentsline {subsection}{\numberline {8.8}The thimble is a Lagrangian submanifold}{13}{subsection.8.8}%
+\contentsline {subsubsection}{\numberline {8.8.1}Proof}{13}{subsubsection.8.8.1}%
+\contentsline {subsubsection}{\numberline {8.8.2}Consequences}{14}{subsubsection.8.8.2}%
+\contentsline {section}{\numberline {9}The Hamilton-Jacobi equation}{14}{section.9}%
+\contentsline {subsection}{\numberline {9.1}The equation}{14}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Concrete form: the arctan equation}{15}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Perturbative expansion}{15}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Convergence of the $1/N$ expansion}{16}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}The Jacobian phase and the order of limits}{16}{subsection.9.5}%
+\contentsline {subsubsection}{\numberline {9.5.1}The residual phase problem}{16}{subsubsection.9.5.1}%
+\contentsline {subsubsection}{\numberline {9.5.2}Consequence for the mass gap}{16}{subsubsection.9.5.2}%
+\contentsline {subsubsection}{\numberline {9.5.3}The quantum Hamilton-Jacobi equation}{17}{subsubsection.9.5.3}%
+\contentsline {subsubsection}{\numberline {9.5.4}Bounds-only approach to the quantum thimble}{17}{subsubsection.9.5.4}%
+\contentsline {subsubsection}{\numberline {9.5.5}The transfer matrix resolution}{18}{subsubsection.9.5.5}%
+\contentsline {section}{\numberline {10}Solution theory and the mass gap proof}{19}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Solution theory for the HJ equation}{19}{subsection.10.1}%
+\contentsline {subsubsection}{\numberline {10.1.1}Method of characteristics}{19}{subsubsection.10.1.1}%
+\contentsline {subsubsection}{\numberline {10.1.2}A priori bounds on $\Phi $}{19}{subsubsection.10.1.2}%
+\contentsline {subsubsection}{\numberline {10.1.3}Fixed-point formulation}{20}{subsubsection.10.1.3}%
+\contentsline {subsubsection}{\numberline {10.1.4}What the proof needs vs.\ what we compute}{21}{subsubsection.10.1.4}%
+\contentsline {subsection}{\numberline {10.2}Properties of the integral over $\mathcal {J}_0$}{21}{subsection.10.2}%
+\contentsline {subsubsection}{\numberline {10.2.1}Singularity avoidance in the thermodynamic limit}{21}{subsubsection.10.2.1}%
+\contentsline {subsubsection}{\numberline {10.2.2}Global vs.\ local log-concavity}{22}{subsubsection.10.2.2}%
+\contentsline {subsubsection}{\numberline {10.2.3}Brascamp-Lieb: which version?}{22}{subsubsection.10.2.3}%
+\contentsline {subsubsection}{\numberline {10.2.4}Uniformity and the infinite-volume limit}{22}{subsubsection.10.2.4}%
+\contentsline {subsection}{\numberline {10.3}The flowed manifold alternative}{23}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}Proof plan (using the constant shift)}{24}{subsection.10.4}%
+\contentsline {section}{\numberline {11}Other strategies for comparison}{25}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Strategy A: NLSM (Kupiainen)}{25}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Strategy B: LSM saddle-point (real axis)}{25}{subsection.11.2}%
+\contentsline {subsection}{\numberline {11.3}Strategy C: LSM $\to $ NLSM equivalence}{25}{subsection.11.3}%
+\contentsline {subsection}{\numberline {11.4}Strategy comparison}{26}{subsection.11.4}%
+\contentsline {section}{\numberline {12}The $N = 2$ obstruction}{26}{section.12}%
+\contentsline {section}{\numberline {13}Current status}{26}{section.13}%
+\contentsline {subsection}{\numberline {13.1}What is proved (in Lean)}{26}{subsection.13.1}%
+\contentsline {subsection}{\numberline {13.2}What is axiomatized}{26}{subsection.13.2}%
+\contentsline {subsection}{\numberline {13.3}Open questions}{27}{subsection.13.3}%
