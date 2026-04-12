@@ -319,6 +319,14 @@ The constant 1/m² is also independent of L.
 Natural number torus distance: min(n.val, L - n.val). -/
 def torusDistNat (n : ZMod L) : ℕ := min n.val (L - n.val)
 
+/-- **Exponential decay of the nearest-neighbor Green's function.**
+
+‖G(n)‖ ≤ (1/m²) · r₋^dist(n) where r₋ = characteristicRoot(m²) ∈ (0,1).
+
+Proof approach: G satisfies the recurrence -G(n+1)+(2+m²)G(n)-G(n-1) = δ_{n,0}/L.
+On Z/LZ, the solution is G(n) = [r₋^n + r₋^{L-n}]/[√disc·(1-r₋^L)].
+The bound follows since r₋^n + r₋^{L-n} ≤ 2·r₋^{min(n,L-n)} and
+2/[√disc·(1-r₋^L)] ≤ 1/m² (verified by Gemini: 1/√(m²(4+m²)) ≤ 1/m²). -/
 axiom greenFunction_exponential_decay
     {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
