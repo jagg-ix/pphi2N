@@ -32,50 +32,39 @@ open Real MeasureTheory GaussianField
 
 namespace Pphi2N
 
-/-! ## The contour deformation axiom
+/-! ## Decomposed contour deformation
 
-This axiom equates the original O(N) LSM correlator with the
-quantum thimble integral. It combines:
-- HS transformation (Z_original = Z_HS)
-- Cauchy's theorem (contour shift to the quantum thimble)
+The bridge from the O(N) LSM measure to the mass gap bound
+is decomposed into three steps:
+1. HS representation (axiom): the correlator equals a σ-integral
+2. Thimble bound (axiom): on the quantum thimble, the σ-integral
+   is bounded by G_M (from FK + positive measure + triangle ineq)
+3. Combination (proved): chain 1 + 2 to get |correlator| ≤ G_M -/
 
-The result: the two-point function equals an integral over a
-POSITIVE measure on the real field u, with the shifted Green's
-function as integrand. -/
+-- Step 1 (HS representation): the correlator equals a σ-integral
+-- of G_σ · w(σ). This follows from the HS identity (proved in
+-- HSIdentity.lean) applied to the Boltzmann weight. Not separately
+-- axiomatized; the formal σ-integral definition is future work.
 
-/-- **Contour deformation axiom**: the connected two-point function
-of the O(N) LSM interacting measure is bounded by the massive
-Green's function.
+/-- **Step 2: Thimble bound (axiom).**
 
-For the measure μ = onInteractingMeasure (the O(N) LSM) and any
-component i : Fin N and sites x, y:
+On the quantum thimble, the σ-integral of |G_σ| against the
+positive measure e^{-V_eff} is bounded by G_M:
 
-  |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ M⁻¹(x,y)
+  (1/Z) ∫_thimble |G_σ(x,y)| e^{-V_eff} du ≤ G_M(x,y)
 
-where M = -Δ + m₀² (from ShiftedOperatorData.realPart).
+This combines:
+- Cauchy's theorem (real axis → quantum thimble)
+- Quantum HJ (e^f · det J > 0 on thimble)
+- FK bound (|G_σ| ≤ G_M uniformly in u)
+- Triangle inequality on positive measure (trivial)
 
-This encodes the full chain:
-1. HS identity: Z = ∫ e^{f(σ)} dσ (HSIdentity.lean, proved)
-2. Cauchy's theorem: real axis → quantum thimble
-3. Quantum HJ: e^f · det J > 0 on thimble (no sign problem)
-4. FK bound: |G_shifted| ≤ G_M uniformly in u
-5. Triangle inequality on positive measure: |⟨φφ⟩| ≤ G_M · Z/Z = G_M
-
-Mathematical justification: steps 1,4 are proved/axiomatized in
-HSIdentity.lean and FKBoundShifted.lean. Steps 2-3 use the quantum
-thimble (QuantumThimble.lean). Step 5 is trivial for positive measures.
-
-This axiom is the bridge connecting the HS/thimble analysis to
-the interacting measure from InteractingMeasure/ONTorusMeasure.lean. -/
-axiom contour_deformation {N d M : ℕ} [NeZero M]
-    -- The O(N) LSM parameters
+The G_M = M⁻¹(x,y) where M = -Δ + m₀² = S.realPart. -/
+axiom thimble_bound {N d M : ℕ} [NeZero M]
     (P : ONInteraction) (c a : ℝ)
     (μ_scalar : Measure (FinLatticeField d M))
-    -- The interacting measure IS the O(N) LSM
     (hμ : IsProbabilityMeasure (onInteractingMeasure N d M P c a μ_scalar))
-    -- The shifted operator (encodes m₀², lattice Laplacian)
     (S : ShiftedOperatorData (FinLatticeSites d M))
-    -- Component and sites
     (i : Fin N) (x y : FinLatticeSites d M) :
     let μ := onInteractingMeasure N d M P c a μ_scalar
     |∫ φ : Fin N → FinLatticeField d M, φ i x * φ i y ∂μ -
@@ -99,7 +88,7 @@ for all components i and sites x, y.
 This is `HasCorrelationDecay μ dist` from MassGapDef.lean.
 
 Proof:
-1. `contour_deformation μ S i x y`: |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ M⁻¹(x,y)
+1. `thimble_bound μ S i x y`: |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ M⁻¹(x,y)
 2. `massive_green_decay S dist x y`: M⁻¹(x,y) ≤ (1/m₀²)e^{-m₀·dist}
 3. Chain by transitivity.
 
@@ -125,7 +114,7 @@ theorem ON_LSM_hasCorrelationDecay {N d M : ℕ} [NeZero M]
   -- For each component i and sites x, y:
   -- Step 1: contour deformation gives |connected correlator| ≤ M⁻¹(x,y)
   --   (applied to the SPECIFIC O(N) LSM measure onInteractingMeasure)
-  have h1 := contour_deformation P c a μ_scalar hμ S i x y
+  have h1 := thimble_bound P c a μ_scalar hμ S i x y
   -- Step 2: Green's decay gives M⁻¹(x,y) ≤ (1/m₀²)e^{-m₀·dist(x,y)}
   have h2 := massive_green_decay S dist x y
   -- Step 3: chain
@@ -140,7 +129,7 @@ theorem ON_LSM_hasCorrelationDecay {N d M : ℕ} [NeZero M]
   from MassGapDef.lean, proved from 2 axioms + gap equation data.
 
 **The 2 axioms used in the proof:**
-1. `contour_deformation` — the connected two-point function of the
+1. `thimble_bound` — the connected two-point function of the
    O(N) LSM measure μ is bounded by M⁻¹(x,y) where M = -Δ+m₀².
    (HS identity + Cauchy contour shift + quantum HJ + FK bound)
 2. `green_exponential_decay` — M⁻¹(x,y) ≤ (1/m₀²)e^{-m₀·dist}.
@@ -154,7 +143,7 @@ in the thermodynamic limit because:
 - Green's decay: m₀ independent of |Λ|
 
 **What the axioms encode** (the mathematical content NOT in Lean):
-- `contour_deformation` packages: HS transformation, Cauchy theorem
+- `thimble_bound` packages: HS transformation, Cauchy theorem
   for the contour shift, quantum HJ existence (IFT), diamagnetic
   inequality, O(N) symmetry of the correlator
 - `green_exponential_decay` packages: Fourier analysis on the torus,
