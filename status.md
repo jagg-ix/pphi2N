@@ -1,6 +1,9 @@
 # pphi2N Status
 
-**4 sorries, 21 axioms, 41 files, 0 errors.**
+**0 sorries, 19 axioms, 41 files, 0 errors.**
+
+See `docs/axiom_status.md` for detailed inventory of all axioms
+with difficulty ratings and proof plans.
 
 ## Main results
 
@@ -10,18 +13,26 @@
 |---------|------|-----------|
 | `lsmTorusLimit_satisfies_OS` | ONTorusLimit.lean | O(N) LSM continuum limit on T²_L satisfies OS0+OS1+OS2 |
 
-### Mass gap (in progress)
+### Mass gap (proved from axioms)
 
-The mass gap proof uses HS with imaginary coupling + steepest descent
-contour rotation + Brascamp-Lieb. See `docs/mass-gap-v2.tex`.
+**`ON_LSM_hasCorrelationDecay`** (`Thimble/MassGapProof.lean`):
+The O(N) LSM interacting measure has `HasCorrelationDecay` with mass
+m₀ > 0 from the gap equation, uniform in lattice volume.
+
+Proved from 2 axioms: `thimble_bound` + `green_exponential_decay`.
+See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 
 | Result | File | Status |
 |--------|------|--------|
 | HS identity | HSIdentity.lean | **Proved** (from Mathlib `fourierIntegral_gaussian`) |
-| Multi-site HS | MultiSiteHS.lean | **Proved** (product of 1-site identities) |
-| Contour rotation lemmas | ContourRotation.lean | **Proved** (|exp(iθ)|=1, exponent real after rotation) |
-| HS equivalence | Equivalence.lean | **1 sorry** (complex arithmetic, routine) |
-| FK bound → mass gap | FKBound.lean | **Proved** (from FK axioms) |
+| HS equivalence | Equivalence.lean | **Proved** (push_cast + ring) |
+| Gap equation | Thimble/GapEquation.lean | **Proved** (v_* < 0, spectral gap) |
+| Shifted operator | Thimble/ShiftedOperator.lean | **Proved** (M ≥ m₀²) |
+| Phase cancellation | Thimble/QuantumThimble.lean | **Proved** (polar form) |
+| 1D diamagnetic | Thimble/DiagmagneticInequality.lean | **Proved** (a ≤ ‖a+bi‖) |
+| Green's function | Thimble/GreenDecay.lean | **15 theorems proved**, 1 axiom |
+| FK decay chain | Thimble/FKBoundShifted.lean | **Proved** (from axioms) |
+| **Mass gap** | Thimble/MassGapProof.lean | **Proved** (HasCorrelationDecay) |
 
 ### N=1 test case
 
@@ -29,40 +40,64 @@ contour rotation + Brascamp-Lieb. See `docs/mass-gap-v2.tex`.
 |--------|------|--------|
 | N=1 setup | N1Test.lean | HS identity, gap equation, connection to P(φ)₂ |
 
-## Axioms (11)
+## Axioms (19)
+
+See `docs/axiom_status.md` for detailed proof plans for each axiom.
+
+### Main mass gap chain (3)
+
+| Axiom | File | Content | Difficulty |
+|-------|------|---------|------------|
+| `thimble_bound` | MassGapProof.lean | HS+Cauchy+QHJ+FK→\|⟨φφ⟩\|≤M⁻¹ | research |
+| `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} | medium |
+| `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist | medium |
+
+### Quantum thimble + diamagnetic (8)
+
+| Axiom | File | Content | Difficulty |
+|-------|------|---------|------------|
+| `quantum_thimble_exists` | QuantumThimble.lean | QHJ solution + BL var | hard |
+| `resolvent_complex_bound` | FKBoundShifted.lean | \|(M+iV)⁻¹\|≤M⁻¹ | medium |
+| `heat_kernel_entrywise_nonneg` | DiagmagneticInequality | exp(-tM)≥0 | medium |
+| `laplace_transform_inverse` | DiagmagneticInequality | M⁻¹=∫exp(-tM)dt | medium |
+| `laplace_transform_inverse_complex` | DiagmagneticInequality | (M+iV)⁻¹=∫... | medium |
+| `trotter_product_matrix` | DiagmagneticInequality | Lie-Trotter | medium |
+| `diamagnetic_inequality` | DiagmagneticInequality | \|exp(-t(M+iV))\|≤exp(-tM) | medium |
+| `m_matrix_inverse_nonneg` | DiagmagneticInequality | M⁻¹≥0 for M-matrix | easy |
+
+### Contour shift (1)
+
+| Axiom | File | Content | Difficulty |
+|-------|------|---------|------------|
+| `vertical_contour_shift` | ContourShift.lean | ∫f(x+y₁i)=∫f(x+y₂i) | easy |
 
 ### Continuum limit (4)
 
-| Axiom | File | Proof source |
-|-------|------|-------------|
-| `nComponentGreen_uniform_bound` | EmbeddingBound.lean | Port from gaussian-field |
-| `lsmDensityTransferConstant` | ONTorusLimit.lean | Nelson bound + Jensen |
-| `lsmGF_latticeApproximation_error_vanishes` | ONTorusLimit.lean | Port from pphi2 |
-| `nComponentGFF_exp_moment_uniform` | ONTorusLimit.lean | Gaussian MGF |
+| Axiom | File | Content | Difficulty |
+|-------|------|---------|------------|
+| `nComponentGreen_uniform_bound` | EmbeddingBound.lean | Port from gaussian-field | easy |
+| `lsmDensityTransferConstant` | ONTorusLimit.lean | Nelson bound + Jensen | easy |
+| `lsmGF_latticeApproximation_error_vanishes` | ONTorusLimit.lean | Port from pphi2 | medium |
+| `nComponentGFF_exp_moment_uniform` | ONTorusLimit.lean | Gaussian MGF | easy |
 
 ### Matrix calculus (3)
 
-| Axiom | File | Proof source |
-|-------|------|-------------|
-| `contDiff_matrix_det` | MatrixCalculus.lean | Proved with Pi norm (DetContDiff.lean), axiom due to norm transfer |
-| `fderiv_log_det` | MatrixCalculus.lean | Jacobi's formula (chain rule for det) |
-| `hessian_log_det` | MatrixCalculus.lean | Second derivative of log det |
+| Axiom | File | Content | Difficulty |
+|-------|------|---------|------------|
+| `contDiff_matrix_det` | MatrixCalculus.lean | det is C∞ (norm transfer) | easy |
+| `fderiv_log_det` | MatrixCalculus.lean | Jacobi's formula | medium |
+| `hessian_log_det` | MatrixCalculus.lean | Hessian of log det | medium |
 
-### Contour shift (2)
+### Proved (no longer axioms)
 
-| Axiom | File | Proof source |
-|-------|------|-------------|
-| `rectangle_integral_vanishes` | ContourShift.lean | Mathlib `integral_boundary_rect_eq_zero` |
-| `vertical_contour_shift` | ContourShift.lean | PNT project `HolomorphicOn.vanishesOnRectangle` |
+| Former axiom | Status |
+|-------------|--------|
+| `rectangle_integral_vanishes` | **Proved** from Mathlib CauchyIntegral |
+| `inverse_HS_one_site` | **Proved** (push_cast + ring) |
+| `green_function_monotone` | **Removed** (deprecated) |
+| `feynmanKac_subGaussian_bound` | **Removed** (deprecated) |
 
-### FK bound (2)
-
-| Axiom | File | Proof source |
-|-------|------|-------------|
-| `green_function_monotone` | FKBound.lean | Spectral theorem for PSD matrices |
-| `feynmanKac_subGaussian_bound` | FKBound.lean | FK representation + Borell sub-Gaussian |
-
-## File inventory (32 files)
+## File inventory (41 files)
 
 ### Model (3 files, 0 axioms)
 - Model/ONModel.lean — O(N) model structure
@@ -105,23 +140,35 @@ contour rotation + Brascamp-Lieb. See `docs/mass-gap-v2.tex`.
 - MassGapDef.lean — HasCorrelationDecay, HasSpectralGap
 - LatticeOperator.lean — Graph Laplacian PSD (from Mathlib)
 
-### HSEquivalence (7 files, 4 axioms, 1 sorry)
+### HSEquivalence (7 files, 1 axiom, 0 sorries)
 - HSIdentity.lean — HS Gaussian identity (proved from Mathlib)
 - MultiSiteHS.lean — Per-site HS + boundedness (proved)
 - ContourRotation.lean — Contour rotation lemmas (proved)
-- ContourShift.lean — Rectangle + vertical shift (2 axioms)
-- FKBound.lean — FK + Borell → mass gap (2 axioms, theorem proved)
-- Equivalence.lean — Z_original = Z_HS (1 sorry)
+- ContourShift.lean — Rectangle integral (proved), vertical shift (1 axiom)
+- FKBound.lean — Deprecated (superseded by Thimble/FKBoundShifted)
+- Equivalence.lean — Z_original = Z_HS (**proved**, was sorry)
 - N1Test.lean — N=1 test case
 
-## Proof plan (docs/mass-gap-v2.tex)
+### Thimble (9 files, 12 axioms, 0 sorries)
+- GapEquation.lean — Gap equation algebra, v_* < 0 (proved)
+- ShiftedOperator.lean — M = -Δ+m₀², spectral gap (proved)
+- QuantumThimble.lean — Phase cancellation (proved), thimble existence (1 axiom)
+- QuantumHJExplicit.lean — Total phase functional, 1/N correction (proved)
+- FKBoundShifted.lean — Concrete FK + Green's decay (2 axioms)
+- DiagmagneticInequality.lean — Semigroup proof structure (6 axioms, 0 sorries)
+- GreenDecay.lean — Lattice Green's function (15 proved, 1 axiom)
+- ThimbleMeasure.lean — BL variance (proved from quantum thimble)
+- MassGapProof.lean — **ON_LSM_hasCorrelationDecay** (1 axiom)
+
+## Proof plan (docs/mass-gap-v3.tex)
 
 1. HS with imaginary coupling (exact, proved in HSIdentity)
-2. Gap equation determines σ* and mass m₀ (standard in 2d)
-3. Steepest descent contour rotation σ → iσ'
-4. Brascamp-Lieb for the rotated (real, log-concave) measure
-5. Renormalized Borell/FK bound with self-energy subtraction
-6. N₀ ~ √(λ/g²) threshold
+2. Gap equation determines v_* and mass m₀ (proved in GapEquation)
+3. Contour shift to quantum thimble (positive measure)
+4. FK bound uniform in u (diamagnetic inequality)
+5. Trivial averaging on positive measure (|⟨φφ⟩| ≤ G_M · Z/Z = G_M)
+6. Green's function decay (G_M ≤ Ce^{-m₀|x|})
+7. Mass gap m₀ > 0, uniform in |Λ|
 
 ## References
 
