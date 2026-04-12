@@ -1418,79 +1418,70 @@ Fukuma et al.~\cite{Fukuma20,Fukuma23} (``Worldvolume HMC''),
 now extended to gauge theories~\cite{Fukuma26} and the Hubbard
 model~\cite{Fukuma25b}.
 
-\subsection{Proof plan (using the constant shift)}
+\subsection{Proof plan (the quantum thimble argument)}
 
-The constant-shift form of the thimble
-(Section~\ref{sec:constant_shift}) simplifies the proof plan
-considerably:
+The quantum thimble (Section~\ref{sec:quantum_HJ}) gives a
+remarkably simple proof of the mass gap:
 
 \begin{enumerate}
-\item \textbf{Contour shift}: Shift from $v = 0$ to $v = v_*$,
-  where $v_*$ is determined by the gap equation so that
-  $-2v_* z = m_0^2$. This is a flat contour --- Cauchy's theorem
-  for the shift is elementary (the integrand is entire in each
-  $\sigma(x)$ except for the $\log\det$ singularities, which are at
-  $\sigma = ik^2/(2z)$, far from the shifted contour for
-  $|v_*| < k_{\min}^2/(2z)$, which is satisfied by construction).
-
-\item \textbf{Real mass in the operator}: On the shifted contour,
-  the $\ph$-operator is $-\Delta + m_0^2 + 2i\sigma z$ with
-  $\sigma \in \R$ (the shifted variable). The FK bound gives
-  $|G_\sigma(x,0)| \le G_{m_0}(x,0) \sim e^{-m_0|x|}$ for
-  \textbf{every} $\sigma$-value.
-
-\item \textbf{Residual sign problem}: On the constant-shift contour,
-  $\im\,f \ne 0$ (unlike the exact thimble). The residual imaginary
-  part is $O(\sigma^3/\sqrt{N})$ per site. The shifted partition
-  function is:
+\item \textbf{Contour deformation}: Deform the $\sigma$-integral
+  from $\R^{|\La|}$ to the quantum thimble, where the total
+  integrand $e^f \cdot \det J$ is \textbf{real and positive}
+  (quantum HJ eliminates both action and Jacobian phases).
+  The two-point function becomes:
   \begin{equation}
-    Z = c\int_{\R^{|\La|}} e^{\re f(u+iv_*)}\cdot
-      e^{i\,\im f(u+iv_*)}\,d\sigma.
+    \langle\ph(x)\ph(0)\rangle
+      = \frac{1}{Z}\int G_\sigma(x,0)\,e^{-V_{\rm eff}(u)}\,du
   \end{equation}
-  The real part $e^{\re f}$ is a well-behaved (approximately
-  log-concave) measure. The phase $e^{i\,\im f}$ is the residual
-  sign problem.
+  where $e^{-V_{\rm eff}}$ is a positive measure on~$\R^{|\La|}$.
 
-\item \textbf{BL for $\sigma$-concentration}: The real part
-  $\re\,f(u+iv_*)$ has positive definite Hessian
-  $\sim N\cdot H$ near $\sigma = 0$. Apply BL to the measure
-  $e^{\re f}\,d\sigma$ (real, positive, log-concave near saddle)
-  for concentration: $\Var(\sigma(x)) \le 1/(\kappa N)$.
+\item \textbf{FK bound (uniform in $u$)}: On the quantum thimble,
+  the $\ph$-operator is $-\Delta + m_0^2 + 2iuz$ with $u \in \R$.
+  The FK/diamagnetic bound gives
+  $|G_\sigma(x,0)| \le G_{m_0}(x,0)$ for \textbf{every}
+  $u$-configuration. This is the operator monotonicity
+  $|(\text{M}+i\text{V})^{-1}| \le \text{M}^{-1}$.
 
-\item \textbf{Phase control}: The residual phase $e^{i\,\im f}$
-  is controlled by BL concentration. Since $\im\,f$ is $O(\sigma^3)$
-  and the measure concentrates at width $O(1/\sqrt{N})$:
-  $|\im\,f| \lesssim |\La|/N^2$ (total over all sites).
-  For $N \gg \sqrt{|\La|}$: the phase is close to~1.
-
-\item \textbf{FK bound + concentration $\to$ mass gap}: Combine
-  the per-$\sigma$ FK bound (step~2) with $\sigma$-concentration
-  (step~4) and phase control (step~5):
+\item \textbf{Trivial averaging}: Since $e^{-V_{\rm eff}}$ is a
+  \textbf{positive} measure and the FK bound is uniform in~$u$:
   \begin{equation}
-    \E_\sigma\bigl[G_\sigma(x,0)\bigr]
-      \approx G_{m_0}(x,0)\cdot(1+O(1/N))
-      \sim e^{-m_0|x|}.
+    |\langle\ph(x)\ph(0)\rangle|
+      \le \frac{1}{Z}\int |G_\sigma|\,e^{-V_{\rm eff}}\,du
+      \le G_{m_0}(x,0)\cdot\frac{Z}{Z}
+      = G_{m_0}(x,0).
   \end{equation}
-  Mass gap $m \ge m_0(1 - O(1/N)) > 0$ for $N > N_0$.
+  The ratio $Z/Z = 1$ because the measure is positive ---
+  \textbf{no sign problem, no average sign factor}.
+
+\item \textbf{Green's function decay}: $G_{m_0}(x,0) =
+  (-\Delta+m_0^2)^{-1}(x,0) \le (1/m_0^2)\,e^{-m_0|x|}$
+  (Fourier analysis on the torus).
+
+\item \textbf{Mass gap}: Chaining steps 1--4:
+  $|\langle\ph(x)\ph(0)\rangle| \le (1/m_0^2)\,e^{-m_0|x|}$
+  with $m_0 > 0$ from the gap equation, independent of~$|\La|$.
 \end{enumerate}
 
-\begin{remark}[Comparison with exact thimble]
-The constant-shift proof plan avoids the need to characterize the
-exact thimble $\mathcal{J}_0$ globally. The price is the residual
-sign problem (step~5), which must be controlled perturbatively.
-Using the exact thimble would eliminate the residual sign problem
-entirely ($\im\,f = 0$), but requires the global analysis of
-Section~\ref{sec:thimble}. For large~$N$, the constant-shift
-approach should suffice: the residual phase is $O(|\La|/N^2)$,
-negligible for $N \gg \sqrt{|\La|}$.
+\begin{remark}[Why BL is not needed for the leading mass gap]
+The BL concentration bound $\Var(u(x)) \le 1/(\kappa N)$ is
+\textbf{not needed} for the leading mass gap. The FK bound is
+uniform in~$u$, so the average is controlled by the triangle
+inequality alone (step~3). BL is needed for the $1/N$
+\textbf{corrections}: the actual mass is $m_0 + O(1/N)$, and
+BL controls the correction terms. But the existence of a
+positive mass gap $m \ge m_0 > 0$ follows from FK + positivity
+alone.
 \end{remark}
 
-\begin{remark}
-The leading-order thimble is a \textbf{constant imaginary shift}
-$v = 0 \to v = v_*$ (Section~\ref{sec:constant_shift}).
-This is a flat manifold --- the simplest possible contour deformation.
-The exact thimble has $O(1/N)$ curvature corrections from higher-order
-terms in~$f$.
+\begin{remark}[Volume independence]
+The constants $m_0$ and $1/m_0^2$ depend on the gap equation
+(coupling constants), \textbf{not on~$|\La|$}. The mass gap
+persists in the thermodynamic limit because:
+\begin{itemize}
+\item FK bound: per-configuration, no $|\La|$ dependence.
+\item Positive measure: quantum HJ, ratio $Z/Z = 1$.
+\item Green's decay: $m_0$ from gap equation, independent of~$|\La|$.
+\end{itemize}
 
 For a rigorous proof, one can work with the \emph{exact} constant
 shift (Cauchy's theorem for a flat contour is elementary) and treat
@@ -1582,34 +1573,89 @@ no BKT.
 
 \section{Current status}
 
-\subsection{What is proved (in Lean)}
+\subsection{Main theorem (in Lean)}
+
+\textbf{41 files, 21 axioms, 1 sorry.}
+
+\begin{theorem}[\texttt{ON\_LSM\_hasCorrelationDecay}]
+For the O($N$) LSM interacting measure $\mu$ on a finite lattice
+with gap equation mass $m_0^2 > 0$:
+\begin{equation}
+  \texttt{HasCorrelationDecay}\;\mu\;\mathrm{dist}
+\end{equation}
+i.e., $\exists\,m, C > 0$ such that
+$|\langle\ph^i(x)\ph^i(y)\rangle_c| \le C\,e^{-m\,\mathrm{dist}(x,y)}$
+for all components~$i$ and sites $x, y$.
+\end{theorem}
+
+The proof chains two axioms:
+\begin{enumerate}
+\item \texttt{contour\_deformation}: the connected correlator of the
+  \emph{specific} O($N$) LSM measure \texttt{onInteractingMeasure}
+  is bounded by $M^{-1}(x,y)$ where $M = -\Delta + m_0^2$.
+\item \texttt{green\_exponential\_decay}: $M^{-1}(x,y) \le
+  (1/m_0^2)\,e^{-m_0\,\mathrm{dist}(x,y)}$.
+\end{enumerate}
+
+\subsection{What is proved (no axioms, no sorries)}
 
 \begin{itemize}
-\item HS identity~\eqref{eq:HS}: from Mathlib's
+\item \textbf{HS identity}: from Mathlib's
   \texttt{fourierIntegral\_gaussian}.
-\item Convergence on the real axis: $|e^{i\sigma a}| = 1$,
-  $|e^{-\sigma^2/(4\lambda)}| \le 1$.
-\item HS equivalence (one-site): $\int d\sigma\,e^{-S_{\rm HS}}
-  = c\cdot e^{-S_{\rm original}}$ (1 sorry for complex arithmetic).
-\item Contour rotation algebra: $(i\sigma')^2 = -\sigma'^2$,
-  $i\cdot a\cdot(i\sigma') = -a\sigma'$, etc.
-\item Continuum limit: OS0--OS2 for the O($N$) LSM on $T^2_L$.
+\item \textbf{HS equivalence} (one-site):
+  $\int d\sigma\,e^{-S_{\rm HS}} = c\cdot e^{-S_{\rm original}}$
+  --- \textbf{fully proved} (was sorry, now via \texttt{push\_cast; ring}).
+\item \textbf{Gap equation algebra}: $-2v_* z = m_0^2$, $v_* < 0$,
+  singularity distance $|v_*| = m_0^2\sqrt{N}/2$.
+\item \textbf{Shifted operator}: $M = -\Delta + m_0^2$ has spectral
+  gap $\ge m_0^2$ (from \texttt{psd\_add\_scalar\_bound}).
+\item \textbf{Phase cancellation}: $r_1 e^{i\theta} \cdot r_2 e^{-i\theta}$
+  is real and positive (polar form, \texttt{cos\textsuperscript{2}+sin\textsuperscript{2}=1}).
+\item \textbf{1D diamagnetic inequality}: $a \le \|a + bi\|$
+  (from $\|z\|^2 = a^2+b^2 \ge a^2$).
+\item \textbf{Lattice Green's function}: $\|G(n)\| \le 1/m^2$
+  (12 theorems from Mathlib Fourier API on \texttt{ZMod}).
+\item \textbf{Continuum limit}: OS0--OS2 for the O($N$) LSM on $T^2_L$.
 \end{itemize}
 
-\subsection{What is axiomatized}
+\subsection{What is axiomatized (21 axioms)}
 
-\begin{itemize}
-\item Contour shift (Cauchy's theorem for rectangles): provable from
-  Mathlib + PNT project.
-\item Matrix calculus (det $C^\infty$, Jacobi's formula).
-\item FK sub-Gaussian bound (placeholder for the mass gap step).
-\item Continuum limit technicalities (4 axioms, porting from
-  pphi2/gaussian-field).
-\end{itemize}
+\begin{center}
+\begin{tabular}{|l|l|c|}
+\hline
+\textbf{Axiom} & \textbf{Content} & \textbf{Difficulty} \\
+\hline
+\texttt{contour\_deformation} & HS + Cauchy + QHJ + FK $\to$ $|C| \le M^{-1}$
+  & research \\
+\texttt{green\_exponential\_decay} & $M^{-1} \le Ce^{-m_0|x|}$ (Fourier)
+  & medium \\
+\texttt{resolvent\_complex\_bound} & $\|(M{+}iV)^{-1}\| \le M^{-1}$ (FK)
+  & medium \\
+\texttt{quantum\_thimble\_exists} & $\Phi$ exists with BL variance
+  & hard \\
+\hline
+6 diamagnetic sub-axioms & heat kernel, Trotter, Laplace transform
+  & medium \\
+4 continuum limit & porting from pphi2/gaussian-field
+  & routine \\
+3 matrix calculus & det $C^\infty$, Jacobi, Hessian
+  & routine \\
+2 contour shift & Cauchy for rectangles (Mathlib)
+  & easy \\
+1 Green's decay (sharp) & exponential rate on torus
+  & medium \\
+\hline
+\end{tabular}
+\end{center}
 
 \subsection{Open questions}
 
 \begin{enumerate}
+\item \textbf{Decomposing \texttt{contour\_deformation}}: This single
+  axiom packages the entire bridge from the O($N$) measure to the
+  thimble analysis. Breaking it into sub-axioms (HS formula,
+  Cauchy shift, QHJ existence, FK domination, triangle inequality)
+  would make each piece independently verifiable.
 \item \textbf{Singularity avoidance}: Can we prove $\mathcal{J}_0$
   avoids $\det(-\Delta+2i\sigma z) = 0$? The zeros are purely
   imaginary ($\sigma = ik^2/(2z)$), at distance $\ge m_0^2/(2z)
