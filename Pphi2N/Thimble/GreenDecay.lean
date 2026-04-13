@@ -321,16 +321,27 @@ If n = 0: ψ_0 = 1, so Σ_k ψ_0(k) = L. -/
 theorem fourierOrthogonality (n : ZMod L) :
     ∑ k : ZMod L, (stdAddChar (k * n) : ℂ) =
       if n = 0 then (L : ℂ) else 0 := by
-  -- Use AddChar.sum_apply_eq_ite from Pontryagin duality:
-  -- Σ_ψ ψ(a) = if a = 0 then |G| else 0
-  -- For ZMod L: characters ψ_k(n) = stdAddChar(k·n)
-  -- so Σ_k stdAddChar(k·n) = if n = 0 then L else 0
-  convert AddChar.sum_apply_eq_ite n using 1
-  · -- LHS: Σ_k stdAddChar(k·n) = Σ_ψ ψ(n)
-    -- where ψ ranges over all characters of ZMod L
-    sorry -- need: k ↦ stdAddChar(k·_) is the Pontryagin dual isomorphism
-  · -- RHS: ite matching
-    split_ifs with h <;> simp [h, ZMod.card]
+  by_cases hn : n = 0
+  · simp [hn, ZMod.card]
+  · simp only [hn, ite_false]
+    -- Rewrite as a character sum: k ↦ stdAddChar(k·n) = composed character
+    have h_eq : ∀ k : ZMod L,
+        stdAddChar (k * n) = (stdAddChar.compAddMonoidHom (AddMonoidHom.mulLeft n)) k := by
+      intro k; simp [AddChar.compAddMonoidHom, mul_comm]
+    simp_rw [h_eq]
+    -- The composed character is nontrivial (since n ≠ 0 and stdAddChar is faithful)
+    apply AddChar.sum_eq_zero_of_ne_one
+    -- Need: stdAddChar ∘ (·*n) ≠ 1
+    intro h_triv
+    apply hn
+    -- If composed char = 1, then for k=1: stdAddChar(1·n) = 1, so stdAddChar(n) = 1
+    have h1 : stdAddChar n = 1 := by
+      have := AddChar.ext_iff.mp h_triv 1
+      simp [AddChar.compAddMonoidHom, AddChar.one_apply] at this
+      exact this
+    -- stdAddChar injective + stdAddChar(0) = 1 → n = 0
+    have h0 : (stdAddChar (0 : ZMod L) : ℂ) = 1 := by simp
+    exact ZMod.injective_stdAddChar (h1.trans h0.symm)
 
 /-- **The Green's function satisfies the lattice equation**: (-Δ+m²)G = δ₀.
 
