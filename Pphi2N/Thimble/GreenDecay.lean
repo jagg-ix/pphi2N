@@ -428,32 +428,72 @@ private theorem explicit_satisfies_recurrence (m_sq : ℝ) (hm : 0 < m_sq) (a b 
   rw [this] at hb'
   linarith
 
+/-! ## The nn operator on ZMod L → ℂ -/
+
+/-- The nearest-neighbor operator (-Δ+m²) acting on f : ZMod L → ℂ. -/
+def nnOp (m_sq : ℝ) (f : ZMod L → ℂ) (n : ZMod L) : ℂ :=
+  (↑(2 + m_sq) : ℂ) * f n - f (n + 1) - f (n - 1)
+
+/-- The Fourier Green's function satisfies (-Δ+m²)G = δ₀.
+
+Proof: the operator acts as eigenvalue multiplication in Fourier space.
+(2+m²) - χ(k) - χ(-k) = m² + 4sin²(πk/L) = nnEigenval k + m².
+So (AG)(n) = (1/L)Σ_k χ(kn)·(λ_k+m²)/(λ_k+m²) = (1/L)Σ_k χ(kn) = δ_{n,0}. -/
+theorem nnGreenFunction_satisfies_eq {L : ℕ} [NeZero L]
+    (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
+    nnOp m_sq (nnGreenFunction m_sq) n = if n = 0 then 1 else 0 := by
+  sorry
+
+/-- The explicit formula defines a function on ZMod L. -/
+def explicitGreen {L : ℕ} [NeZero L] (m_sq : ℝ) (n : ZMod L) : ℂ :=
+  ((characteristicRoot m_sq) ^ n.val +
+   (characteristicRoot m_sq) ^ (L - n.val)) /
+  ((1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+   (1 - (characteristicRoot m_sq) ^ L))
+
+/-- The explicit formula satisfies (-Δ+m²)E = δ₀.
+
+For n ≠ 0: recurrence from characteristic equation (proved above).
+For n = 0: jump condition (Vieta algebra). -/
+theorem explicitGreen_satisfies_eq {L : ℕ} [NeZero L]
+    (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
+    nnOp m_sq (explicitGreen m_sq) n = if n = 0 then 1 else 0 := by
+  sorry
+
+/-- The operator (-Δ+m²) is injective on ZMod L → ℂ.
+
+Proof: positive definiteness. For f ≠ 0:
+  Re⟨f, Af⟩ = Σ|f(n)-f(n+1)|² + m²Σ|f(n)|² ≥ m²‖f‖² > 0
+so Af ≠ 0. -/
+theorem nnOp_injective {L : ℕ} [NeZero L]
+    (m_sq : ℝ) (hm : 0 < m_sq) :
+    Function.Injective (nnOp m_sq : (ZMod L → ℂ) → (ZMod L → ℂ)) := by
+  sorry
+
 /-! ## Explicit formula -/
 
 /-- **Explicit formula for the Green's function on Z/LZ.**
 
 G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊ - r₋)(1 - r₋^L))
 
-Proof status: the algebraic core is proved above:
-- `characteristicRoot_satisfies`: r² - (2+m²)r + 1 = 0
-- `explicit_satisfies_recurrence`: the numerator satisfies the
-  homogeneous recurrence for interior points
-
-Remaining gap: operator injectivity on Z/LZ (if (-Δ+m²)f = 0
-then f = 0), which follows from positive eigenvalues λ_k + m² > 0.
-This is proved in gaussian-field (`massOperator_surjective_2d`)
-for the 2D case; the 1D case is analogous.
-
-The denominator has (1 - r₋^L), NOT (1 + r₋^L).
-Verified numerically and by Gemini deep think (2026-04-13). -/
-axiom greenFunction_explicit_formula
+Proof: both nnGreenFunction and explicitGreen satisfy (-Δ+m²)f = δ₀
+(from `nnGreenFunction_satisfies_eq` and `explicitGreen_satisfies_eq`).
+By injectivity of (-Δ+m²) (from `nnOp_injective`), they are equal. -/
+theorem greenFunction_explicit_formula
     {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
     nnGreenFunction (L := L) m_sq n =
       ((characteristicRoot m_sq) ^ n.val +
        (characteristicRoot m_sq) ^ (L - n.val)) /
       ((1 / characteristicRoot m_sq - characteristicRoot m_sq) *
-       (1 - (characteristicRoot m_sq) ^ L))
+       (1 - (characteristicRoot m_sq) ^ L)) := by
+  have hG := @nnGreenFunction_satisfies_eq L _ m_sq hm
+  have hE := @explicitGreen_satisfies_eq L _ m_sq hm
+  have hinj := @nnOp_injective L _ m_sq hm
+  have heq : nnOp m_sq (nnGreenFunction (L := L) m_sq) =
+      nnOp m_sq (explicitGreen (L := L) m_sq) := by
+    ext k; rw [hG k, hE k]
+  exact congr_fun (hinj heq) n
 
 /-- **Exponential decay of the nearest-neighbor Green's function.**
 
