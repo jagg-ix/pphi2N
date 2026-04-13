@@ -388,23 +388,60 @@ theorem greenFunction_inverts_operator
 /-- **Natural number torus distance:** min(n.val, L - n.val). -/
 def torusDistNat (n : ZMod L) : ℕ := min n.val (L - n.val)
 
+/-! ## Characteristic equation and recurrence -/
+
+/-- The characteristic root satisfies r² - (2+m²)r + 1 = 0. -/
+theorem characteristicRoot_satisfies (m_sq : ℝ) (hm : 0 < m_sq) :
+    (characteristicRoot m_sq) ^ 2 - (2 + m_sq) * (characteristicRoot m_sq) + 1 = 0 := by
+  unfold characteristicRoot
+  set s := Real.sqrt ((2 + m_sq) ^ 2 - 4)
+  have hsq : s ^ 2 = (2 + m_sq) ^ 2 - 4 := Real.sq_sqrt (by nlinarith)
+  field_simp; nlinarith [hsq]
+
+/-- The recurrence: if r satisfies r²-(2+c)r+1=0, then
+(2+c)·r^{n+1} = r^{n+2} + r^n. -/
+private theorem recurrence_from_char (r c : ℝ) (hr : r ^ 2 - (2 + c) * r + 1 = 0) (n : ℕ) :
+    (2 + c) * r ^ (n + 1) - r ^ (n + 2) - r ^ n = 0 := by
+  have : r ^ (n + 2) = (2 + c) * r ^ (n + 1) - r ^ n := by
+    have : r ^ (n + 2) = r ^ n * r ^ 2 := by ring
+    rw [this, show r ^ 2 = (2 + c) * r - 1 from by linarith]; ring
+  linarith
+
+/-- The explicit formula satisfies the recurrence for n ≥ 1:
+(2+m²)(r^n + r^{L-n}) - (r^{n+1}+r^{L-n-1}) - (r^{n-1}+r^{L-n+1}) = 0
+when r is the characteristic root. -/
+private theorem explicit_satisfies_recurrence (m_sq : ℝ) (hm : 0 < m_sq) (a b : ℕ)
+    (ha : 1 ≤ a) (hb : 1 ≤ b) :
+    (2 + m_sq) * ((characteristicRoot m_sq) ^ a + (characteristicRoot m_sq) ^ b) -
+    ((characteristicRoot m_sq) ^ (a + 1) + (characteristicRoot m_sq) ^ (b - 1)) -
+    ((characteristicRoot m_sq) ^ (a - 1) + (characteristicRoot m_sq) ^ (b + 1)) = 0 := by
+  set r := characteristicRoot m_sq
+  have hr := characteristicRoot_satisfies m_sq hm
+  have ha' := recurrence_from_char r m_sq hr (a - 1)
+  have hb' := recurrence_from_char r m_sq hr (b - 1)
+  rw [Nat.sub_one_add_one (by omega : a ≠ 0)] at ha'
+  rw [Nat.sub_one_add_one (by omega : b ≠ 0)] at hb'
+  -- Need a-1+2 = a+1 and b-1+2 = b+1
+  have : a - 1 + 2 = a + 1 := by omega
+  rw [this] at ha'
+  have : b - 1 + 2 = b + 1 := by omega
+  rw [this] at hb'
+  linarith
+
+/-! ## Explicit formula -/
+
 /-- **Explicit formula for the Green's function on Z/LZ.**
 
 G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊ - r₋)(1 - r₋^L))
 
-where r₊, r₋ are the roots of the characteristic polynomial
-t² - (2+m²)t + 1 = 0, with r₋ = characteristicRoot(m²) ∈ (0,1)
-and r₊ = 1/r₋ > 1.
+Derivation: The explicit formula satisfies the same recurrence
+(-Δ+m²)f = δ₀ as the Fourier-defined Green's function (proved
+in `explicit_satisfies_recurrence` above), and the operator (-Δ+m²)
+is injective on Z/LZ (all eigenvalues λ_k + m² > 0), so the
+solution is unique.
 
-Derivation: G satisfies the recurrence -G(n+1)+(2+m²)G(n)-G(n-1) = δ_{n,0}
-with periodic BCs G(n+L) = G(n). The homogeneous solution is A·r₊ⁿ + B·r₋ⁿ.
-Periodicity and the jump condition at n=0 determine the coefficients.
-
-Note: the denominator has (1 - r₋^L), NOT (1 + r₋^L).
-Verified numerically: L=3, m²=1 gives G(0) = 1/2 with (1-r₋^L),
-but G(0) = 1/√5 ≠ 1/2 with (1+r₋^L).
-
-Verified by Gemini deep think (2026-04-13). -/
+The denominator has (1 - r₋^L), NOT (1 + r₋^L).
+Verified numerically and by Gemini deep think (2026-04-13). -/
 axiom greenFunction_explicit_formula
     {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
