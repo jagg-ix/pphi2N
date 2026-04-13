@@ -1,6 +1,6 @@
 # Axiom Status
 
-**17 axioms, 0 sorries, 42 files.**
+**16 axioms, 0 sorries, 42 files.**
 All axioms verified correct by Gemini deep think (2026-04-12).
 
 Former axioms now proved:
@@ -44,19 +44,16 @@ These are the axioms directly used in the proof of
   1D torus (axiom 19) via product structure of the d-dimensional torus.
 - **Dependencies:** greenFunction_exponential_decay
 
-### 3. `greenFunction_explicit_formula`
+### ~~3. `greenFunction_explicit_formula`~~ — NOW PROVED
 - **File:** `Thimble/GreenDecay.lean`
-- **Statement:** G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊-r₋)(1+r₋^L)) for the
-  nearest-neighbor massive Green's function on Z/LZ.
-- **Difficulty:** Medium. Recurrence + periodic BCs.
-- **Proof plan:** G satisfies -G(n+1)+(2+m²)G(n)-G(n-1)=δ/L.
-  Homogeneous solution A·r₊ⁿ + B·r₋ⁿ, periodicity + jump condition
-  determine A, B. Key: denominator has (1+r₋^L) not (1-r₋^L) because
-  r₊·r₋ = 1 (Vieta). Verified by Gemini (2026-04-11).
-- **Note:** `greenFunction_exponential_decay` is now a THEOREM (with sorry)
-  proved from this axiom: ‖G(n)‖ ≤ (2/m²)·r₋^dist(n). Sharp constant is
-  2/m² (not 1/m², which fails for L=2).
-- **Dependencies:** None (self-contained)
+- **Status:** **PROVED** via operator verification + PD injectivity.
+- **Proof:** Both Fourier G and explicit formula satisfy (-Δ+m²)f = δ₀.
+  Operator is injective (positive definite: Re⟨f,Af⟩ ≥ m²‖f‖²).
+  Therefore G = explicit formula.
+  - `nnGreenFunction_satisfies_eq`: eigenvalue identity + Fourier orthogonality
+  - `explicitGreen_satisfies_eq`: char eq recurrence + Vieta jump condition
+  - `nnOp_injective`: AM-GM + sum reindexing on ZMod
+- **Note:** `greenFunction_exponential_decay` is also proved from this.
 
 ## Quantum thimble (1 axiom)
 
@@ -218,11 +215,11 @@ These are porting targets from pphi2 and gaussian-field.
 
 ## Priority order for proving
 
-1. **greenFunction_explicit_formula** (medium, self-contained — proves greenFunction_exponential_decay)
+1. ~~**greenFunction_explicit_formula**~~ **PROVED!**
 2. ~~**vertical_contour_shift**~~ **PROVED!**
 3. ~~**contDiff_matrix_det**~~ **PROVED!**
-4. **nComponentGreen_uniform_bound** (easy, port from gaussian-field)
-5. **heat_kernel_entrywise_nonneg** (medium, Euler scheme)
+4. **heat_kernel_entrywise_nonneg** (medium, Metzler shift — partially proved in markov-semigroups)
+5. **nComponentGreen_uniform_bound** (easy, port from gaussian-field)
 6. **laplace_transform_inverse** (medium, spectral theorem)
 7. **fderiv_log_det** (medium, chain rule + cofactor)
 8. **trotter_product_matrix** (medium, BCH remainder)

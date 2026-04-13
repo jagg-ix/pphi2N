@@ -20,7 +20,7 @@ The O(N) LSM interacting measure has `HasCorrelationDecay` with mass
 m₀ > 0 from the gap equation, uniform in lattice volume.
 
 Proved from `correlator_le_thimble_avg` + `green_exponential_decay`.
-See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
+See `docs/mass-gap-v3.tex` (31 pages) and `docs/axiom_status.md`.
 
 | Result | File | Status |
 |--------|------|--------|
@@ -30,7 +30,7 @@ See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 | Shifted operator | Thimble/ShiftedOperator.lean | **Proved** (M ≥ m₀²) |
 | Phase cancellation | Thimble/QuantumThimble.lean | **Proved** (polar form) |
 | 1D diamagnetic | Thimble/DiagmagneticInequality.lean | **Proved** (a ≤ ‖a+bi‖) |
-| Green's function | Thimble/GreenDecay.lean | **17 theorems proved**, 1 axiom |
+| Green's function | Thimble/GreenDecay.lean | **25+ theorems proved**, 0 axioms |
 | FK decay chain | Thimble/FKBoundShifted.lean | **Proved** (from axioms) |
 | **Mass gap** | Thimble/MassGapProof.lean | **Proved** (HasCorrelationDecay) |
 
@@ -40,7 +40,7 @@ See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 |--------|------|--------|
 | N=1 setup | N1Test.lean | HS identity, gap equation, connection to P(φ)₂ |
 
-## Axioms (18)
+## Axioms (16)
 
 See `docs/axiom_status.md` for detailed proof plans for each axiom.
 
@@ -53,20 +53,13 @@ Only these 2 axioms are formal dependencies of `ON_LSM_hasCorrelationDecay`:
 | `correlator_le_thimble_avg` | MassGapProof.lean | HS+Cauchy+triangle→\|⟨φφ⟩\|≤E[G] | medium (plumbing) |
 | `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} (concrete operator) | medium |
 
-### Supporting the mass gap axioms (1 axiom)
-
-| Axiom | File | Content | Difficulty |
-|-------|------|---------|------------|
-| `greenFunction_explicit_formula` | GreenDecay.lean | G(n) closed form on Z/LZ | medium |
-
-### Intended transitive dependencies (10 axioms)
+### Intended transitive dependencies (9 axioms)
 
 These are NOT formal dependencies of the main theorem yet, but
 WOULD be needed to prove the 2 main axioms above:
 
 | Axiom | File | Needed by |
 |-------|------|-----------|
-| `greenFunction_explicit_formula` | GreenDecay.lean | → greenFunction_exponential_decay → green_exponential_decay |
 | `quantum_thimble_exists` | QuantumThimble.lean | → correlator_le_thimble_avg |
 | `resolvent_complex_bound` | FKBoundShifted.lean | → correlator_le_thimble_avg |
 | `heat_kernel_entrywise_nonneg` | DiagmagneticInequality | → resolvent_complex_bound |
@@ -75,7 +68,6 @@ WOULD be needed to prove the 2 main axioms above:
 | `trotter_product_matrix` | DiagmagneticInequality | → resolvent_complex_bound |
 | `diamagnetic_inequality` | DiagmagneticInequality | → resolvent_complex_bound |
 | `m_matrix_inverse_nonneg` | DiagmagneticInequality | → resolvent_complex_bound |
-| `contDiff_matrix_det` | MatrixCalculus.lean | → quantum_thimble_exists (Hessian) |
 
 ### Matrix calculus for Hessian (2 axioms, for quantum_thimble_exists)
 
@@ -84,7 +76,7 @@ WOULD be needed to prove the 2 main axioms above:
 | `fderiv_log_det` | MatrixCalculus.lean | Jacobi's formula |
 | `hessian_log_det` | MatrixCalculus.lean | Hessian of log det |
 
-### Continuum limit only — not mass gap (4 axioms)
+### Not in mass gap chain (14 axioms)
 
 These are infrastructure for future proofs (diamagnetic inequality,
 quantum thimble theory, continuum limit, matrix calculus). None are
@@ -119,6 +111,7 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 | `hs_partition_complex` | **Proved** (Fubini + inverse_HS_one_site) |
 | `thimble_bound` | **Proved** (from correlator_le_thimble_avg + fk_bound) |
 | `contDiff_matrix_det` | **Proved** (Leibniz formula + linftyOp entry bound) |
+| `greenFunction_explicit_formula` | **Proved** (operator verification + PD injectivity) |
 
 ## File inventory (41 files)
 
