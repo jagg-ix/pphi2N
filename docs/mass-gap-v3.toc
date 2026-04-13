@@ -62,15 +62,18 @@
 \contentsline {subsubsection}{\numberline {10.2.4}Uniformity and the infinite-volume limit}{22}{subsubsection.10.2.4}%
 \contentsline {subsection}{\numberline {10.3}The flowed manifold alternative}{23}{subsection.10.3}%
 \contentsline {subsection}{\numberline {10.4}Proof plan (the quantum thimble argument)}{24}{subsection.10.4}%
-\contentsline {section}{\numberline {11}Other strategies for comparison}{25}{section.11}%
-\contentsline {subsection}{\numberline {11.1}Strategy A: NLSM (Kupiainen)}{25}{subsection.11.1}%
-\contentsline {subsection}{\numberline {11.2}Strategy B: LSM saddle-point (real axis)}{25}{subsection.11.2}%
-\contentsline {subsection}{\numberline {11.3}Strategy C: LSM $\to $ NLSM equivalence}{25}{subsection.11.3}%
-\contentsline {subsection}{\numberline {11.4}Strategy comparison}{26}{subsection.11.4}%
-\contentsline {section}{\numberline {12}The $N = 2$ obstruction}{26}{section.12}%
-\contentsline {section}{\numberline {13}Current status}{26}{section.13}%
-\contentsline {subsection}{\numberline {13.1}Main theorem (in Lean)}{26}{subsection.13.1}%
-\contentsline {subsection}{\numberline {13.2}What is proved (no axioms; 1 sorry in diagonal case)}{27}{subsection.13.2}%
-\contentsline {subsection}{\numberline {13.3}What is axiomatized (21 axioms)}{27}{subsection.13.3}%
-\contentsline {subsection}{\numberline {13.4}Open questions}{27}{subsection.13.4}%
-\contentsline {subsection}{\numberline {13.5}Gap between this document and the Lean formalization}{28}{subsection.13.5}%
+\contentsline {section}{\numberline {11}The diamagnetic inequality}{25}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Statement}{25}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}The semigroup proof}{25}{subsection.11.2}%
+\contentsline {section}{\numberline {12}Other strategies for comparison}{27}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Strategy A: NLSM (Kupiainen)}{27}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Strategy B: LSM saddle-point (real axis)}{27}{subsection.12.2}%
+\contentsline {subsection}{\numberline {12.3}Strategy C: LSM $\to $ NLSM equivalence}{27}{subsection.12.3}%
+\contentsline {subsection}{\numberline {12.4}Strategy comparison}{28}{subsection.12.4}%
+\contentsline {section}{\numberline {13}The $N = 2$ obstruction}{28}{section.13}%
+\contentsline {section}{\numberline {14}Current status}{28}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Main theorem (in Lean)}{28}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.2}What is proved (0 sorries)}{28}{subsection.14.2}%
+\contentsline {subsection}{\numberline {14.3}What is axiomatized (17 axioms)}{29}{subsection.14.3}%
+\contentsline {subsection}{\numberline {14.4}Open questions}{30}{subsection.14.4}%
+\contentsline {subsection}{\numberline {14.5}Gap between this document and the Lean formalization}{30}{subsection.14.5}%
