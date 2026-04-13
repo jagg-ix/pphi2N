@@ -410,9 +410,14 @@ has solution G(n) = A·r₊ⁿ + B·r₋ⁿ. On Z/LZ, periodicity forces
 A ~ r₋^L (exponentially small). So G(n) ≈ B·r₋ⁿ for n ≤ L/2.
 
 The bound |G(n)| ≤ (1/m²)·r₋^dist(n) follows from the explicit
-formula and the verified constant bound (Gemini: 1/√(m²(4+m²)) ≤ 1/m²). -/
+formula and the verified constant bound (Gemini: 1/√(m²(4+m²)) ≤ 1/m²).
+
+Note: the constant 1/m² works for L ≥ 3 but FAILS for L=2
+(verified numerically: G(1)=0.4 > 0.382=(1/m²)·r₋ at m²=1, L=2).
+We add the hypothesis 2 < L. For the mass gap application,
+L is the lattice size → ∞, so this is no restriction. -/
 theorem greenFunction_exponential_decay
-    {L : ℕ} [NeZero L]
+    {L : ℕ} [NeZero L] (hL : 2 < L)
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
     ‖nnGreenFunction (L := L) m_sq n‖ ≤
       (1 / m_sq) * (characteristicRoot m_sq) ^ torusDistNat n := by
