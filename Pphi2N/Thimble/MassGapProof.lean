@@ -132,9 +132,9 @@ theorem ON_LSM_hasCorrelationDecay {N d M : ℕ} [NeZero M]
     (T : ThimbleIntegralData S)
     (dist : FinLatticeSites d M → FinLatticeSites d M → ℝ) :
     HasCorrelationDecay (onInteractingMeasure N d M P c a μ_scalar) dist := by
-  refine ⟨sqrt S.gap.m0_sq, 1 / S.gap.m0_sq,
+  refine ⟨sqrt S.gap.m0_sq, 2 / S.gap.m0_sq,
          sqrt_pos.mpr S.gap.hm0_sq_pos,
-         div_pos one_pos S.gap.hm0_sq_pos,
+         div_pos two_pos S.gap.hm0_sq_pos,
          fun i x y => ?_⟩
   have h1 := thimble_bound P c a μ_scalar hμ S T i x y
   have h2 := massive_green_decay S dist x y

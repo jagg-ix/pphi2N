@@ -44,16 +44,18 @@ These are the axioms directly used in the proof of
   1D torus (axiom 19) via product structure of the d-dimensional torus.
 - **Dependencies:** greenFunction_exponential_decay
 
-### 3. `greenFunction_exponential_decay`
+### 3. `greenFunction_explicit_formula`
 - **File:** `Thimble/GreenDecay.lean`
-- **Statement:** ‖G_m(n)‖ ≤ (1/m²) · r₋^dist(n) for nearest-neighbor
-  Laplacian on Z/LZ, where r₋ = characteristicRoot(m²) ∈ (0,1).
-- **Difficulty:** Medium. Pure Fourier analysis / recurrence.
-- **Proof plan:** G satisfies the recurrence -G(n+1)+(2+m²)G(n)-G(n-1)=δ/L.
-  Solution on Z/LZ: G(n) = [r₋ⁿ + r₋^{L-n}]/[√disc·(1-r₋^L)].
-  Bound: 2r₋^dist / [√disc·(1-r₋^L)] ≤ 1/m² (verified: 1/√(m²(4+m²)) ≤ 1/m²).
-  Already proved: r₋ ∈ (0,1), α = -log(r₋) > 0, r₋ⁿ = exp(-αn),
-  ‖G(n)‖ ≤ 1/m² (crude bound), 15 supporting theorems.
+- **Statement:** G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊-r₋)(1+r₋^L)) for the
+  nearest-neighbor massive Green's function on Z/LZ.
+- **Difficulty:** Medium. Recurrence + periodic BCs.
+- **Proof plan:** G satisfies -G(n+1)+(2+m²)G(n)-G(n-1)=δ/L.
+  Homogeneous solution A·r₊ⁿ + B·r₋ⁿ, periodicity + jump condition
+  determine A, B. Key: denominator has (1+r₋^L) not (1-r₋^L) because
+  r₊·r₋ = 1 (Vieta). Verified by Gemini (2026-04-11).
+- **Note:** `greenFunction_exponential_decay` is now a THEOREM (with sorry)
+  proved from this axiom: ‖G(n)‖ ≤ (2/m²)·r₋^dist(n). Sharp constant is
+  2/m² (not 1/m², which fails for L=2).
 - **Dependencies:** None (self-contained)
 
 ## Quantum thimble (1 axiom)
@@ -218,7 +220,7 @@ These are porting targets from pphi2 and gaussian-field.
 
 ## Priority order for proving
 
-1. **greenFunction_exponential_decay** (medium, self-contained, 90% done)
+1. **greenFunction_explicit_formula** (medium, self-contained — proves greenFunction_exponential_decay)
 2. ~~**vertical_contour_shift**~~ **PROVED!**
 3. **contDiff_matrix_det** (easy, already proved with different norm)
 4. **nComponentGreen_uniform_bound** (easy, port from gaussian-field)

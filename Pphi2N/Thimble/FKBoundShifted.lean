@@ -66,7 +66,7 @@ This references the SPECIFIC operator `S.realPart` from
 axiom green_exponential_decay {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
     (S : ShiftedOperatorData Λ) (dist : Λ → Λ → ℝ) (x y : Λ) :
     S.realPart⁻¹ x y ≤
-      (1 / S.gap.m0_sq) * Real.exp (-Real.sqrt S.gap.m0_sq * dist x y)
+      (2 / S.gap.m0_sq) * Real.exp (-Real.sqrt S.gap.m0_sq * dist x y)
 
 /-! ## Combined FK + decay for the shifted operator -/
 
@@ -87,7 +87,7 @@ The entry M⁻¹(x,y) for M = -Δ+m₀² decays exponentially in distance. -/
 theorem massive_green_decay {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
     (S : ShiftedOperatorData Λ) (dist : Λ → Λ → ℝ) (x y : Λ) :
     S.realPart⁻¹ x y ≤
-      (1 / S.gap.m0_sq) * Real.exp (-Real.sqrt S.gap.m0_sq * dist x y) :=
+      (2 / S.gap.m0_sq) * Real.exp (-Real.sqrt S.gap.m0_sq * dist x y) :=
   green_exponential_decay S dist x y
 
 end Pphi2N

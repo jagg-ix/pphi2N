@@ -30,7 +30,7 @@ See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 | Shifted operator | Thimble/ShiftedOperator.lean | **Proved** (M ≥ m₀²) |
 | Phase cancellation | Thimble/QuantumThimble.lean | **Proved** (polar form) |
 | 1D diamagnetic | Thimble/DiagmagneticInequality.lean | **Proved** (a ≤ ‖a+bi‖) |
-| Green's function | Thimble/GreenDecay.lean | **15 theorems proved**, 1 axiom |
+| Green's function | Thimble/GreenDecay.lean | **17 theorems proved**, 1 axiom |
 | FK decay chain | Thimble/FKBoundShifted.lean | **Proved** (from axioms) |
 | **Mass gap** | Thimble/MassGapProof.lean | **Proved** (HasCorrelationDecay) |
 
@@ -57,7 +57,7 @@ Only these 2 axioms are formal dependencies of `ON_LSM_hasCorrelationDecay`:
 
 | Axiom | File | Content | Difficulty |
 |-------|------|---------|------------|
-| `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist (1D torus) | medium |
+| `greenFunction_explicit_formula` | GreenDecay.lean | G(n) closed form on Z/LZ | medium |
 
 ### Intended transitive dependencies (10 axioms)
 
@@ -66,7 +66,7 @@ WOULD be needed to prove the 2 main axioms above:
 
 | Axiom | File | Needed by |
 |-------|------|-----------|
-| `greenFunction_exponential_decay` | GreenDecay.lean | → green_exponential_decay |
+| `greenFunction_explicit_formula` | GreenDecay.lean | → greenFunction_exponential_decay → green_exponential_decay |
 | `quantum_thimble_exists` | QuantumThimble.lean | → correlator_le_thimble_avg |
 | `resolvent_complex_bound` | FKBoundShifted.lean | → correlator_le_thimble_avg |
 | `heat_kernel_entrywise_nonneg` | DiagmagneticInequality | → resolvent_complex_bound |
