@@ -48,7 +48,7 @@ See `docs/axiom_status.md` for detailed proof plans for each axiom.
 
 | Axiom | File | Content | Difficulty |
 |-------|------|---------|------------|
-| `correlator_le_thimble_avg` | MassGapProof.lean | HS+Cauchy+triangle→\|⟨φφ⟩\|≤E[G] | research |
+| `correlator_le_thimble_avg` | MassGapProof.lean | HS+Cauchy+triangle→\|⟨φφ⟩\|≤E[G] | medium (plumbing) |
 | `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} | medium |
 | `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist | medium |
 

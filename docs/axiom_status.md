@@ -18,7 +18,8 @@ These are the axioms directly used in the proof of
   (a) HS representation of the correlator (from HSIdentity, proved)
   (b) Cauchy contour shift to quantum thimble (BEFORE absolute values!)
   (c) Triangle inequality on POSITIVE thimble measure
-- **Difficulty:** Research-level. The Cauchy shift is the hard step.
+- **Difficulty:** Medium (measure plumbing). The hard mathematical
+  content (Cauchy, quantum HJ, FK) is in the axioms it depends on.
 - **Proof plan:**
   (a) Define σ-integral from algebraic HS identity (measure plumbing)
   (b) Apply vertical_contour_shift site-by-site (Fubini + decay)
@@ -222,4 +223,4 @@ These are porting targets from pphi2 and gaussian-field.
 7. **fderiv_log_det** (medium, chain rule + cofactor)
 8. **trotter_product_matrix** (medium, BCH remainder)
 9. **quantum_thimble_exists** (hard, IFT for quantum HJ)
-10. **correlator_le_thimble_avg** (research-level, HS+Cauchy+triangle)
+10. **correlator_le_thimble_avg** (medium, measure plumbing + other axioms)
