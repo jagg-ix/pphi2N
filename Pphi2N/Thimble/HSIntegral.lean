@@ -126,7 +126,9 @@ theorem hs_partition_complex {Λ : Type*} [Fintype Λ]
       cexp (hsExponentSite lam rho_sq (σ x) (fieldNormSq x)) =
     ∏ x : Λ, ∫ σ_x : ℝ,
       cexp (hsExponentSite lam rho_sq σ_x (fieldNormSq x)) := by
-    sorry -- Fubini: integral_fintype_prod_eq_prod + volume = pi volume
+    -- volume on (Λ → ℝ) = Measure.pi (fun _ => volume) by volume_pi
+    exact integral_fintype_prod_volume_eq_prod
+      (fun x σ_x => cexp (hsExponentSite lam rho_sq σ_x (fieldNormSq x)))
   rw [h_fubini]
   -- Step 2: Apply inverse_HS_one_site at each site
   congr 1; ext x
