@@ -434,6 +434,72 @@ private theorem explicit_satisfies_recurrence (m_sq : ℝ) (hm : 0 < m_sq) (a b 
 def nnOp (m_sq : ℝ) (f : ZMod L → ℂ) (n : ZMod L) : ℂ :=
   (↑(2 + m_sq) : ℂ) * f n - f (n + 1) - f (n - 1)
 
+/-- The nearest-neighbor eigenvalue expressed via cosine:
+nnEigenval k = 2 - 2cos(2πk/L), from the double-angle identity
+4sin²(πk/L) = 2 - 2cos(2πk/L). -/
+private theorem nnEigenval_eq_cos {L : ℕ} (k : ZMod L) :
+    (nnEigenval (L := L) k : ℝ) = 2 - 2 * Real.cos (2 * Real.pi * k.val / L) := by
+  unfold nnEigenval
+  have harg : 2 * Real.pi * ↑k.val / ↑L = 2 * (Real.pi * ↑k.val / ↑L) := by ring
+  rw [harg]
+  nlinarith [Real.cos_two_mul (Real.pi * ↑k.val / ↑L), Real.sin_sq (Real.pi * ↑k.val / ↑L)]
+
+/-- Character sum identity: χ(k) + χ(-k) = 2cos(2πk/L) on ZMod L.
+
+Uses exp(iθ) + exp(-iθ) = 2cos(θ) via `Complex.two_cos`. -/
+private theorem stdAddChar_add_neg {L : ℕ} [NeZero L] (k : ZMod L) :
+    (stdAddChar k : ℂ) + (stdAddChar (-k) : ℂ) =
+    ↑(2 * Real.cos (2 * Real.pi * ↑k.val / ↑L)) := by
+  rw [stdAddChar_apply, toCircle_apply]
+  have hneg : (stdAddChar (-k) : ℂ) = (stdAddChar k : ℂ)⁻¹ := by
+    have h : (stdAddChar k : ℂ) * (stdAddChar (-k) : ℂ) = 1 := by
+      rw [← AddChar.map_add_eq_mul]; simp [stdAddChar.map_zero_eq_one]
+    exact inv_eq_of_mul_eq_one_right h ▸ rfl
+  rw [hneg, stdAddChar_apply, toCircle_apply, ← Complex.exp_neg]
+  rw [show 2 * ↑Real.pi * I * (↑k.val : ℂ) / (↑L : ℂ) = ↑(2 * Real.pi * ↑k.val / ↑L) * I from by
+    push_cast; ring]
+  rw [show -(↑(2 * Real.pi * ↑k.val / ↑L) * I) = -(↑(2 * Real.pi * ↑k.val / ↑L)) * I from by ring]
+  rw [← Complex.two_cos]; push_cast; ring
+
+/-- Per-mode identity: the operator applied to a single Fourier mode gives χ(kn).
+
+For each k: (2+m²)·χ(kn)·prop(k) - χ(k(n+1))·prop(k) - χ(k(n-1))·prop(k) = χ(kn).
+Uses character multiplicativity, the trig identity 2-2cos = 4sin²,
+and propagator cancellation prop(k)·(λ_k+m²) = 1. -/
+private theorem nnGreen_per_mode {L : ℕ} [NeZero L]
+    (m_sq : ℝ) (hm : 0 < m_sq) (k n : ZMod L) :
+    (↑(2 + m_sq) : ℂ) * (stdAddChar (k * n) * ↑(propagator nnEigenval m_sq k)) -
+    stdAddChar (k * (n + 1)) * ↑(propagator nnEigenval m_sq k) -
+    stdAddChar (k * (n - 1)) * ↑(propagator nnEigenval m_sq k) =
+    (stdAddChar (k * n) : ℂ) := by
+  -- Character multiplicativity: χ(k(n+1)) = χ(kn)·χ(k), χ(k(n-1)) = χ(kn)/χ(k)
+  rw [mul_add, mul_one, AddChar.map_add_eq_mul,
+      mul_sub, mul_one, AddChar.map_sub_eq_div, div_eq_mul_inv]
+  -- Factor: χ(kn) · prop(k) · ((2+m²) - χ(k) - χ(k)⁻¹)
+  rw [show (↑(2 + m_sq) : ℂ) * (stdAddChar (k * n) * ↑(propagator nnEigenval m_sq k)) -
+    stdAddChar (k * n) * stdAddChar k * ↑(propagator nnEigenval m_sq k) -
+    stdAddChar (k * n) * (stdAddChar k)⁻¹ * ↑(propagator nnEigenval m_sq k) =
+    stdAddChar (k * n) * (↑(propagator nnEigenval m_sq k) *
+      ((↑(2 + m_sq) : ℂ) - stdAddChar k - (stdAddChar k)⁻¹)) from by ring]
+  -- Replace χ(k)⁻¹ by χ(-k)
+  have hchar_inv : (stdAddChar k : ℂ)⁻¹ = (stdAddChar (-k) : ℂ) := by
+    symm; rw [eq_comm, inv_eq_of_mul_eq_one_left]
+    rw [← AddChar.map_add_eq_mul]; simp [stdAddChar.map_zero_eq_one]
+  rw [hchar_inv]
+  -- (2+m²) - χ(k) - χ(-k) = ↑(nnEigenval k + m²) via trig identity
+  rw [show (↑(2 + m_sq) : ℂ) - stdAddChar k - stdAddChar (-k) =
+      ↑(2 + m_sq) - ((stdAddChar k : ℂ) + (stdAddChar (-k) : ℂ)) from by ring]
+  rw [stdAddChar_add_neg]
+  rw [show (↑(2 + m_sq) : ℂ) - ↑(2 * Real.cos (2 * Real.pi * ↑k.val / ↑L)) =
+      ↑(nnEigenval k + m_sq) from by push_cast; rw [nnEigenval_eq_cos]; push_cast; ring]
+  -- Propagator cancellation: prop(k) · (λ_k + m²) = 1
+  have h_pos : (0 : ℝ) < nnEigenval k + m_sq := by linarith [nnEigenval_nonneg (L := L) k]
+  rw [show (propagator nnEigenval m_sq k : ℂ) * ↑(nnEigenval k + m_sq) =
+      ↑(propagator nnEigenval m_sq k * (nnEigenval k + m_sq)) from by push_cast; ring]
+  rw [show propagator nnEigenval m_sq k * (nnEigenval k + m_sq) = 1 from by
+    unfold propagator; rw [div_mul_cancel₀]; exact ne_of_gt h_pos]
+  simp [mul_one]
+
 /-- The Fourier Green's function satisfies (-Δ+m²)G = δ₀.
 
 Proof: the operator acts as eigenvalue multiplication in Fourier space.
@@ -442,7 +508,21 @@ So (AG)(n) = (1/L)Σ_k χ(kn)·(λ_k+m²)/(λ_k+m²) = (1/L)Σ_k χ(kn) = δ_{n,
 theorem nnGreenFunction_satisfies_eq {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
     nnOp m_sq (nnGreenFunction m_sq) n = if n = 0 then 1 else 0 := by
-  sorry
+  unfold nnOp nnGreenFunction greenFunction
+  -- Factor out (L:ℂ)⁻¹ and combine the three sums into one
+  rw [show (↑(2 + m_sq) : ℂ) * ((↑L)⁻¹ * ∑ k, stdAddChar (k * n) * ↑(propagator nnEigenval m_sq k)) -
+      (↑L)⁻¹ * ∑ k, stdAddChar (k * (n + 1)) * ↑(propagator nnEigenval m_sq k) -
+      (↑L)⁻¹ * ∑ k, stdAddChar (k * (n - 1)) * ↑(propagator nnEigenval m_sq k) =
+      (↑L)⁻¹ * ∑ k, ((↑(2 + m_sq) : ℂ) * (stdAddChar (k * n) * ↑(propagator nnEigenval m_sq k)) -
+        stdAddChar (k * (n + 1)) * ↑(propagator nnEigenval m_sq k) -
+        stdAddChar (k * (n - 1)) * ↑(propagator nnEigenval m_sq k)) from by
+    simp only [Finset.mul_sum]
+    rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
+    congr 1; ext k; ring]
+  -- Apply the per-mode identity: each summand simplifies to χ(kn)
+  simp_rw [nnGreen_per_mode m_sq hm]
+  -- Conclude by Fourier orthogonality: (1/L)Σ_k χ(kn) = δ_{n,0}
+  exact greenFunction_inverts_operator nnEigenval (fun k => nnEigenval_nonneg k) m_sq hm n
 
 /-- The explicit formula defines a function on ZMod L. -/
 def explicitGreen {L : ℕ} [NeZero L] (m_sq : ℝ) (n : ZMod L) : ℂ :=
