@@ -137,48 +137,60 @@ theorem hs_partition_complex {Λ : Type*} [Fintype Λ]
   unfold hsExponentSite
   exact inverse_HS_one_site lam hlam (Real.sqrt (fieldNormSq x)) rho_sq
 
-/-- **The HS correlator identity (axiom for the correlator bridge).**
+/-! ## The HS correlator bound
 
-The connected two-point function of the O(N) LSM equals:
-  ⟨φⁱ(x)φⁱ(y)⟩_c = (1/Z) ∫ G_σ(x,y) · w(σ) dσ
+At fixed σ, the φ-integral is Gaussian with complex operator
+A = -Δ + 2iσz. The correlator at fixed σ is:
 
-where G_σ = (-Δ + 2iσz)⁻¹ is the propagator at fixed σ.
+  ⟨φⁱ(x)φⁱ(y)⟩_σ = A⁻¹(x,y)  (Gaussian integral formula)
 
-This extends inverse_HS_one_site to correlators: the Gaussian
-φ-integral at fixed σ produces both det(A)^{-1/2} (the weight)
-and A⁻¹(x,y) (the propagator) where A = -Δ + 2iσz.
+The CONNECTED correlator of the interacting measure satisfies:
 
-Mathematical content: Gaussian integral formula
-∫ x_i x_j e^{-½⟨x,Ax⟩} dx = (det A)^{-1/2} · A⁻¹(i,j)
-applied to the O(N) LSM (N independent components, each sees A).
-This is a standard result for Gaussian integrals. -/
-axiom hs_correlator_identity {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
-    (lam : ℝ) (hlam : 0 < lam) (rho_sq : ℝ)
-    (Laplacian : Matrix Λ Λ ℝ) (hLap : Laplacian.PosSemidef)
-    -- The shifted Green's function at fixed σ
-    (G_sigma : (Λ → ℝ) → Λ → Λ → ℂ)
-    -- G_σ = (-Δ + 2iσz)⁻¹ (the concrete resolvent)
-    (hG : True)  -- placeholder for G_sigma = resolvent
-    (x y : Λ) :
-    -- The correlator has an HS integral representation
-    -- involving G_σ and the HS weight.
-    -- We state the EXISTENCE of such a representation.
-    ∃ (hs_corr : ℂ),
-      -- The HS correlator is the σ-integral of G_σ · weight
-      True ∧  -- placeholder for the integral equation
-      -- And its real part equals the physical correlator
-      True  -- placeholder for Re(hs_corr) = ⟨φφ⟩
+  ⟨φⁱ(x)φⁱ(y)⟩_c = (1/Z) ∫ A⁻¹(x,y) · det(A)^{-N/2} · bare_weight(σ) dσ
+
+For the mass gap, we don't need the exact integral. We need:
+
+  |⟨φⁱ(x)φⁱ(y)⟩_c| ≤ (1/Z) ∫ |A⁻¹(x,y)| · |weight(σ)| dσ
+
+This is the TRIANGLE INEQUALITY applied to the σ-integral (on the
+real axis, this introduces the sign problem; on the thimble, it's
+clean because the weight is positive).
+
+The Gaussian formula ⟨φφ⟩_σ = A⁻¹ follows from Mathlib's
+`covariance_eval_multivariateGaussian` for the case where A is
+real PD. For complex A (our case): the formula extends by
+analytic continuation, or we use the FK bound directly.
+
+The key insight: the HS transformation + Gaussian integral +
+contour shift + FK bound are all packaged into `correlator_le_thimble_avg`
+in MassGapProof.lean. This file provides the foundational HS identity
+(hs_partition_complex, PROVED) that justifies step 1.
+-/
+
+-- The Gaussian correlator formula at fixed σ is not separately
+-- axiomatized. It is part of the content of correlator_le_thimble_avg
+-- (the bridge axiom in MassGapProof.lean).
+--
+-- For a future proof of correlator_le_thimble_avg, the steps are:
+-- 1. hs_partition_complex (PROVED in this file)
+-- 2. Gaussian correlator: ⟨φφ⟩_σ = A⁻¹(x,y) at fixed σ
+--    (from covariance_eval_multivariateGaussian for real A,
+--     or analytic continuation / FK bound for complex A)
+-- 3. Cauchy contour shift (from vertical_contour_shift)
+-- 4. Triangle inequality on positive measure (Mathlib)
 
 /-! ## Status
 
-The definitions (hsExponentSite, hsExponentMulti) are concrete and
-build on the proved HS identity. The axioms (hs_partition_identity,
-hs_correlator_identity) bridge to the measure-theoretic formulation.
+**Proved:**
+- `hs_partition_complex`: ∫ ∏ exp(f_site) = ∏ [√(4πλ)·exp(-quartic)]
+  (Fubini from Mathlib + inverse_HS_one_site, both fully proved)
 
-To prove correlator_le_thimble_avg, we would chain:
-1. hs_correlator_identity → correlator = σ-integral (this file)
-2. vertical_contour_shift → σ-integral = thimble integral (ContourShift)
-3. triangle inequality on positive measure → ≤ T.thimble_avg (Mathlib)
+**Roadmap for correlator_le_thimble_avg** (MassGapProof.lean):
+1. hs_partition_complex (PROVED here) — HS identity for partition function
+2. Gaussian correlator at fixed σ — ⟨φφ⟩_σ = A⁻¹(x,y)
+   (from covariance_eval_multivariateGaussian or FK bound)
+3. Cauchy contour shift (vertical_contour_shift, axiom)
+4. Triangle inequality on positive measure (Mathlib)
 -/
 
 end Pphi2N
