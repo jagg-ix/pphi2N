@@ -1,6 +1,6 @@
 # Axiom Status
 
-**16 axioms, 0 sorries, 42 files.**
+**15 axioms, 0 sorries, 42 files.**
 All axioms verified correct by Gemini deep think (2026-04-12).
 
 Former axioms now proved:

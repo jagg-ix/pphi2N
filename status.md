@@ -1,6 +1,6 @@
 # pphi2N Status
 
-**0 sorries, 16 axioms, 42 files, 0 errors.**
+**0 sorries, 15 axioms, 42 files, 0 errors.**
 
 See `docs/axiom_status.md` for detailed inventory of all axioms
 with difficulty ratings and proof plans.
@@ -40,7 +40,7 @@ See `docs/mass-gap-v3.tex` (31 pages) and `docs/axiom_status.md`.
 |--------|------|--------|
 | N=1 setup | N1Test.lean | HS identity, gap equation, connection to P(φ)₂ |
 
-## Axioms (16)
+## Axioms (15)
 
 See `docs/axiom_status.md` for detailed proof plans for each axiom.
 
@@ -112,6 +112,7 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 | `thimble_bound` | **Proved** (from correlator_le_thimble_avg + fk_bound) |
 | `contDiff_matrix_det` | **Proved** (Leibniz formula + linftyOp entry bound) |
 | `greenFunction_explicit_formula` | **Proved** (operator verification + PD injectivity) |
+| `fderiv_log_det` | **Proved** (chain rule + adjugate + ContinuousAlternatingMap) |
 
 ## File inventory (41 files)
 
