@@ -535,10 +535,177 @@ def explicitGreen {L : ℕ} [NeZero L] (m_sq : ℝ) (n : ZMod L) : ℂ :=
 
 For n ≠ 0: recurrence from characteristic equation (proved above).
 For n = 0: jump condition (Vieta algebra). -/
+-- Helper: (-1 : ZMod L).val = L - 1 for general L with [NeZero L].
+private lemma val_neg_one_eq (L : ℕ) [NeZero L] : (-1 : ZMod L).val = L - 1 := by
+  obtain ⟨L', rfl⟩ := Nat.exists_eq_succ_of_ne_zero (NeZero.ne L)
+  exact ZMod.val_neg_one L'
+
 theorem explicitGreen_satisfies_eq {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
     nnOp m_sq (explicitGreen m_sq) n = if n = 0 then 1 else 0 := by
-  sorry
+  have hr_pos := characteristicRoot_pos m_sq hm
+  have hr_lt := characteristicRoot_lt_one m_sq hm
+  have hD_pos : 0 < (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+      (1 - (characteristicRoot m_sq) ^ L) := by
+    apply mul_pos
+    · -- 1/r - r > 0 since 0 < r < 1 implies 1/r > 1 > r
+      have : 1 < 1 / characteristicRoot m_sq := by rw [lt_div_iff₀ hr_pos]; linarith
+      linarith
+    · linarith [pow_lt_one₀ hr_pos.le hr_lt (NeZero.pos L).ne']
+  have hr_ne : characteristicRoot m_sq ≠ 0 := ne_of_gt hr_pos
+  have hchar : (2 + m_sq) * characteristicRoot m_sq = characteristicRoot m_sq ^ 2 + 1 := by
+    linarith [characteristicRoot_satisfies m_sq hm]
+  -- Step 1: combine the three terms of nnOp into a single fraction over D
+  have hunfold : nnOp m_sq (explicitGreen m_sq) n =
+    ((↑(2 + m_sq) : ℂ) *
+      ((↑(characteristicRoot m_sq)) ^ n.val +
+       (↑(characteristicRoot m_sq)) ^ (L - n.val)) -
+     ((↑(characteristicRoot m_sq)) ^ (n+1).val +
+      (↑(characteristicRoot m_sq)) ^ (L - (n+1).val)) -
+     ((↑(characteristicRoot m_sq)) ^ (n-1).val +
+      (↑(characteristicRoot m_sq)) ^ (L - (n-1).val))) /
+    ((1 / (↑(characteristicRoot m_sq)) - (↑(characteristicRoot m_sq))) *
+     (1 - (↑(characteristicRoot m_sq)) ^ L)) := by
+    unfold nnOp explicitGreen; ring
+  rw [hunfold]
+  -- Case split: L = 1 vs L ≥ 2
+  by_cases hL1 : L = 1
+  · -----------------------------------------------------------------
+    -- Case L = 1: ZMod 1 is a subsingleton, so n = 0 always.
+    -- The identity reduces to m²(1+r) = (1/r-r)(1-r).
+    -----------------------------------------------------------------
+    subst hL1
+    have hn : n = 0 := Subsingleton.elim n 0
+    subst hn; simp only [ite_true]
+    have hv : ∀ (x : ZMod 1), x.val = 0 := fun x => by
+      have := ZMod.val_lt x; omega
+    simp only [hv, Nat.sub_zero, pow_zero, pow_one]
+    -- Denominator ≠ 0
+    have hDc_ne : (1 / (↑(characteristicRoot m_sq) : ℂ) - ↑(characteristicRoot m_sq)) *
+        (1 - ↑(characteristicRoot m_sq)) ≠ 0 := by
+      rw [pow_one] at hD_pos; intro heq
+      exact (ne_of_gt hD_pos) (by exact_mod_cast (show
+        (((1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+          (1 - characteristicRoot m_sq) : ℝ) : ℂ) = 0 by convert heq using 1; push_cast; ring))
+    rw [div_eq_one_iff_eq hDc_ne]
+    -- Reduce to real identity: m²(1+r) = (1/r-r)(1-r)
+    suffices hr : m_sq * (1 + characteristicRoot m_sq) =
+        (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+        (1 - characteristicRoot m_sq) by
+      have := congr_arg ((↑) : ℝ → ℂ) hr
+      simp only [ofReal_sub, ofReal_add, ofReal_mul, ofReal_div, ofReal_one] at this
+      have hleft : (↑(2 + m_sq) : ℂ) * (1 + ↑(characteristicRoot m_sq)) -
+          (1 + ↑(characteristicRoot m_sq)) - (1 + ↑(characteristicRoot m_sq)) =
+          ↑m_sq * (1 + ↑(characteristicRoot m_sq)) := by push_cast; ring
+      rw [hleft, this]
+    -- Real algebra: multiply by r > 0, use characteristic equation
+    exact mul_right_cancel₀ hr_ne (by
+      have rhs : (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+          (1 - characteristicRoot m_sq) * characteristicRoot m_sq =
+          (1 - characteristicRoot m_sq ^ 2) * (1 - characteristicRoot m_sq) := by field_simp
+      rw [rhs]; nlinarith [hchar, sq_nonneg (characteristicRoot m_sq - 1)])
+  · -----------------------------------------------------------------
+    -- Case L ≥ 2
+    -----------------------------------------------------------------
+    have hL : 1 < L := by
+      rcases L with _ | _ | L' <;> simp_all [NeZero.ne]
+    haveI : Fact (1 < L) := ⟨hL⟩
+    -- Denominator ≠ 0 (complex)
+    have hDc_ne : (1 / (↑(characteristicRoot m_sq) : ℂ) - ↑(characteristicRoot m_sq)) *
+        (1 - ↑(characteristicRoot m_sq) ^ L) ≠ 0 := by
+      intro heq
+      exact (ne_of_gt hD_pos) (by exact_mod_cast (show
+        (((1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+          (1 - characteristicRoot m_sq ^ L) : ℝ) : ℂ) = 0 by
+        convert heq using 1; push_cast; ring))
+    by_cases hn : n = 0
+    · ---------------------------------------------------------------
+      -- Subcase n = 0 (jump condition): result = 1
+      -- Need: (2+m²)(1+r^L) - 2(r+r^(L-1)) = (1/r-r)(1-r^L)
+      ---------------------------------------------------------------
+      subst hn; simp only [ite_true]
+      simp only [ZMod.val_zero, Nat.sub_zero, pow_zero]
+      rw [show (0 + 1 : ZMod L) = (1 : ZMod L) from by ring, ZMod.val_one]
+      rw [show (0 - 1 : ZMod L) = (-1 : ZMod L) from by ring, val_neg_one_eq]
+      rw [show L - (L - 1) = 1 from by omega]
+      rw [div_eq_one_iff_eq hDc_ne]
+      -- Reduce to real identity
+      suffices hr : (2 + m_sq) * (1 + characteristicRoot m_sq ^ L) -
+          2 * (characteristicRoot m_sq + characteristicRoot m_sq ^ (L - 1)) =
+          (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+          (1 - characteristicRoot m_sq ^ L) by
+        have := congr_arg ((↑) : ℝ → ℂ) hr
+        simp only [ofReal_sub, ofReal_add, ofReal_mul, ofReal_pow, ofReal_div,
+          ofReal_one, ofReal_ofNat] at this
+        convert this using 1; push_cast; ring
+      -- Real algebra: multiply both sides by r > 0
+      have hrL : characteristicRoot m_sq * characteristicRoot m_sq ^ (L - 1) =
+          characteristicRoot m_sq ^ L := by
+        rw [← pow_succ']; congr 1
+        exact Nat.succ_pred_eq_of_pos (NeZero.pos L)
+      exact mul_right_cancel₀ hr_ne (by
+        have lhs : ((2 + m_sq) * (1 + characteristicRoot m_sq ^ L) -
+            2 * (characteristicRoot m_sq + characteristicRoot m_sq ^ (L - 1))) *
+            characteristicRoot m_sq =
+          (2 + m_sq) * characteristicRoot m_sq +
+          (2 + m_sq) * characteristicRoot m_sq * characteristicRoot m_sq ^ L -
+          2 * characteristicRoot m_sq ^ 2 -
+          2 * (characteristicRoot m_sq * characteristicRoot m_sq ^ (L - 1)) := by ring
+        rw [lhs, hchar, hrL]
+        have rhs : (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+            (1 - characteristicRoot m_sq ^ L) * characteristicRoot m_sq =
+            (1 - characteristicRoot m_sq ^ 2) *
+            (1 - characteristicRoot m_sq ^ L) := by field_simp
+        rw [rhs]; ring)
+    · ---------------------------------------------------------------
+      -- Subcase n ≠ 0 (interior recurrence): result = 0
+      -- The numerator vanishes by explicit_satisfies_recurrence.
+      ---------------------------------------------------------------
+      simp only [hn, ite_false]
+      have hn_val : 1 ≤ n.val := by
+        by_contra h; push Not at h
+        exact hn ((ZMod.val_eq_zero n).mp (by omega))
+      have hn_lt : n.val < L := ZMod.val_lt n
+      -- Rewrite ZMod val of n+1
+      have hval_add : (n + 1).val = (n.val + 1) % L := by
+        rw [ZMod.val_add, ZMod.val_one]
+      -- Rewrite ZMod val of n-1
+      have hval_sub : (n - 1).val = n.val - 1 := by
+        rw [ZMod.val_sub (by rw [ZMod.val_one]; exact hn_val), ZMod.val_one]
+      -- Connect n+1 terms to natural number arithmetic
+      have hadd_rw : (↑(characteristicRoot m_sq) : ℂ) ^ (n+1).val +
+          (↑(characteristicRoot m_sq) : ℂ) ^ (L - (n+1).val) =
+          (↑(characteristicRoot m_sq) : ℂ) ^ (n.val + 1) +
+          (↑(characteristicRoot m_sq) : ℂ) ^ ((L - n.val) - 1) := by
+        rw [hval_add]
+        by_cases hlt : n.val + 1 < L
+        · rw [Nat.mod_eq_of_lt hlt, show L - (n.val + 1) = L - n.val - 1 from by omega]
+        · have heq : n.val + 1 = L := by omega
+          rw [heq, Nat.mod_self]
+          simp only [pow_zero, Nat.sub_zero]
+          rw [show L - n.val - 1 = 0 from by omega, pow_zero]; ring
+      -- Connect n-1 terms to natural number arithmetic
+      have hsub_rw : (↑(characteristicRoot m_sq) : ℂ) ^ (n-1).val +
+          (↑(characteristicRoot m_sq) : ℂ) ^ (L - (n-1).val) =
+          (↑(characteristicRoot m_sq) : ℂ) ^ (n.val - 1) +
+          (↑(characteristicRoot m_sq) : ℂ) ^ ((L - n.val) + 1) := by
+        rw [hval_sub, show L - (n.val - 1) = L - n.val + 1 from by omega]
+      rw [hadd_rw, hsub_rw]
+      -- The numerator now matches explicit_satisfies_recurrence
+      have hb : 1 ≤ L - n.val := by omega
+      have hrec := explicit_satisfies_recurrence m_sq hm n.val (L - n.val) hn_val hb
+      have hnum_zero : (↑(2 + m_sq) : ℂ) *
+          ((↑(characteristicRoot m_sq) : ℂ) ^ n.val +
+           (↑(characteristicRoot m_sq) : ℂ) ^ (L - n.val)) -
+          ((↑(characteristicRoot m_sq) : ℂ) ^ (n.val + 1) +
+           (↑(characteristicRoot m_sq) : ℂ) ^ ((L - n.val) - 1)) -
+          ((↑(characteristicRoot m_sq) : ℂ) ^ (n.val - 1) +
+           (↑(characteristicRoot m_sq) : ℂ) ^ ((L - n.val) + 1)) = 0 := by
+        have := congr_arg ((↑) : ℝ → ℂ) hrec
+        simp only [ofReal_zero, ofReal_sub, ofReal_add, ofReal_mul, ofReal_pow,
+          ofReal_ofNat] at this
+        convert this using 1; push_cast; ring
+      rw [hnum_zero, zero_div]
 
 /-- Linearity of nnOp: nnOp(f - g) = nnOp f - nnOp g. -/
 private theorem nnOp_sub {L : ℕ} [NeZero L] (m_sq : ℝ) (f g : ZMod L → ℂ) :

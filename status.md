@@ -1,6 +1,6 @@
 # pphi2N Status
 
-**3 sorries, 16 axioms, 42 files, 0 errors.**
+**0 sorries, 16 axioms, 42 files, 0 errors.**
 
 See `docs/axiom_status.md` for detailed inventory of all axioms
 with difficulty ratings and proof plans.
