@@ -104,15 +104,36 @@ Fubini step is the remaining content.
 
 Mathematical content: Fubini's theorem for the product
 ∫∫ e^{f(σ,φ)} dσ dφ = ∫ (∫ e^{f} dσ) dφ, where the inner σ-integral
-at each site gives back the quartic (by inverse_HS_one_site, proved). -/
-axiom hs_partition_identity {Λ : Type*} [Fintype Λ]
+at each site gives back the quartic (by inverse_HS_one_site, proved).
+
+**Multi-site HS identity (complex-valued).**
+
+∫ ∏_x exp(f_site(σ(x), φ(x))) dσ = ∏_x [√(4πλ) · exp(-λ(φ(x)-ρ²)²)]
+
+Proof: Fubini (integral_fintype_prod_volume_eq_prod from Mathlib)
++ inverse_HS_one_site (proved) at each site. -/
+theorem hs_partition_complex {Λ : Type*} [Fintype Λ]
     (lam : ℝ) (hlam : 0 < lam) (rho_sq : ℝ)
-    -- The multi-site integral of e^{HS exponent} over all σ(x)
-    -- gives back the original Boltzmann weight e^{-V(φ)}:
     (fieldNormSq : Λ → ℝ) :
-    ∫ σ : Λ → ℝ, (cexp (hsExponentMulti lam rho_sq σ fieldNormSq)).re =
-      (4 * π * lam) ^ (Fintype.card Λ / 2 : ℝ) *
-      Real.exp (-lam * ∑ x : Λ, (fieldNormSq x - rho_sq) ^ 2)
+    ∫ σ : Λ → ℝ, ∏ x : Λ,
+      cexp (hsExponentSite lam rho_sq (σ x) (fieldNormSq x)) =
+    ∏ x : Λ, ((4 * ↑π * ↑lam) ^ (1/2 : ℂ) *
+      cexp (-(↑(siteAction_original lam rho_sq (Real.sqrt (fieldNormSq x)))))) := by
+  -- Step 1: Fubini: ∫ ∏ f_i(σ_i) dσ = ∏ ∫ f_i dσ_i
+  -- Uses integral_fintype_prod_eq_prod from Mathlib.MeasureTheory.Integral.Pi
+  -- Sorry for the measure-space plumbing (product Lebesgue = Lebesgue on Λ→ℝ)
+  have h_fubini : ∫ σ : Λ → ℝ, ∏ x : Λ,
+      cexp (hsExponentSite lam rho_sq (σ x) (fieldNormSq x)) =
+    ∏ x : Λ, ∫ σ_x : ℝ,
+      cexp (hsExponentSite lam rho_sq σ_x (fieldNormSq x)) := by
+    sorry -- Fubini: integral_fintype_prod_eq_prod + volume = pi volume
+  rw [h_fubini]
+  -- Step 2: Apply inverse_HS_one_site at each site
+  congr 1; ext x
+  -- Goal: ∫ cexp(f_site(σ_x, φ(x))) dσ_x = √(4πλ)·exp(-λ(φ(x)-ρ²)²)
+  -- f_site = -(siteAction_HS ...), so cexp(f_site) = cexp(-(siteAction_HS ...))
+  unfold hsExponentSite
+  exact inverse_HS_one_site lam hlam (Real.sqrt (fieldNormSq x)) rho_sq
 
 /-- **The HS correlator identity (axiom for the correlator bridge).**
 
