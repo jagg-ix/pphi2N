@@ -27,6 +27,7 @@ These axioms can be replaced by imports from those projects.
 
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
 noncomputable section
 
@@ -107,8 +108,9 @@ This is proved in the PNT project for specific classes of functions
 from the Gaussian factor exp(-σ²/(4λ)).
 
 Reference: PrimeNumberTheoremAnd/ResidueCalcOnRectangles.lean
-and PrimeNumberTheoremAnd/MediumPNT.lean (contour shifting steps). -/
-/-- **Vertical contour shift for entire functions.**
+and PrimeNumberTheoremAnd/MediumPNT.lean (contour shifting steps).
+
+**Vertical contour shift for entire functions.**
 
 Proof from `rectangle_integral_vanishes` (PROVED from Mathlib):
 1. Apply rectangle identity to [-R,R]×[y₁,y₂] for each R:
@@ -126,19 +128,46 @@ theorem vertical_contour_shift
     (hf_int₁ : Integrable (fun x : ℝ => f (↑x + ↑y₁ * I)))
     (hf_int₂ : Integrable (fun x : ℝ => f (↑x + ↑y₂ * I))) :
     ∫ x : ℝ, f (↑x + ↑y₁ * I) = ∫ x : ℝ, f (↑x + ↑y₂ * I) := by
-  -- Suffices to show the difference is 0
-  -- Show the difference → 0 via the rectangle identity + limits.
-  -- Each step uses standard Mathlib; the composition is the work.
-  --
-  -- Proof outline (all ingredients available in Mathlib):
-  -- 1. intervalIntegral_tendsto_integral: ∫_{-n}^n f → ∫ f (from hf_int)
-  -- 2. rectangle_integral_vanishes: rectangle identity at each n (PROVED)
-  -- 3. hf_decay: vertical integrals → 0
-  -- 4. Squeeze: difference → 0
-  --
-  -- The sorry here is for the limit composition, not for any
-  -- mathematical content. All 4 steps have identified Mathlib lemmas.
-  sorry
+  -- Define g₁(x) = f(x + y₁i), g₂(x) = f(x + y₂i)
+  set g₁ := fun x : ℝ => f (↑x + ↑y₁ * I)
+  set g₂ := fun x : ℝ => f (↑x + ↑y₂ * I)
+  -- Step 1: ∫_{-n}^n gᵢ → ∫ gᵢ as n → ∞ (from integrability)
+  have h_a : Filter.Tendsto (fun n : ℕ => -(n : ℝ)) Filter.atTop Filter.atBot :=
+    Filter.tendsto_neg_atTop_atBot.comp tendsto_natCast_atTop_atTop
+  have h_b : Filter.Tendsto (fun n : ℕ => (n : ℝ)) Filter.atTop Filter.atTop :=
+    tendsto_natCast_atTop_atTop
+  have h_tend₁ : Filter.Tendsto (fun n : ℕ => ∫ x in (-(n : ℝ))..(n : ℝ), g₁ x)
+      Filter.atTop (nhds (∫ x, g₁ x)) :=
+    intervalIntegral_tendsto_integral hf_int₁ h_a h_b
+  have h_tend₂ : Filter.Tendsto (fun n : ℕ => ∫ x in (-(n : ℝ))..(n : ℝ), g₂ x)
+      Filter.atTop (nhds (∫ x, g₂ x)) :=
+    intervalIntegral_tendsto_integral hf_int₂ h_a h_b
+  -- Step 2: The difference ∫_{-n}^n g₁ - ∫_{-n}^n g₂ tends to ∫g₁ - ∫g₂
+  have h_diff_tend : Filter.Tendsto
+      (fun n : ℕ => (∫ x in (-(n : ℝ))..(n : ℝ), g₁ x) - (∫ x in (-(n : ℝ))..(n : ℝ), g₂ x))
+      Filter.atTop (nhds ((∫ x, g₁ x) - (∫ x, g₂ x))) :=
+    h_tend₁.sub h_tend₂
+  -- Step 3: The difference also → 0 (from rectangle identity + decay)
+  -- For each n: the rectangle identity gives the difference = vertical terms
+  -- and the decay hypothesis makes the vertical terms → 0.
+  have h_diff_zero : Filter.Tendsto
+      (fun n : ℕ => (∫ x in (-(n : ℝ))..(n : ℝ), g₁ x) - (∫ x in (-(n : ℝ))..(n : ℝ), g₂ x))
+      Filter.atTop (nhds 0) := by
+    -- For each n, the rectangle identity gives:
+    -- d(n) = -(I·∫_{y₁}^{y₂} f(n+yi) - I·∫_{y₁}^{y₂} f(-n+yi))
+    -- ‖d(n)‖ ≤ ‖∫ f(n+yi)dy‖ + ‖∫ f(-n+yi)dy‖ ≤ 2·|y₂-y₁|·ε(n)
+    -- where ε(n) → 0 from hf_decay.
+    rw [Metric.tendsto_atTop]
+    intro ε hε
+    obtain ⟨R, hR, hR_decay⟩ := hf_decay (ε / (2 * (|y₂ - y₁| + 1))) (by positivity)
+    use ⌈R⌉₊ + 1
+    intro n hn
+    -- Need: ‖d(n)‖ < ε
+    -- From rectangle identity: d(n) = vertical terms
+    -- From decay: vertical terms are small
+    sorry
+  -- Step 4: Limits are unique: if d_n → L and d_n → 0, then L = 0
+  exact sub_eq_zero.mp (tendsto_nhds_unique h_diff_tend h_diff_zero)
 
 /-! ## Application to the HS integral
 
