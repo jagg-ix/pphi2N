@@ -25,5 +25,6 @@ import Pphi2N.Thimble.QuantumHJExplicit
 import Pphi2N.Thimble.FKBoundShifted
 import Pphi2N.Thimble.DiagmagneticInequality
 import Pphi2N.Thimble.ThimbleMeasure
+import Pphi2N.Thimble.HSIntegral
 import Pphi2N.Thimble.MassGapProof
 import Pphi2N.Thimble.GreenDecay
