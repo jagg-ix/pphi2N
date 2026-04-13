@@ -59,10 +59,32 @@ Only these 2 axioms are formal dependencies of `ON_LSM_hasCorrelationDecay`:
 |-------|------|---------|------------|
 | `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist (1D torus) | medium |
 
-### Infrastructure — not used in mass gap (15 axioms)
+### Intended transitive dependencies (10 axioms)
 
-Note: `vertical_contour_shift` is now **PROVED** (was axiom).
-Note: `quantum_thimble_exists` is trivially true as stated.
+These are NOT formal dependencies of the main theorem yet, but
+WOULD be needed to prove the 2 main axioms above:
+
+| Axiom | File | Needed by |
+|-------|------|-----------|
+| `greenFunction_exponential_decay` | GreenDecay.lean | → green_exponential_decay |
+| `quantum_thimble_exists` | QuantumThimble.lean | → correlator_le_thimble_avg |
+| `resolvent_complex_bound` | FKBoundShifted.lean | → correlator_le_thimble_avg |
+| `heat_kernel_entrywise_nonneg` | DiagmagneticInequality | → resolvent_complex_bound |
+| `laplace_transform_inverse` | DiagmagneticInequality | → resolvent_complex_bound |
+| `laplace_transform_inverse_complex` | DiagmagneticInequality | → resolvent_complex_bound |
+| `trotter_product_matrix` | DiagmagneticInequality | → resolvent_complex_bound |
+| `diamagnetic_inequality` | DiagmagneticInequality | → resolvent_complex_bound |
+| `m_matrix_inverse_nonneg` | DiagmagneticInequality | → resolvent_complex_bound |
+| `contDiff_matrix_det` | MatrixCalculus.lean | → quantum_thimble_exists (Hessian) |
+
+### Matrix calculus for Hessian (2 axioms, for quantum_thimble_exists)
+
+| Axiom | File | Content |
+|-------|------|---------|
+| `fderiv_log_det` | MatrixCalculus.lean | Jacobi's formula |
+| `hessian_log_det` | MatrixCalculus.lean | Hessian of log det |
+
+### Continuum limit only — not mass gap (4 axioms)
 
 These are infrastructure for future proofs (diamagnetic inequality,
 quantum thimble theory, continuum limit, matrix calculus). None are
