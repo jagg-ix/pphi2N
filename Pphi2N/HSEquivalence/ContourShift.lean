@@ -179,9 +179,82 @@ theorem vertical_contour_shift
     -- Each vertical: ‖∫_{y₁}^{y₂} f(±n+yi)dy‖ ≤ |y₂-y₁|·ε'
     -- where ε' = ε/(2(|y₂-y₁|+1))
     -- Total: ‖d(n)‖ ≤ 2|y₂-y₁|·ε' < ε
-    sorry -- rectangle identity gives d(n) = vertical terms;
-          -- vertical terms bounded by |y₂-y₁|·ε' from hR_decay;
-          -- total < ε. All ingredients available, needs algebra.
+    -- Simplify h_rect: { re := -↑n, im := y₁ }.re = -↑n, etc.
+    simp only [Complex.ofReal_neg, Complex.neg_re, Complex.ofReal_re,
+               Complex.ofReal_im, Complex.neg_im] at h_rect
+    -- h_rect now: (∫ g₁ - ∫ g₂) + I·∫f(n+yi) - I·∫f(-n+yi) = 0
+    -- So: ∫ g₁ - ∫ g₂ = I·∫f(-n+yi) - I·∫f(n+yi)
+    -- g₁ x = f(x + y₁i) and g₂ x = f(x + y₂i)
+    -- so ∫ g₁ = ∫ f(x+y₁i) and ∫ g₂ = ∫ f(x+y₂i) appearing in h_rect
+    change ‖(∫ x in (-↑n : ℝ)..↑n, f (↑x + ↑y₁ * I)) -
+            (∫ x in (-↑n : ℝ)..↑n, f (↑x + ↑y₂ * I))‖ < ε
+    have h_eq : (∫ x in (-↑n : ℝ)..↑n, f (↑x + ↑y₁ * I)) -
+        (∫ x in (-↑n : ℝ)..↑n, f (↑x + ↑y₂ * I)) =
+        I • (∫ y in y₁..y₂, f (↑(-↑n : ℝ) + ↑y * I)) -
+        I • (∫ y in y₁..y₂, f (↑(↑n : ℝ) + ↑y * I)) := by
+      -- h_rect: ((A - B) + C) - D = 0
+      -- Goal: A - B = D - C
+      -- Rearrange h_rect: A - B = D - C
+      -- h_rect: ((A - B) + C) - D = 0 where
+      -- A = ∫g₁, B = ∫g₂, C = I·vert_R, D = I·vert_L
+      -- Goal: A - B = D - C
+      -- Proof: from h_rect, A - B = D - C by algebra in ℂ
+      set A := ∫ (x : ℝ) in -↑n..↑n, f (↑x + ↑y₁ * I)
+      set B := ∫ (x : ℝ) in -↑n..↑n, f (↑x + ↑y₂ * I)
+      set C := I • ∫ (y : ℝ) in y₁..y₂, f (↑↑n + ↑y * I)
+      set D := I • ∫ (y : ℝ) in y₁..y₂, f (-↑↑n + ↑y * I)
+      -- h_rect : ((A - B) + C) - D = 0
+      -- Goal : A - B = D - C
+      -- ((A - B) + C) - D = 0  ↔  (A - B) + C = D  ↔  A - B = D - C
+      have h2 : (A - B) + C = D := sub_eq_zero.mp h_rect
+      have h3 : A - B = D - C := by rw [eq_sub_iff_add_eq]; exact h2
+      convert h3 using 2 <;> push_cast <;> ring
+    rw [h_eq]
+    -- Now bound: ‖I·∫f(-n+yi) - I·∫f(n+yi)‖ ≤ ‖∫f(-n+yi)‖ + ‖∫f(n+yi)‖
+    calc ‖I • (∫ y in y₁..y₂, f (↑(-↑n : ℝ) + ↑y * I)) -
+          I • (∫ y in y₁..y₂, f (↑(↑n : ℝ) + ↑y * I))‖
+        ≤ ‖I • (∫ y in y₁..y₂, f (↑(-↑n : ℝ) + ↑y * I))‖ +
+          ‖I • (∫ y in y₁..y₂, f (↑(↑n : ℝ) + ↑y * I))‖ := norm_sub_le _ _
+      _ = ‖∫ y in y₁..y₂, f (↑(-↑n : ℝ) + ↑y * I)‖ +
+          ‖∫ y in y₁..y₂, f (↑(↑n : ℝ) + ↑y * I)‖ := by
+          simp [norm_smul, Complex.norm_I]
+      _ < ε := by
+          set ε' := ε / (2 * (|y₂ - y₁| + 1))
+          -- Each vertical integral bounded by ε'·|y₂-y₁|
+          have h_bound₁ : ‖∫ y in y₁..y₂, f (↑(-↑n : ℝ) + ↑y * I)‖ ≤ ε' * |y₂ - y₁| := by
+            apply intervalIntegral.norm_integral_le_of_norm_le_const
+            intro y hy
+            apply le_of_lt
+            apply hR_decay (-↑n)
+            · simp [abs_of_pos (by linarith : (0:ℝ) < n)]; exact hn_gt_R
+            · exact (Set.uIoc_subset_uIcc hy).1
+            · exact (Set.uIoc_subset_uIcc hy).2
+          have h_bound₂ : ‖∫ y in y₁..y₂, f (↑(↑n : ℝ) + ↑y * I)‖ ≤ ε' * |y₂ - y₁| := by
+            apply intervalIntegral.norm_integral_le_of_norm_le_const
+            intro y hy
+            apply le_of_lt
+            apply hR_decay (↑n)
+            · simp [abs_of_pos (by linarith : (0:ℝ) < n)]; exact hn_gt_R
+            · exact (Set.uIoc_subset_uIcc hy).1
+            · exact (Set.uIoc_subset_uIcc hy).2
+          -- Sum: 2 · ε' · |y₂-y₁| < ε
+          -- Each ≤ ε'·|y₂-y₁| where ε' = ε/(2(|y₂-y₁|+1))
+          -- Sum ≤ 2·ε'·|y₂-y₁| = ε·|y₂-y₁|/(|y₂-y₁|+1) < ε
+          have h_denom_pos : (0 : ℝ) < 2 * (|y₂ - y₁| + 1) :=
+            mul_pos two_pos (by linarith [abs_nonneg (y₂ - y₁)])
+          have h_ε'_val : ε' = ε / (2 * (|y₂ - y₁| + 1)) := rfl
+          calc _ ≤ ε' * |y₂ - y₁| + ε' * |y₂ - y₁| := add_le_add h_bound₁ h_bound₂
+            _ = ε / (2 * (|y₂ - y₁| + 1)) * |y₂ - y₁| * 2 := by rw [h_ε'_val]; ring
+            _ < ε := by
+                have := abs_nonneg (y₂ - y₁)
+                have : ε / (2 * (|y₂ - y₁| + 1)) * |y₂ - y₁| * 2 < ε := by
+                  rw [show ε / (2 * (|y₂ - y₁| + 1)) * |y₂ - y₁| * 2 =
+                    ε * (|y₂ - y₁| / (|y₂ - y₁| + 1)) from by
+                    field_simp]
+                  exact mul_lt_of_lt_one_right hε
+                    (Bound.div_lt_one_of_pos_of_lt (by linarith : (0:ℝ) < |y₂ - y₁| + 1)
+                      (by linarith : |y₂ - y₁| < |y₂ - y₁| + 1))
+                exact this
   -- Step 4: Limits are unique: if d_n → L and d_n → 0, then L = 0
   exact sub_eq_zero.mp (tendsto_nhds_unique h_diff_tend h_diff_zero)
 
