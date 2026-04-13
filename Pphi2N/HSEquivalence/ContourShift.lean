@@ -162,10 +162,26 @@ theorem vertical_contour_shift
     obtain ⟨R, hR, hR_decay⟩ := hf_decay (ε / (2 * (|y₂ - y₁| + 1))) (by positivity)
     use ⌈R⌉₊ + 1
     intro n hn
-    -- Need: ‖d(n)‖ < ε
-    -- From rectangle identity: d(n) = vertical terms
-    -- From decay: vertical terms are small
-    sorry
+    simp only [dist_zero_right]
+    -- n ≥ ⌈R⌉₊ + 1 > R, so decay applies at x = ±n
+    have hn_gt_R : R < (n : ℝ) := by
+      calc R ≤ ↑⌈R⌉₊ := Nat.le_ceil R
+        _ < ↑(⌈R⌉₊ + 1) := by exact_mod_cast Nat.lt_succ_of_le le_rfl
+        _ ≤ ↑n := by exact_mod_cast hn
+    -- Apply rectangle_integral_vanishes at (-n, y₁), (n, y₂)
+    have h_rect := rectangle_integral_vanishes f
+      (⟨-(n : ℝ), y₁⟩ : ℂ) (⟨(n : ℝ), y₂⟩ : ℂ)
+      (hf.continuous.continuousOn.mono (fun _ _ => trivial))
+      (fun x _ => hf.differentiableAt)
+    -- h_rect: horiz₁ - horiz₂ + I·vert_R - I·vert_L = 0
+    -- So: horiz₁ - horiz₂ = -(I·vert_R - I·vert_L)
+    -- And ‖horiz₁ - horiz₂‖ ≤ ‖vert_R‖ + ‖vert_L‖
+    -- Each vertical: ‖∫_{y₁}^{y₂} f(±n+yi)dy‖ ≤ |y₂-y₁|·ε'
+    -- where ε' = ε/(2(|y₂-y₁|+1))
+    -- Total: ‖d(n)‖ ≤ 2|y₂-y₁|·ε' < ε
+    sorry -- rectangle identity gives d(n) = vertical terms;
+          -- vertical terms bounded by |y₂-y₁|·ε' from hR_decay;
+          -- total < ε. All ingredients available, needs algebra.
   -- Step 4: Limits are unique: if d_n → L and d_n → 0, then L = 0
   exact sub_eq_zero.mp (tendsto_nhds_unique h_diff_tend h_diff_zero)
 
