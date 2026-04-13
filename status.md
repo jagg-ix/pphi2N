@@ -44,46 +44,44 @@ See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 
 See `docs/axiom_status.md` for detailed proof plans for each axiom.
 
-### Main mass gap chain (3)
+### Used in the mass gap proof (2 axioms)
+
+Only these 2 axioms are formal dependencies of `ON_LSM_hasCorrelationDecay`:
 
 | Axiom | File | Content | Difficulty |
 |-------|------|---------|------------|
 | `correlator_le_thimble_avg` | MassGapProof.lean | HS+Cauchy+triangle→\|⟨φφ⟩\|≤E[G] | medium (plumbing) |
-| `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} | medium |
-| `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist | medium |
+| `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} (concrete operator) | medium |
 
-### Quantum thimble + diamagnetic (8)
+### Supporting the mass gap axioms (2 axioms)
+
+These support the proof of `correlator_le_thimble_avg` (documented, not formal deps):
 
 | Axiom | File | Content | Difficulty |
 |-------|------|---------|------------|
-| `quantum_thimble_exists` | QuantumThimble.lean | QHJ solution + BL var | hard |
-| `resolvent_complex_bound` | FKBoundShifted.lean | \|(M+iV)⁻¹\|≤M⁻¹ | medium |
+| `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist (1D torus) | medium |
+| `vertical_contour_shift` | ContourShift.lean | ∫f(x+y₁i)=∫f(x+y₂i) | easy |
+
+### Infrastructure — not used in mass gap (15 axioms)
+
+These are infrastructure for future proofs (diamagnetic inequality,
+quantum thimble theory, continuum limit, matrix calculus). None are
+formal dependencies of `ON_LSM_hasCorrelationDecay`.
+
+| Axiom | File | Content | Difficulty |
+|-------|------|---------|------------|
+| `quantum_thimble_exists` | QuantumThimble.lean | QHJ solution + BL var (trivially true as stated) | — |
+| `resolvent_complex_bound` | FKBoundShifted.lean | \|(M+iV)⁻¹\|≤M⁻¹ (diamagnetic) | medium |
 | `heat_kernel_entrywise_nonneg` | DiagmagneticInequality | exp(-tM)≥0 | medium |
 | `laplace_transform_inverse` | DiagmagneticInequality | M⁻¹=∫exp(-tM)dt | medium |
 | `laplace_transform_inverse_complex` | DiagmagneticInequality | (M+iV)⁻¹=∫... | medium |
 | `trotter_product_matrix` | DiagmagneticInequality | Lie-Trotter | medium |
 | `diamagnetic_inequality` | DiagmagneticInequality | \|exp(-t(M+iV))\|≤exp(-tM) | medium |
 | `m_matrix_inverse_nonneg` | DiagmagneticInequality | M⁻¹≥0 for M-matrix | easy |
-
-### Contour shift (1)
-
-| Axiom | File | Content | Difficulty |
-|-------|------|---------|------------|
-| `vertical_contour_shift` | ContourShift.lean | ∫f(x+y₁i)=∫f(x+y₂i) | easy |
-
-### Continuum limit (4)
-
-| Axiom | File | Content | Difficulty |
-|-------|------|---------|------------|
 | `nComponentGreen_uniform_bound` | EmbeddingBound.lean | Port from gaussian-field | easy |
 | `lsmDensityTransferConstant` | ONTorusLimit.lean | Nelson bound + Jensen | easy |
 | `lsmGF_latticeApproximation_error_vanishes` | ONTorusLimit.lean | Port from pphi2 | medium |
 | `nComponentGFF_exp_moment_uniform` | ONTorusLimit.lean | Gaussian MGF | easy |
-
-### Matrix calculus (3)
-
-| Axiom | File | Content | Difficulty |
-|-------|------|---------|------------|
 | `contDiff_matrix_det` | MatrixCalculus.lean | det is C∞ (norm transfer) | easy |
 | `fderiv_log_det` | MatrixCalculus.lean | Jacobi's formula | medium |
 | `hessian_log_det` | MatrixCalculus.lean | Hessian of log det | medium |
