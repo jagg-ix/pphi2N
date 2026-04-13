@@ -167,17 +167,40 @@ in MassGapProof.lean. This file provides the foundational HS identity
 (hs_partition_complex, PROVED) that justifies step 1.
 -/
 
--- The Gaussian correlator formula at fixed σ is not separately
--- axiomatized. It is part of the content of correlator_le_thimble_avg
--- (the bridge axiom in MassGapProof.lean).
---
--- For a future proof of correlator_le_thimble_avg, the steps are:
--- 1. hs_partition_complex (PROVED in this file)
--- 2. Gaussian correlator: ⟨φφ⟩_σ = A⁻¹(x,y) at fixed σ
---    (from covariance_eval_multivariateGaussian for real A,
---     or analytic continuation / FK bound for complex A)
--- 3. Cauchy contour shift (from vertical_contour_shift)
--- 4. Triangle inequality on positive measure (Mathlib)
+/-! ## The Gaussian two-point function
+
+The gaussian-field library provides `cross_moment_eq_covariance`:
+  E_GFF[ω(f) · ω(g)] = ⟨T(f), T(g)⟩_H = C(f,g)
+
+For the lattice GFF with T = (-Δ+m²)^{-1/2}:
+  E[φ(x)·φ(y)] = (-Δ+m²)⁻¹(x,y) = G_m(x,y)
+
+This is the FREE two-point function. The INTERACTING correlator
+involves the σ-average:
+  ⟨φ(x)φ(y)⟩_int = (1/Z) ∫ G_σ(x,y) · w(σ) dσ
+
+where G_σ = (-Δ+2iσz)⁻¹ at fixed σ and w(σ) is the HS weight.
+
+At the saddle (σ = 0 after shifting, i.e., on the constant shift):
+  G_{v_*}(x,y) = (-Δ+m₀²)⁻¹(x,y) = G_{m₀}(x,y)
+
+which is exactly `cross_moment_eq_covariance` applied to the
+massive GFF. The σ-corrections are controlled by BL concentration.
+
+Key Mathlib/library results used:
+- `cross_moment_eq_covariance` (gaussian-field): E[ω(f)ω(g)] = C(f,g)
+- `covariance_eval_multivariateGaussian` (Mathlib): Cov(x_i,x_j) = S(i,j)
+- `inverse_HS_one_site` (this project, proved): HS identity per site
+- `integral_fintype_prod_volume_eq_prod` (Mathlib): Fubini for products
+-/
+
+-- Roadmap for proving correlator_le_thimble_avg:
+-- 1. hs_partition_complex (PROVED here) — multi-site HS identity
+-- 2. Gaussian correlator at fixed σ: ⟨φφ⟩_σ = A⁻¹(x,y)
+--    For real A: cross_moment_eq_covariance (gaussian-field, proved)
+--    For complex A: FK bound gives |⟨φφ⟩_σ| ≤ |A⁻¹(x,y)| (sufficient)
+-- 3. Cauchy contour shift (vertical_contour_shift, axiom)
+-- 4. Triangle inequality on positive thimble measure (Mathlib)
 
 /-! ## Status
 
