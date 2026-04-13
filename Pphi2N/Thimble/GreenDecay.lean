@@ -390,22 +390,21 @@ def torusDistNat (n : ZMod L) : ℕ := min n.val (L - n.val)
 
 /-- **Explicit formula for the Green's function on Z/LZ.**
 
-G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊ - r₋)(1 + r₋^L))
+G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊ - r₋)(1 - r₋^L))
 
 where r₊, r₋ are the roots of the characteristic polynomial
 t² - (2+m²)t + 1 = 0, with r₋ = characteristicRoot(m²) ∈ (0,1)
 and r₊ = 1/r₋ > 1.
 
-Derivation: G satisfies the recurrence -G(n+1)+(2+m²)G(n)-G(n-1) = δ_{n,0}/L
+Derivation: G satisfies the recurrence -G(n+1)+(2+m²)G(n)-G(n-1) = δ_{n,0}
 with periodic BCs G(n+L) = G(n). The homogeneous solution is A·r₊ⁿ + B·r₋ⁿ.
-Periodicity G(0) = G(L) and G(1) = G(L+1) determine A and B.
-The jump condition at n=0 fixes the normalization.
+Periodicity and the jump condition at n=0 determine the coefficients.
 
-Note: the denominator has (1 + r₋^L), NOT (1 - r₋^L).
-This is because r₊·r₋ = 1 (Vieta), so r₊^L · r₋^L = 1, and the
-Wronskian-like condition gives the + sign.
+Note: the denominator has (1 - r₋^L), NOT (1 + r₋^L).
+Verified numerically: L=3, m²=1 gives G(0) = 1/2 with (1-r₋^L),
+but G(0) = 1/√5 ≠ 1/2 with (1+r₋^L).
 
-Verified by Gemini deep think (2026-04-11). -/
+Verified by Gemini deep think (2026-04-13). -/
 axiom greenFunction_explicit_formula
     {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) (n : ZMod L) :
@@ -413,23 +412,21 @@ axiom greenFunction_explicit_formula
       ((characteristicRoot m_sq) ^ n.val +
        (characteristicRoot m_sq) ^ (L - n.val)) /
       ((1 / characteristicRoot m_sq - characteristicRoot m_sq) *
-       (1 + (characteristicRoot m_sq) ^ L))
+       (1 - (characteristicRoot m_sq) ^ L))
 
 /-- **Exponential decay of the nearest-neighbor Green's function.**
 
 ‖G(n)‖ ≤ (2/m²) · r₋^dist(n) where r₋ = characteristicRoot(m²) ∈ (0,1).
 
-From the explicit formula: G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊-r₋)(1+r₋^L)).
-Since r₋ⁿ + r₋^{L-n} ≤ 2·r₋^{min(n,L-n)} and r₊-r₋ = √(m²(4+m²))/1 ≥ m²
-(because √(m²(4+m²)) ≥ m²) and 1+r₋^L ≥ 1, we get:
+From the explicit formula: G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊-r₋)(1-r₋^L)).
+Since r₋ⁿ + r₋^{L-n} ≤ 2·r₋^{min(n,L-n)} and (r₊-r₋)(1-r₋^L) ≥ m², we get:
 
-  |G(n)| ≤ 2·r₋^dist / (r₊-r₋) ≤ 2·r₋^dist / m² = (2/m²)·r₋^dist
+  |G(n)| ≤ 2·r₋^dist / m² = (2/m²)·r₋^dist
 
-The constant 2/m² is sharp (attained at L=2, n=1) and works for ALL L ≥ 1.
+The denominator bound uses: (1/r-r)(1-r) = m²(1+r) (algebraic identity
+from the characteristic equation r²-(2+m²)r+1=0) and 1-r^L ≥ 1-r.
 
-Verified by Gemini deep think (2026-04-11): the bound 2/√(m²(4+m²)) ≤ 2/m²
-holds because √(m²(4+m²)) = m·√(4+m²) ≥ m·2 = 2m ≥ m² only for m≤2,
-but the actual bound is tighter: 1/(r₊-r₋) = 1/√(m²(4+m²)) ≤ 1/m². -/
+The constant 2/m² works for ALL L ≥ 1. Verified by Gemini (2026-04-13). -/
 -- Helper: r^a + r^b ≤ 2 · r^min(a,b) for r ∈ (0,1]
 private theorem pow_add_pow_le_two_mul_pow_min (r : ℝ) (hr0 : 0 < r) (hr1 : r ≤ 1)
     (a b : ℕ) : r ^ a + r ^ b ≤ 2 * r ^ min a b := by
@@ -486,10 +483,67 @@ private theorem denom_factor_ge (m_sq : ℝ) (hm : 0 < m_sq) :
 -- Helper: the denominator in the explicit formula is positive
 private theorem explicit_denom_pos (m_sq : ℝ) (hm : 0 < m_sq) (L : ℕ) [NeZero L] :
     0 < (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
-        (1 + (characteristicRoot m_sq) ^ L) := by
+        (1 - (characteristicRoot m_sq) ^ L) := by
   apply mul_pos
   · linarith [denom_factor_ge m_sq hm]
-  · linarith [pow_nonneg (characteristicRoot_pos m_sq hm).le L]
+  · have : characteristicRoot m_sq ^ L < 1 :=
+      pow_lt_one₀ (characteristicRoot_pos m_sq hm).le (characteristicRoot_lt_one m_sq hm)
+        (NeZero.pos L).ne'
+    linarith
+
+-- Helper: (1/r - r)(1 - r) = m²(1+r) (from characteristic equation r²-(2+m²)r+1=0)
+-- This is key: the denominator at L=1 equals m²(1+r) > m².
+private theorem denom_L1_identity (m_sq : ℝ) (hm : 0 < m_sq) :
+    (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+      (1 - characteristicRoot m_sq) =
+    m_sq * (1 + characteristicRoot m_sq) := by
+  -- (1/r - r)(1-r) = (1-r²)/r · (1-r) = (1-r)²(1+r)/r
+  -- m² = 1/r + r - 2 = (1-r)²/r
+  -- So m²(1+r) = (1-r)²(1+r)/r = (1/r-r)(1-r) ✓
+  unfold characteristicRoot
+  set s := Real.sqrt ((2 + m_sq) ^ 2 - 4)
+  have hsq : s ^ 2 = (2 + m_sq) ^ 2 - 4 := Real.sq_sqrt (disc_nonneg m_sq hm)
+  have hs_lt : s < 2 + m_sq := by
+    calc s < Real.sqrt ((2 + m_sq) ^ 2) := by
+            apply Real.sqrt_lt_sqrt (disc_nonneg m_sq hm); nlinarith
+      _ = |2 + m_sq| := Real.sqrt_sq_eq_abs _
+      _ = 2 + m_sq := abs_of_nonneg (by linarith)
+  have hr_pos : (0 : ℝ) < (2 + m_sq - s) / 2 := by linarith
+  -- 1/r = (2+m²+s)/2 (from Vieta, proved in inv_sub_eq_sqrt_disc)
+  have hVieta : ((2 + m_sq - s) / 2) * ((2 + m_sq + s) / 2) = 1 := by nlinarith
+  have hinv : 1 / ((2 + m_sq - s) / 2) = (2 + m_sq + s) / 2 := by
+    rw [one_div, eq_comm, inv_eq_of_mul_eq_one_left]; linarith [hVieta]
+  rw [hinv]
+  -- Now pure algebra: ((2+m+s)/2 - (2+m-s)/2)(1 - (2+m-s)/2) = m(1 + (2+m-s)/2)
+  -- LHS = s · (1 - (2+m-s)/2) = s · (2-2-m+s)/(2) = s · (s-m)/2
+  -- RHS = m · (1 + (2+m-s)/2) = m · (2+2+m-s)/2 = m · (4+m-s)/2
+  -- So we need: s(s-m) = m(4+m-s)
+  -- s² - ms = 4m + m² - ms
+  -- s² = 4m + m² = (2+m)²-4 ✓ (this is the disc equation!)
+  -- Wait, s² = (2+m_sq)²-4 and we want s² = 4·m_sq + m_sq²
+  -- (2+m_sq)²-4 = 4+4m_sq+m_sq²-4 = 4m_sq+m_sq² ✓
+  nlinarith [hsq]
+
+-- Helper: (1/r-r)(1-r^L) ≥ m² for all L ≥ 1
+private theorem denom_with_L_ge_msq (m_sq : ℝ) (hm : 0 < m_sq) (L : ℕ) [NeZero L] :
+    m_sq ≤ (1 / characteristicRoot m_sq - characteristicRoot m_sq) *
+            (1 - (characteristicRoot m_sq) ^ L) := by
+  set r := characteristicRoot m_sq
+  have hr_pos := characteristicRoot_pos m_sq hm
+  have hr_lt := characteristicRoot_lt_one m_sq hm
+  -- r^L ≤ r^1 = r (since r ∈ (0,1) and L ≥ 1)
+  have hrL_le_r : r ^ L ≤ r ^ 1 :=
+    pow_le_pow_of_le_one hr_pos.le hr_lt.le (NeZero.pos L)
+  -- So 1 - r^L ≥ 1 - r, and the denominator is ≥ (1/r-r)(1-r) = m²(1+r) ≥ m²
+  have h_denom_mono : (1 / r - r) * (1 - r) ≤ (1 / r - r) * (1 - r ^ L) := by
+    apply mul_le_mul_of_nonneg_left
+    · linarith [show r ^ L ≤ r from by simpa using hrL_le_r]
+    · linarith [denom_factor_ge m_sq hm]
+  have h_identity := denom_L1_identity m_sq hm
+  -- m²(1+r) ≥ m² since r > 0
+  calc m_sq ≤ m_sq * (1 + r) := by nlinarith
+    _ = (1 / r - r) * (1 - r) := h_identity.symm
+    _ ≤ (1 / r - r) * (1 - r ^ L) := h_denom_mono
 
 theorem greenFunction_exponential_decay
     {L : ℕ} [NeZero L]
@@ -502,40 +556,28 @@ theorem greenFunction_exponential_decay
   -- Step 1: Rewrite using explicit formula and split norm
   rw [greenFunction_explicit_formula m_sq hm n, Complex.norm_div]
   -- Step 2: Convert complex norms to real values
-  -- The numerator and denominator are real (coerced from ℝ to ℂ)
   have hnum_pos : (0 : ℝ) ≤ r ^ n.val + r ^ (L - n.val) := by positivity
   have hdenom_pos := explicit_denom_pos m_sq hm L
-  -- Normalize complex norms to real values
   have hnum_eq : ‖(↑r : ℂ) ^ n.val + (↑r : ℂ) ^ (L - n.val)‖ =
       r ^ n.val + r ^ (L - n.val) := by
     rw [show (↑r : ℂ) ^ n.val + (↑r : ℂ) ^ (L - n.val) =
         ((r ^ n.val + r ^ (L - n.val) : ℝ) : ℂ) from by push_cast; ring]
     rw [Complex.norm_real]
     exact Real.norm_of_nonneg hnum_pos
-  have hdenom_eq : ‖(1 / (↑r : ℂ) - (↑r : ℂ)) * (1 + (↑r : ℂ) ^ L)‖ =
-      (1 / r - r) * (1 + r ^ L) := by
-    rw [show (1 / (↑r : ℂ) - (↑r : ℂ)) * (1 + (↑r : ℂ) ^ L) =
-        (((1 / r - r) * (1 + r ^ L) : ℝ) : ℂ) from by push_cast; ring]
+  have hdenom_eq : ‖(1 / (↑r : ℂ) - (↑r : ℂ)) * (1 - (↑r : ℂ) ^ L)‖ =
+      (1 / r - r) * (1 - r ^ L) := by
+    rw [show (1 / (↑r : ℂ) - (↑r : ℂ)) * (1 - (↑r : ℂ) ^ L) =
+        (((1 / r - r) * (1 - r ^ L) : ℝ) : ℂ) from by push_cast; ring]
     rw [Complex.norm_real]
     exact Real.norm_of_nonneg hdenom_pos.le
   rw [hnum_eq, hdenom_eq]
   -- Step 3: Pure real bound
   have hnum_bound : r ^ n.val + r ^ (L - n.val) ≤ 2 * r ^ torusDistNat n :=
     pow_add_pow_le_two_mul_pow_min r hr_pos hr_lt.le n.val (L - n.val)
-  have hdenom_lower : m_sq ≤ (1 / r - r) * (1 + r ^ L) := by
-    calc m_sq ≤ 1 / r - r := denom_factor_ge m_sq hm
-      _ = (1 / r - r) * 1 := by ring
-      _ ≤ (1 / r - r) * (1 + r ^ L) := by
-          apply mul_le_mul_of_nonneg_left
-          · linarith [pow_nonneg hr_pos.le L]
-          · linarith [denom_factor_ge m_sq hm]
-  -- num/denom ≤ (2*r^d)/m_sq by cross-multiplication
+  have hdenom_lower := denom_with_L_ge_msq m_sq hm L
   rw [show (2 : ℝ) / m_sq * r ^ torusDistNat n =
       (2 * r ^ torusDistNat n) / m_sq from by ring]
   rw [div_le_div_iff₀ hdenom_pos hm]
-  -- Goal: (num) * m_sq ≤ (2 * r^d) * denom
-  -- From hnum_bound: num ≤ 2*r^d, so num*m_sq ≤ 2*r^d*m_sq
-  -- From hdenom_lower: m_sq ≤ denom, so 2*r^d*m_sq ≤ 2*r^d*denom
   nlinarith [mul_le_mul_of_nonneg_right hnum_bound hm.le,
              mul_le_mul_of_nonneg_left hdenom_lower
                (show 0 ≤ 2 * r ^ torusDistNat n from by positivity)]
