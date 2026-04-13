@@ -1,6 +1,6 @@
 # pphi2N Status
 
-**0 sorries, 19 axioms, 41 files, 0 errors.**
+**0 sorries, 18 axioms, 42 files, 0 errors.**
 
 See `docs/axiom_status.md` for detailed inventory of all axioms
 with difficulty ratings and proof plans.
@@ -40,7 +40,7 @@ See `docs/mass-gap-v3.tex` (29 pages) and `docs/axiom_status.md`.
 |--------|------|--------|
 | N=1 setup | N1Test.lean | HS identity, gap equation, connection to P(φ)₂ |
 
-## Axioms (19)
+## Axioms (18)
 
 See `docs/axiom_status.md` for detailed proof plans for each axiom.
 
@@ -53,16 +53,16 @@ Only these 2 axioms are formal dependencies of `ON_LSM_hasCorrelationDecay`:
 | `correlator_le_thimble_avg` | MassGapProof.lean | HS+Cauchy+triangle→\|⟨φφ⟩\|≤E[G] | medium (plumbing) |
 | `green_exponential_decay` | FKBoundShifted.lean | M⁻¹≤Ce^{-m₀\|x\|} (concrete operator) | medium |
 
-### Supporting the mass gap axioms (2 axioms)
-
-These support the proof of `correlator_le_thimble_avg` (documented, not formal deps):
+### Supporting the mass gap axioms (1 axiom)
 
 | Axiom | File | Content | Difficulty |
 |-------|------|---------|------------|
 | `greenFunction_exponential_decay` | GreenDecay.lean | ‖G(n)‖≤(1/m²)r₋^dist (1D torus) | medium |
-| `vertical_contour_shift` | ContourShift.lean | ∫f(x+y₁i)=∫f(x+y₂i) | easy |
 
 ### Infrastructure — not used in mass gap (15 axioms)
+
+Note: `vertical_contour_shift` is now **PROVED** (was axiom).
+Note: `quantum_thimble_exists` is trivially true as stated.
 
 These are infrastructure for future proofs (diamagnetic inequality,
 quantum thimble theory, continuum limit, matrix calculus). None are
@@ -94,6 +94,9 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 | `inverse_HS_one_site` | **Proved** (push_cast + ring) |
 | `green_function_monotone` | **Removed** (deprecated) |
 | `feynmanKac_subGaussian_bound` | **Removed** (deprecated) |
+| `vertical_contour_shift` | **Proved** (rectangle + limits + decay) |
+| `hs_partition_complex` | **Proved** (Fubini + inverse_HS_one_site) |
+| `thimble_bound` | **Proved** (from correlator_le_thimble_avg + fk_bound) |
 
 ## File inventory (41 files)
 
@@ -138,16 +141,17 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 - MassGapDef.lean — HasCorrelationDecay, HasSpectralGap
 - LatticeOperator.lean — Graph Laplacian PSD (from Mathlib)
 
-### HSEquivalence (7 files, 1 axiom, 0 sorries)
+### HSEquivalence (7 files, 0 axioms, 0 sorries)
 - HSIdentity.lean — HS Gaussian identity (proved from Mathlib)
 - MultiSiteHS.lean — Per-site HS + boundedness (proved)
 - ContourRotation.lean — Contour rotation lemmas (proved)
-- ContourShift.lean — Rectangle integral (proved), vertical shift (1 axiom)
+- ContourShift.lean — Rectangle integral (**proved**), vertical shift (**proved**)
 - FKBound.lean — Deprecated (superseded by Thimble/FKBoundShifted)
 - Equivalence.lean — Z_original = Z_HS (**proved**, was sorry)
 - N1Test.lean — N=1 test case
 
-### Thimble (9 files, 12 axioms, 0 sorries)
+### Thimble (10 files, 12 axioms, 0 sorries)
+- HSIntegral.lean — Multi-site HS identity (**proved** from Fubini + inverse_HS)
 - GapEquation.lean — Gap equation algebra, v_* < 0 (proved)
 - ShiftedOperator.lean — M = -Δ+m₀², spectral gap (proved)
 - QuantumThimble.lean — Phase cancellation (proved), thimble existence (1 axiom)

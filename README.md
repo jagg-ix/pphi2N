@@ -2,7 +2,7 @@
 
 ## What this project proves
 
-Lean 4 formalization with 21 axioms, 4 sorries, 41 files.
+Lean 4 formalization with 18 axioms, 0 sorries, 42 files.
 
 ### Theorem 1: Continuum limit with OS axioms
 

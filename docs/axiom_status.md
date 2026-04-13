@@ -1,7 +1,15 @@
 # Axiom Status
 
-**19 axioms, 0 sorries, 41 files.**
+**18 axioms, 0 sorries, 42 files.**
 All axioms verified correct by Gemini deep think (2026-04-12).
+
+Former axioms now proved:
+- `vertical_contour_shift` → PROVED (rectangle + limits + decay)
+- `rectangle_integral_vanishes` → PROVED (Mathlib CauchyIntegral)
+- `hs_correlator_identity` → removed (content in correlator_le_thimble_avg)
+- `thimble_bound` → PROVED (from correlator_le_thimble_avg + fk_bound)
+- `inverse_HS_one_site` → PROVED (push_cast + ring)
+- `hs_partition_complex` → PROVED (Fubini + inverse_HS_one_site)
 
 ## Main mass gap chain (3 axioms)
 
@@ -136,16 +144,12 @@ Together they prove `resolvent_complex_bound`.
 
 ## Contour shift (1 axiom)
 
-### 12. `vertical_contour_shift`
+### ~~12. `vertical_contour_shift`~~ — NOW PROVED
 - **File:** `HSEquivalence/ContourShift.lean`
-- **Statement:** For f entire with decay, ∫f(x+y₁i)dx = ∫f(x+y₂i)dx.
-- **Difficulty:** Easy-medium. Follows from rectangle_integral_vanishes
-  (now PROVED from Mathlib) + limit as rectangle width → ∞.
-- **Proof plan:** Apply rectangle_integral_vanishes to [-R,R]×[y₁,y₂].
-  Vertical integrals → 0 as R → ∞ (from decay hypothesis).
-  Horizontal integrals → the full line integrals (dominated convergence).
-- **Dependencies:** rectangle_integral_vanishes (PROVED),
-  dominated convergence (Mathlib)
+- **Status:** **PROVED** from Mathlib (was axiom).
+- **Proof:** rectangle_integral_vanishes + intervalIntegral_tendsto_integral
+  + norm_integral_le_of_norm_le_const + tendsto_nhds_unique +
+  Bound.div_lt_one_of_pos_of_lt. All Mathlib lemmas, 0 sorries.
 
 ## Continuum limit (4 axioms)
 
@@ -215,7 +219,7 @@ These are porting targets from pphi2 and gaussian-field.
 ## Priority order for proving
 
 1. **greenFunction_exponential_decay** (medium, self-contained, 90% done)
-2. **vertical_contour_shift** (easy-medium, rectangle_integral proved)
+2. ~~**vertical_contour_shift**~~ **PROVED!**
 3. **contDiff_matrix_det** (easy, already proved with different norm)
 4. **nComponentGreen_uniform_bound** (easy, port from gaussian-field)
 5. **heat_kernel_entrywise_nonneg** (medium, Euler scheme)
