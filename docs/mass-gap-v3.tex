@@ -1501,6 +1501,136 @@ contour is $O(u^3/\sqrt{N})$ per site --- small within the
 saddle-point width but requiring control in the tails.
 \end{remark}
 
+\section{The diamagnetic inequality}\label{sec:diamagnetic}
+
+The FK bound $|G_\sigma(x,0)| \le G_{m_0}(x,0)$ used in Step~3
+of the proof plan (\S10.2) relies on the \textbf{diamagnetic
+inequality} for the resolvent of $M + iV$, where $M = -\Delta +
+m_0^2$ is positive definite and $V = 2uz$ is a real diagonal
+matrix. This section presents the semigroup proof, following
+Simon~\cite{Simon1979} Ch.~22 and Reed--Simon~IV \S X.4.
+
+\subsection{Statement}
+
+\begin{theorem}[Diamagnetic inequality for finite matrices]
+\label{thm:diamagnetic}
+Let $M$ be a real symmetric positive definite $n \times n$ matrix
+with nonpositive off-diagonal entries (a Stieltjes matrix), and let
+$V$ be a real diagonal matrix. Then for all $x, y$:
+\begin{equation}\label{eq:diamagnetic}
+  |(M + iV)^{-1}(x,y)| \le M^{-1}(x,y).
+\end{equation}
+In particular, $M^{-1}(x,y) \ge 0$ for all $x,y$.
+\end{theorem}
+
+In our application, $M = -\Delta + m_0^2$ (the shifted lattice
+Laplacian) and $V = \mathrm{diag}(2u(x)/\sqrt{N})$, so the
+hypotheses are satisfied: $M$ has off-diagonal entries $-1$ (from
+the nearest-neighbor Laplacian) and diagonal entries $2d + m_0^2
+\ge m_0^2 > 0$, giving positive definiteness by Gershgorin.
+
+\subsection{The semigroup proof}
+
+The proof decomposes into five steps.
+
+\medskip\noindent\textbf{Step 1: Laplace transform representation.}
+For any positive definite matrix~$A$,
+\begin{equation}\label{eq:laplace-resolvent}
+  A^{-1} = \int_0^\infty e^{-tA}\,dt.
+\end{equation}
+This follows from spectral decomposition: $A = \sum_k \lambda_k
+|e_k\rangle\langle e_k|$ with all $\lambda_k > 0$, so
+$\int_0^\infty e^{-t\lambda_k}\,dt = 1/\lambda_k$. Similarly,
+$(M+iV)^{-1} = \int_0^\infty e^{-t(M+iV)}\,dt$ since the
+eigenvalues of $M + iV$ have positive real part (from $M > 0$).
+
+\medskip\noindent\textbf{Step 2: Lie--Trotter product formula.}
+For finite matrices $A$ and $B$,
+\begin{equation}\label{eq:trotter}
+  e^{A+B} = \lim_{n\to\infty} \bigl(e^{A/n}\,e^{B/n}\bigr)^n.
+\end{equation}
+This is the Lie product formula; for matrices it follows from
+$e^{A/n}e^{B/n} = e^{(A+B)/n + O(1/n^2)}$ (Baker--Campbell--Hausdorff)
+and $(I + X/n)^n \to e^X$. Applied to $A = -tM$ and $B = -itV$:
+\begin{equation}
+  e^{-t(M+iV)} = \lim_{n\to\infty}
+    \bigl(e^{-tM/n}\,e^{-itV/n}\bigr)^n.
+\end{equation}
+
+\medskip\noindent\textbf{Step 3: Phase bound.}
+Since $V = \mathrm{diag}(v_1, \ldots, v_n)$ is diagonal,
+\begin{equation}
+  e^{-itV/n}(x,y) = \delta_{xy}\,e^{-itv_x/n}
+\end{equation}
+has $|e^{-itV/n}(x,y)| = \delta_{xy}$. In particular, for any
+matrix~$P$,
+\begin{equation}\label{eq:phase-bound}
+  |(P\,e^{-itV/n})(x,y)| = |P(x,y)\,e^{-itv_y/n}| = |P(x,y)|.
+\end{equation}
+
+\medskip\noindent\textbf{Step 4: Heat kernel positivity.}
+Since $M$ has nonpositive off-diagonal entries (it is a \emph{Z-matrix}
+or equivalently $-M$ is a \emph{Metzler matrix}), the matrix
+exponential $e^{-tM}$ has nonneg entries for all $t \ge 0$:
+\begin{equation}\label{eq:heat-nonneg}
+  e^{-tM}(x,y) \ge 0 \quad\text{for all } x, y, t \ge 0.
+\end{equation}
+
+\begin{proof}[Proof of~\eqref{eq:heat-nonneg}]
+Write $-M = D + R$ where $D$ is the diagonal part and $R \ge 0$
+entrywise (since $M$ has nonpositive off-diagonal). By the
+Euler approximation:
+\begin{equation}
+  e^{-tM} = \lim_{n\to\infty} \Bigl(I - \frac{tM}{n}\Bigr)^n
+  = \lim_{n\to\infty} \Bigl(I + \frac{t(D+R)}{n}\Bigr)^n.
+\end{equation}
+For $n > t\|M\|$, each factor $I + t(D+R)/n$ has nonneg entries
+(diagonal entries $\ge 1 - t\|D\|_\infty/n > 0$, off-diagonal
+entries $= tR_{xy}/n \ge 0$). The product of entrywise-nonneg
+matrices is entrywise-nonneg, so $e^{-tM}(x,y) \ge 0$.
+\end{proof}
+
+\medskip\noindent\textbf{Step 5: Assembly.}
+Each Trotter factor satisfies:
+\begin{equation}
+  |(e^{-tM/n}\,e^{-itV/n})(x,y)|
+  \stackrel{\eqref{eq:phase-bound}}{=} |e^{-tM/n}(x,y)|
+  \stackrel{\eqref{eq:heat-nonneg}}{=} e^{-tM/n}(x,y).
+\end{equation}
+For the $n$-fold product, the entry-wise triangle inequality gives:
+\begin{align}
+  |\bigl(e^{-tM/n}e^{-itV/n}\bigr)^n(x,y)|
+  &\le \sum_{z_1,\ldots,z_{n-1}}
+    \prod_{k=1}^n |(e^{-tM/n}e^{-itV/n})(z_{k-1},z_k)| \\
+  &= \sum_{z_1,\ldots,z_{n-1}}
+    \prod_{k=1}^n e^{-tM/n}(z_{k-1},z_k) \\
+  &= (e^{-tM/n})^n(x,y) = e^{-tM}(x,y).
+\end{align}
+Taking $n \to \infty$ (Trotter) and integrating over $t$
+(Laplace transform):
+\begin{equation}
+  |(M+iV)^{-1}(x,y)|
+  = \Bigl|\int_0^\infty e^{-t(M+iV)}(x,y)\,dt\Bigr|
+  \le \int_0^\infty |e^{-t(M+iV)}(x,y)|\,dt
+  \le \int_0^\infty e^{-tM}(x,y)\,dt
+  = M^{-1}(x,y). \qed
+\end{equation}
+
+\begin{remark}[M-matrix inverse nonnegativity]
+As a corollary, $M^{-1}(x,y) \ge 0$: from~\eqref{eq:laplace-resolvent}
+and~\eqref{eq:heat-nonneg}, $M^{-1} = \int_0^\infty e^{-tM}\,dt
+\ge 0$ entrywise. This is a standard result in M-matrix theory.
+\end{remark}
+
+\begin{remark}[The Lean formalization]
+The Lean file \texttt{DiagmagneticInequality.lean} (413 lines)
+decomposes this proof into 6 axioms corresponding to Steps~1--5
+above, plus the M-matrix corollary. The phase bound (Step~3) and
+the entry-wise triangle inequality are fully proved; the remaining
+axioms (Trotter, heat kernel positivity, Laplace transform) use
+standard Mathlib tools (matrix exponential, spectral theorem).
+\end{remark}
+
 \section{Other strategies for comparison}
 
 Section~\ref{sec:thimble} describes what we call \textbf{Strategy~D}
@@ -1753,6 +1883,9 @@ complete formal derivation of the analytic steps.
 \bibitem{LY24} S.~Lawrence and S.~Yamauchi,
   ``Convex optimization and contour deformations,''
   Phys.~Rev.~D~\textbf{110} (2024); arXiv:2311.13002.
+\bibitem{Simon1979} B.~Simon,
+  \emph{Functional Integration and Quantum Physics},
+  Academic Press (1979); 2nd ed., AMS Chelsea (2005).
 \bibitem{Witten10} E.~Witten,
   ``A new look at the path integral of quantum mechanics,''
   in \emph{Surveys in Differential Geometry XV} (2010); arXiv:1009.6032.
