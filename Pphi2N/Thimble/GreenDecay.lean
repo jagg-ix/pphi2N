@@ -540,6 +540,11 @@ theorem explicitGreen_satisfies_eq {L : ℕ} [NeZero L]
     nnOp m_sq (explicitGreen m_sq) n = if n = 0 then 1 else 0 := by
   sorry
 
+/-- Linearity of nnOp: nnOp(f - g) = nnOp f - nnOp g. -/
+private theorem nnOp_sub {L : ℕ} [NeZero L] (m_sq : ℝ) (f g : ZMod L → ℂ) :
+    nnOp m_sq (f - g) = nnOp m_sq f - nnOp m_sq g := by
+  ext n; simp only [nnOp, Pi.sub_apply]; ring
+
 /-- The operator (-Δ+m²) is injective on ZMod L → ℂ.
 
 Proof: positive definiteness. For f ≠ 0:
@@ -548,7 +553,78 @@ so Af ≠ 0. -/
 theorem nnOp_injective {L : ℕ} [NeZero L]
     (m_sq : ℝ) (hm : 0 < m_sq) :
     Function.Injective (nnOp m_sq : (ZMod L → ℂ) → (ZMod L → ℂ)) := by
-  sorry
+  intro f g heq
+  suffices hd : f - g = 0 from sub_eq_zero.mp hd
+  set d := f - g with hd_def
+  -- nnOp d = 0 by linearity
+  have hd0 : ∀ n, nnOp m_sq d n = 0 := by
+    have : nnOp m_sq d = 0 := by rw [hd_def, nnOp_sub, heq, sub_self]
+    exact fun n => congr_fun this n
+  -- S = Σ normSq(d n). Show S = 0.
+  set S := ∑ n : ZMod L, normSq (d n) with hS_def
+  suffices hS : S = 0 by
+    ext n
+    have h_all := (Finset.sum_eq_zero_iff_of_nonneg (fun i _ => normSq_nonneg (d i))).mp hS
+    exact normSq_eq_zero.mp (h_all n (Finset.mem_univ n))
+  -- From nnOp d = 0: (2+m²) d(n) = d(n+1) + d(n-1)
+  have heqn : ∀ n, (↑(2 + m_sq) : ℂ) * d n = d (n + 1) + d (n - 1) := by
+    intro n; have := hd0 n; simp only [nnOp] at this
+    have h : (↑(2 + m_sq) : ℂ) * d n - (d (n + 1) + d (n - 1)) = 0 := by
+      ring_nf; ring_nf at this; exact this
+    exact sub_eq_zero.mp h
+  -- Per-site bilinear identity:
+  -- (2+m²) normSq(d n) = Re(conj(d n) d(n+1)) + Re(conj(d n) d(n-1))
+  have key : ∀ n : ZMod L,
+      (2 + m_sq) * normSq (d n) =
+      ((starRingEnd ℂ) (d n) * d (n + 1)).re +
+      ((starRingEnd ℂ) (d n) * d (n - 1)).re := by
+    intro n
+    have hre : ((starRingEnd ℂ) (d n) * ((↑(2 + m_sq) : ℂ) * d n)).re =
+        (2 + m_sq) * normSq (d n) := by
+      rw [show (starRingEnd ℂ) (d n) * ((↑(2 + m_sq) : ℂ) * d n) =
+          (↑(2 + m_sq) : ℂ) * ((starRingEnd ℂ) (d n) * d n) from by ring,
+          show (starRingEnd ℂ) (d n) * d n = ↑(normSq (d n)) from
+            normSq_eq_conj_mul_self.symm]
+      simp [ofReal_re]
+    rw [← hre, heqn n, mul_add, Complex.add_re]
+  -- Summed: (2+m²) S = cross1 + cross2
+  have hbil : (2 + m_sq) * S =
+      ∑ n : ZMod L, ((starRingEnd ℂ) (d n) * d (n + 1)).re +
+      ∑ n : ZMod L, ((starRingEnd ℂ) (d n) * d (n - 1)).re := by
+    rw [hS_def, Finset.mul_sum, ← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl (fun n _ => key n)
+  -- AM-GM: Re(conj a * b) ≤ (normSq a + normSq b) / 2
+  have amgm : ∀ (a b : ℂ), ((starRingEnd ℂ) a * b).re ≤ (normSq a + normSq b) / 2 := by
+    intro a b
+    have h := normSq_nonneg (a - b); rw [normSq_sub] at h
+    have : ((starRingEnd ℂ) a * b).re = (a * (starRingEnd ℂ) b).re := by
+      simp only [Complex.mul_re, Complex.conj_re, Complex.conj_im]; ring
+    linarith
+  -- Sum reindexing: Σ normSq(d(n + a)) = S
+  have shift_sum : ∀ (a : ZMod L),
+      ∑ n : ZMod L, normSq (d (n + a)) = S := by
+    intro a; rw [hS_def]
+    exact Equiv.sum_comp (Equiv.addRight a) (fun n => normSq (d n))
+  -- cross1 ≤ S (AM-GM + reindexing)
+  have hc1 : ∑ n : ZMod L, ((starRingEnd ℂ) (d n) * d (n + 1)).re ≤ S := by
+    calc ∑ n, ((starRingEnd ℂ) (d n) * d (n + 1)).re
+        ≤ ∑ n, (normSq (d n) + normSq (d (n + 1))) / 2 :=
+          Finset.sum_le_sum (fun n _ => amgm (d n) (d (n + 1)))
+      _ = S := by
+          rw [← Finset.sum_div, Finset.sum_add_distrib, shift_sum 1, hS_def]; ring
+  -- cross2 ≤ S (AM-GM + reindexing)
+  have hc2 : ∑ n : ZMod L, ((starRingEnd ℂ) (d n) * d (n - 1)).re ≤ S := by
+    calc ∑ n, ((starRingEnd ℂ) (d n) * d (n - 1)).re
+        ≤ ∑ n, (normSq (d n) + normSq (d (n - 1))) / 2 :=
+          Finset.sum_le_sum (fun n _ => amgm (d n) (d (n - 1)))
+      _ = S := by
+          rw [← Finset.sum_div, Finset.sum_add_distrib]
+          simp_rw [show ∀ n : ZMod L, d (n - 1) = d (n + (-1 : ZMod L)) from fun n => by ring_nf]
+          rw [shift_sum (-1), hS_def]; ring
+  -- (2+m²) S ≤ 2S from hbil + hc1 + hc2, so m² S ≤ 0
+  -- But S ≥ 0 and m² > 0, so S = 0.
+  have hS_nonneg : 0 ≤ S := Finset.sum_nonneg (fun n _ => normSq_nonneg (d n))
+  nlinarith [mul_nonneg (le_of_lt hm) hS_nonneg]
 
 /-! ## Explicit formula -/
 
