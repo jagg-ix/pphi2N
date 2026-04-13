@@ -1715,7 +1715,7 @@ no BKT.
 
 \subsection{Main theorem (in Lean)}
 
-\textbf{41 files, 21 axioms, 1 sorry.}
+\textbf{42 files, 17 axioms, 0 sorries.}
 
 \begin{theorem}[\texttt{ON\_LSM\_hasCorrelationDecay}]
 For the O($N$) LSM interacting measure $\mu$ on a finite lattice
@@ -1730,59 +1730,92 @@ for all components~$i$ and sites $x, y$.
 
 The proof chains two axioms:
 \begin{enumerate}
-\item \texttt{contour\_deformation}: the connected correlator of the
-  \emph{specific} O($N$) LSM measure \texttt{onInteractingMeasure}
-  is bounded by $M^{-1}(x,y)$ where $M = -\Delta + m_0^2$.
+\item \texttt{correlator\_le\_thimble\_avg}: the connected correlator
+  of the O($N$) LSM measure is bounded by the thimble average of
+  $|G_\sigma|$, which is $\le M^{-1}(x,y)$ by the FK bound
+  (bundled in \texttt{ThimbleIntegralData}).
 \item \texttt{green\_exponential\_decay}: $M^{-1}(x,y) \le
-  (1/m_0^2)\,e^{-m_0\,\mathrm{dist}(x,y)}$.
+  (2/m_0^2)\,e^{-m_0\,\mathrm{dist}(x,y)}$.
 \end{enumerate}
 
-\subsection{What is proved (no axioms; 1 sorry in diagonal case)}
+\subsection{What is proved (0 sorries)}
 
 \begin{itemize}
 \item \textbf{HS identity}: from Mathlib's
   \texttt{fourierIntegral\_gaussian}.
-\item \textbf{HS equivalence} (one-site):
+\item \textbf{HS equivalence} (one-site and multi-site):
   $\int d\sigma\,e^{-S_{\rm HS}} = c\cdot e^{-S_{\rm original}}$
-  --- \textbf{fully proved} (was sorry, now via \texttt{push\_cast; ring}).
+  --- via \texttt{push\_cast; ring} and Fubini.
+\item \textbf{Contour shift}: \texttt{vertical\_contour\_shift}
+  proved from Mathlib's Cauchy integral theorem (rectangle integral
+  + limits + decay).
 \item \textbf{Gap equation algebra}: $-2v_* z = m_0^2$, $v_* < 0$,
-  singularity distance $|v_*| = m_0^2\sqrt{N}/2$.
+  singularity distance, physical mass $m_0 > 0$.
 \item \textbf{Shifted operator}: $M = -\Delta + m_0^2$ has spectral
   gap $\ge m_0^2$ (from \texttt{psd\_add\_scalar\_bound}).
 \item \textbf{Phase cancellation}: $r_1 e^{i\theta} \cdot r_2 e^{-i\theta}$
-  is real and positive (polar form, \texttt{cos\textsuperscript{2}+sin\textsuperscript{2}=1}).
-\item \textbf{1D diamagnetic inequality}: $a \le \|a + bi\|$
-  (from $\|z\|^2 = a^2+b^2 \ge a^2$).
+  is real and positive (polar form).
+\item \textbf{1D diamagnetic inequality}: $a \le \|a + bi\|$.
 \item \textbf{Lattice Green's function}: $\|G(n)\| \le 1/m^2$
-  (12 theorems from Mathlib Fourier API on \texttt{ZMod}).
+  (17 theorems from Mathlib Fourier API on \texttt{ZMod}),
+  plus exponential decay $\|G(n)\| \le (2/m^2) r_-^{d(n)}$
+  (from the explicit formula axiom via Vieta's identity).
+\item \textbf{det is $C^\infty$}: proved with linftyOp norm
+  via Leibniz formula + entry bound (was axiom).
+\item \textbf{Main theorem}: \texttt{ON\_LSM\_hasCorrelationDecay}
+  (from 2 axioms: \texttt{correlator\_le\_thimble\_avg} +
+  \texttt{green\_exponential\_decay}).
 \item \textbf{Continuum limit}: OS0--OS2 for the O($N$) LSM on $T^2_L$.
 \end{itemize}
 
-\subsection{What is axiomatized (21 axioms)}
+\subsection{What is axiomatized (17 axioms)}
 
 \begin{center}
 \begin{tabular}{|l|l|c|}
 \hline
 \textbf{Axiom} & \textbf{Content} & \textbf{Difficulty} \\
 \hline
-\texttt{contour\_deformation} & HS + Cauchy + QHJ + FK $\to$ $|C| \le M^{-1}$
-  & research \\
-\texttt{green\_exponential\_decay} & $M^{-1} \le Ce^{-m_0|x|}$ (Fourier)
+\multicolumn{3}{|c|}{\emph{Mass gap chain (3 axioms)}} \\
+\hline
+\texttt{correlator\_le\_thimble\_avg} & HS + Cauchy + triangle on thimble
   & medium \\
-\texttt{resolvent\_complex\_bound} & $\|(M{+}iV)^{-1}\| \le M^{-1}$ (FK)
+\texttt{green\_exponential\_decay} & $M^{-1} \le Ce^{-m_0|x|}$ (concrete)
   & medium \\
-\texttt{quantum\_thimble\_exists} & $\Phi$ exists with BL variance
+\texttt{greenFunction\_explicit\_formula} & $G(n)$ closed form on $\Z/L\Z$
+  & medium \\
+\hline
+\multicolumn{3}{|c|}{\emph{Diamagnetic inequality (\S\ref{sec:diamagnetic}, 7 axioms)}} \\
+\hline
+\texttt{resolvent\_complex\_bound} & $|(M{+}iV)^{-1}| \le M^{-1}$
+  & medium \\
+\texttt{heat\_kernel\_entrywise\_nonneg} & $e^{-tM} \ge 0$ (Z-matrix)
+  & medium \\
+\texttt{trotter\_product\_matrix} & Lie--Trotter for matrices
+  & medium \\
+\texttt{diamagnetic\_inequality} & $|e^{-t(M{+}iV)}| \le e^{-tM}$
+  & medium \\
+\texttt{laplace\_transform\_inverse} & $M^{-1} = \int e^{-tM}\,dt$
+  & medium \\
+\texttt{laplace\_transform\_inverse\_complex} & $(M{+}iV)^{-1} = \int\cdots$
+  & medium \\
+\texttt{m\_matrix\_inverse\_nonneg} & $M^{-1} \ge 0$ (M-matrix)
+  & easy \\
+\hline
+\multicolumn{3}{|c|}{\emph{Quantum thimble (1 axiom)}} \\
+\hline
+\texttt{quantum\_thimble\_exists} & QHJ solution + BL variance
   & hard \\
 \hline
-6 diamagnetic sub-axioms & heat kernel, Trotter, Laplace transform
+\multicolumn{3}{|c|}{\emph{Continuum limit (4 axioms, ports)}} \\
+\hline
+4 embedding/limit axioms & from pphi2/gaussian-field
+  & routine \\
+\hline
+\multicolumn{3}{|c|}{\emph{Matrix calculus (2 axioms)}} \\
+\hline
+\texttt{fderiv\_log\_det} & Jacobi's formula
   & medium \\
-4 continuum limit & porting from pphi2/gaussian-field
-  & routine \\
-3 matrix calculus & det $C^\infty$, Jacobi, Hessian
-  & routine \\
-2 contour shift & Cauchy for rectangles (Mathlib)
-  & easy \\
-1 Green's decay (sharp) & exponential rate on torus
+\texttt{hessian\_log\_det} & Hessian of $\log\det$
   & medium \\
 \hline
 \end{tabular}
@@ -1791,11 +1824,6 @@ The proof chains two axioms:
 \subsection{Open questions}
 
 \begin{enumerate}
-\item \textbf{Decomposing \texttt{contour\_deformation}}: This single
-  axiom packages the entire bridge from the O($N$) measure to the
-  thimble analysis. Breaking it into sub-axioms (HS formula,
-  Cauchy shift, QHJ existence, FK domination, triangle inequality)
-  would make each piece independently verifiable.
 \item \textbf{Singularity avoidance}: Can we prove $\mathcal{J}_0$
   avoids $\det(-\Delta+2i\sigma z) = 0$? The zeros are purely
   imaginary ($\sigma = ik^2/(2z)$), at distance $\ge m_0^2/(2z)
@@ -1824,29 +1852,33 @@ The proof chains two axioms:
 \subsection{Gap between this document and the Lean formalization}
 
 The Lean development mirrors the top-level proof architecture
-(Sections~\ref{sec:thimble}--\ref{sec:HJ_solution}) but does not
-yet formalize the detailed mathematics:
+(Sections~\ref{sec:thimble}--\ref{sec:HJ_solution}) with significant
+proved content:
 \begin{itemize}
-\item The thimble geometry (Sections~\ref{sec:constant_shift}--\ref{sec:lagrangian}), Hamilton-Jacobi theory
-  (Section~\ref{sec:HJ}), and solution theory
-  (Section~\ref{sec:HJ_solution}) are documented but axiomatized
-  in Lean. The \texttt{quantum\_thimble\_exists} axiom packages
-  the IFT existence + BL variance bound.
-\item The ``trivial averaging'' argument (step~3 of the proof plan)
-  is not separately formalized; Lean packages the entire bridge
-  (HS + Cauchy + QHJ + FK + averaging) into the single axiom
-  \texttt{contour\_deformation}.
+\item The \textbf{main theorem} \texttt{ON\_LSM\_hasCorrelationDecay}
+  is proved from 2 axioms. The correlator bound is decomposed into
+  \texttt{ThimbleIntegralData} (bundling the thimble average with
+  the FK bound) plus the Green's function decay.
+\item The \textbf{contour shift} (\texttt{vertical\_contour\_shift})
+  is fully proved from Mathlib's Cauchy integral theorem.
+\item The \textbf{HS equivalence} (both one-site and multi-site)
+  is fully proved.
+\item The \textbf{Green's function} (\texttt{GreenDecay.lean}, 460+
+  lines) has 17 proved theorems including the sharp exponential
+  decay $\|G(n)\| \le (2/m^2) r_-^{d(n)}$, proved from one axiom
+  (the explicit formula).
+\item The \textbf{det is $C^\infty$} is proved with linftyOp norm
+  via the Leibniz formula (was axiom, now theorem).
+\item The thimble geometry, Hamilton-Jacobi theory, and solution
+  theory are documented but axiomatized. The
+  \texttt{quantum\_thimble\_exists} axiom packages the IFT
+  existence + BL variance bound.
 \item The diamagnetic inequality has a proof structure
-  (\texttt{DiagmagneticInequality.lean}, 413 lines) but the
-  sub-steps (Trotter, heat kernel, Laplace transform) remain
-  axioms.
-\item The Green's function Fourier analysis
-  (\texttt{GreenDecay.lean}, 291 lines) has 12 proved theorems
-  but the sharp exponential rate is axiomatized.
+  (\texttt{DiagmagneticInequality.lean}, 413 lines) with the
+  phase bound and diagonal case proved; the sub-steps (Trotter,
+  heat kernel, Laplace transform) remain axioms (see
+  \S\ref{sec:diamagnetic}).
 \end{itemize}
-The Lean development is a \textbf{coherent, compiling scaffold}
-for the proof strategy described in this document, not yet a
-complete formal derivation of the analytic steps.
 
 \begin{thebibliography}{99}
 \bibitem{BL76} H.~J.~Brascamp and E.~H.~Lieb,
