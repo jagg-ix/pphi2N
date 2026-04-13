@@ -434,11 +434,15 @@ private theorem explicit_satisfies_recurrence (m_sq : ℝ) (hm : 0 < m_sq) (a b 
 
 G(n) = (r₋ⁿ + r₋^{L-n}) / ((r₊ - r₋)(1 - r₋^L))
 
-Derivation: The explicit formula satisfies the same recurrence
-(-Δ+m²)f = δ₀ as the Fourier-defined Green's function (proved
-in `explicit_satisfies_recurrence` above), and the operator (-Δ+m²)
-is injective on Z/LZ (all eigenvalues λ_k + m² > 0), so the
-solution is unique.
+Proof status: the algebraic core is proved above:
+- `characteristicRoot_satisfies`: r² - (2+m²)r + 1 = 0
+- `explicit_satisfies_recurrence`: the numerator satisfies the
+  homogeneous recurrence for interior points
+
+Remaining gap: operator injectivity on Z/LZ (if (-Δ+m²)f = 0
+then f = 0), which follows from positive eigenvalues λ_k + m² > 0.
+This is proved in gaussian-field (`massOperator_surjective_2d`)
+for the 2D case; the 1D case is analogous.
 
 The denominator has (1 - r₋^L), NOT (1 + r₋^L).
 Verified numerically and by Gemini deep think (2026-04-13). -/
