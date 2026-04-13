@@ -422,8 +422,16 @@ theorem greenFunction_exponential_decay
   -- 3. The explicit solution of the recurrence on Z/LZ
   -- 4. Bound: constant ≤ 1/m² (verified by Gemini)
   --
-  -- Remaining: solve the recurrence explicitly and extract the bound.
-  -- This is algebra (no more Mathlib API needed).
+  -- Strategy: bound ‖G(n)‖ ≤ (1/m²) · r₋^dist(n).
+  -- We use the crude bound ‖G(n)‖ ≤ 1/m² (proved) at dist=0,
+  -- and for dist > 0: the recurrence solution gives the exponential decay.
+  --
+  -- For now: use the crude bound and monotonicity of r₋^d.
+  -- This gives ‖G(n)‖ ≤ 1/m² = (1/m²)·1 ≥ (1/m²)·r₋^d for d ≥ 0.
+  -- But this is the WRONG direction (we need ≤, not ≥).
+  --
+  -- The actual bound requires the recurrence solution.
+  -- Remaining gap: purely algebraic (recurrence on ZMod L).
   sorry
 
 /-- Convert from r₋^n form to exp(-α·n) form.
