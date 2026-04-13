@@ -1,6 +1,6 @@
 # Axiom Status
 
-**18 axioms, 0 sorries, 42 files.**
+**17 axioms, 0 sorries, 42 files.**
 All axioms verified correct by Gemini deep think (2026-04-12).
 
 Former axioms now proved:
@@ -191,14 +191,12 @@ These are porting targets from pphi2 and gaussian-field.
 
 ## Matrix calculus (3 axioms)
 
-### 17. `contDiff_matrix_det`
+### ~~17. `contDiff_matrix_det`~~ — NOW PROVED
 - **File:** `GeneralResults/MatrixCalculus.lean`
-- **Statement:** det : Matrix n n ℝ → ℝ is C∞.
-- **Difficulty:** Easy. Already PROVED in DetContDiff.lean with Pi norm.
-  Axiom exists only because of linftyOp vs Pi norm mismatch.
-- **Proof plan:** Prove norm equivalence for finite-dim spaces,
-  then transfer ContDiff. Or: reprove with linftyOp norm directly.
-- **Dependencies:** DetContDiff.lean (proved with Pi norm)
+- **Status:** **PROVED** directly with linftyOp norm.
+- **Proof:** Leibniz formula (det = Σ_σ sign(σ) Π_i A(σi,i)) + each entry
+  extraction is a bounded linear functional (‖A i j‖ ≤ ‖A‖_linftyOp via
+  single_le_sum + le_sup). No norm transfer needed.
 
 ### 18. `fderiv_log_det`
 - **File:** `GeneralResults/MatrixCalculus.lean`
@@ -222,7 +220,7 @@ These are porting targets from pphi2 and gaussian-field.
 
 1. **greenFunction_explicit_formula** (medium, self-contained — proves greenFunction_exponential_decay)
 2. ~~**vertical_contour_shift**~~ **PROVED!**
-3. **contDiff_matrix_det** (easy, already proved with different norm)
+3. ~~**contDiff_matrix_det**~~ **PROVED!**
 4. **nComponentGreen_uniform_bound** (easy, port from gaussian-field)
 5. **heat_kernel_entrywise_nonneg** (medium, Euler scheme)
 6. **laplace_transform_inverse** (medium, spectral theorem)

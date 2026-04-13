@@ -53,14 +53,39 @@ theorem contDiffAt_ring_inverse {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 /-! ## det is C∞ -/
 
+/-- Each matrix entry is bounded by the linftyOp norm: |A i j| ≤ ‖A‖. -/
+private theorem matrix_entry_le_linftyOp (A : Matrix n n ℝ) (i j : n) : ‖A i j‖ ≤ ‖A‖ := by
+  simp only [Matrix.linfty_opNorm_def]
+  have h1 : ‖A i j‖₊ ≤ ∑ j' : n, ‖A i j'‖₊ :=
+    Finset.single_le_sum (f := fun j' => ‖A i j'‖₊) (fun _ _ => zero_le _) (Finset.mem_univ j)
+  have h2 : (∑ j' : n, ‖A i j'‖₊) ≤ Finset.univ.sup (fun i' : n => ∑ j' : n, ‖A i' j'‖₊) := by
+    apply Finset.le_sup (f := fun i' : n => ∑ j' : n, ‖A i' j'‖₊); exact Finset.mem_univ i
+  calc (‖A i j‖ : ℝ) = ↑‖A i j‖₊ := (coe_nnnorm _).symm
+    _ ≤ ↑(∑ j' : n, ‖A i j'‖₊) := by exact_mod_cast h1
+    _ ≤ ↑(Finset.univ.sup fun i' => ∑ j', ‖A i' j'‖₊) := by exact_mod_cast h2
+
 /-- **The determinant is C∞** with the linftyOp norm.
 
-Proved in DetContDiff.lean with Pi norm (`contDiff_matrix_det_proved`).
-The linftyOp and Pi norms induce the same topology on finite-dim Matrix,
-but Lean's definitional equality check times out on the norm transfer.
-Axiomatized here; the mathematical content is fully proved. -/
-axiom contDiff_matrix_det :
-    ContDiff ℝ ⊤ (Matrix.det : Matrix n n ℝ → ℝ)
+Proof: Leibniz formula expresses det as a polynomial in matrix entries.
+Each entry A(σ(i), i) is a bounded linear functional (norm ≤ 1 by linftyOp),
+hence C∞. Products and sums of C∞ functions are C∞. -/
+set_option maxHeartbeats 800000 in
+theorem contDiff_matrix_det :
+    ContDiff ℝ ⊤ (Matrix.det : Matrix n n ℝ → ℝ) := by
+  have hdet : (Matrix.det : Matrix n n ℝ → ℝ) = fun A =>
+      ∑ σ : Equiv.Perm n, Equiv.Perm.sign σ • ∏ i ∈ Finset.univ, A (σ i) i := by
+    ext A; simp [Matrix.det_apply]
+  rw [hdet]
+  apply ContDiff.sum; intro σ _
+  apply ContDiff.const_smul
+  apply contDiff_prod; intro i _
+  apply IsBoundedLinearMap.contDiff
+  exact {
+    map_add := fun _ _ => rfl
+    map_smul := fun _ _ => rfl
+    bound := ⟨1, zero_lt_one, fun A => by
+      simp only [one_mul]; exact matrix_entry_le_linftyOp A _ _⟩
+  }
 
 /-! ## log ∘ det is C∞ -/
 

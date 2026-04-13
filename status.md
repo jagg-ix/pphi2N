@@ -1,6 +1,6 @@
 # pphi2N Status
 
-**0 sorries, 18 axioms, 42 files, 0 errors.**
+**0 sorries, 17 axioms, 42 files, 0 errors.**
 
 See `docs/axiom_status.md` for detailed inventory of all axioms
 with difficulty ratings and proof plans.
@@ -104,7 +104,6 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 | `lsmDensityTransferConstant` | ONTorusLimit.lean | Nelson bound + Jensen | easy |
 | `lsmGF_latticeApproximation_error_vanishes` | ONTorusLimit.lean | Port from pphi2 | medium |
 | `nComponentGFF_exp_moment_uniform` | ONTorusLimit.lean | Gaussian MGF | easy |
-| `contDiff_matrix_det` | MatrixCalculus.lean | det is C∞ (norm transfer) | easy |
 | `fderiv_log_det` | MatrixCalculus.lean | Jacobi's formula | medium |
 | `hessian_log_det` | MatrixCalculus.lean | Hessian of log det | medium |
 
@@ -119,6 +118,7 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 | `vertical_contour_shift` | **Proved** (rectangle + limits + decay) |
 | `hs_partition_complex` | **Proved** (Fubini + inverse_HS_one_site) |
 | `thimble_bound` | **Proved** (from correlator_le_thimble_avg + fk_bound) |
+| `contDiff_matrix_det` | **Proved** (Leibniz formula + linftyOp entry bound) |
 
 ## File inventory (41 files)
 
@@ -152,7 +152,7 @@ formal dependencies of `ON_LSM_hasCorrelationDecay`.
 - LSMTorusMeasure.lean — LSM measure, Wick constant (proved)
 - ONTorusLimit.lean — OS0-OS2 (3 axioms)
 
-### GeneralResults (3 files, 3 axioms)
+### GeneralResults (3 files, 2 axioms)
 - MatrixCalculus.lean — det/inv/log-det smoothness (3 axioms)
 - DetContDiff.lean — det C∞ with Pi norm (proved)
 - TraceFormula.lean — Tr(M·E_x·N·E_y) (proved)
