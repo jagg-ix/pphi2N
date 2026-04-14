@@ -6,15 +6,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 General results about the differentiability of matrix operations.
 
-## Main results (proved, 0 sorries)
+## Main results (proved, 0 sorries, 0 axioms)
 
 - `contDiffAt_ring_inverse` — Ring.inverse is C∞ at units
 - `contDiff_matrix_det` — det is C∞ (from Leibniz formula)
 - `contDiffAt_log_det` — log∘det is C∞ at det > 0
 - `fderiv_log_det` — d(log det A)/dA · H = Tr(A⁻¹H) (Jacobi's formula)
-
-## Axioms (1, for Hessian formula)
-
 - `hessian_log_det` — d²(log det A) · (H,K) = -Tr(A⁻¹HA⁻¹K)
 
 ## References
@@ -26,10 +23,16 @@ General results about the differentiability of matrix operations.
 import Mathlib.Analysis.Analytic.Constructions
 import Mathlib.Analysis.Calculus.ContDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.ContinuousAlternatingMap
+import Mathlib.Analysis.Calculus.FDeriv.Comp
+import Mathlib.Analysis.Calculus.FDeriv.Congr
+import Mathlib.Analysis.Calculus.FDeriv.Linear
+import Mathlib.Analysis.Calculus.FDeriv.Mul
 import Mathlib.Analysis.Calculus.LineDeriv.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.Matrix.Normed
+import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.LinearAlgebra.Matrix.Trace
 import Pphi2N.GeneralResults.DetContDiff
 
 noncomputable section
@@ -203,13 +206,76 @@ theorem fderiv_log_det (A : Matrix n n ℝ) (hA : 0 < A.det) (H : Matrix n n ℝ
   rw [sum_det_updateRow_eq_trace A H]
   exact trace_adjugate_div_det A H hA
 
+/-! ### Auxiliary CLMs for Hessian computation -/
+
+/-- Trace as a continuous linear map (finite-dimensional, hence bounded). -/
+private def traceCLM : Matrix n n ℝ →L[ℝ] ℝ :=
+  { Matrix.traceLinearMap n ℝ ℝ with
+    cont := LinearMap.continuous_of_finiteDimensional _ }
+
+/-- Right-multiplication by H as a continuous linear map. -/
+private def mulRightCLM (H : Matrix n n ℝ) : Matrix n n ℝ →L[ℝ] Matrix n n ℝ :=
+  (ContinuousLinearMap.mul ℝ (Matrix n n ℝ)).flip H
+
+set_option maxHeartbeats 400000 in
 /-- **Hessian of log det:** d²(log det A) · (H, K) = -Tr(A⁻¹ H A⁻¹ K).
 
-Mathematical content: differentiate Tr(A⁻¹ H) using d(A⁻¹) = -A⁻¹ · (·) · A⁻¹.
+Proof: The first derivative is Tr(A⁻¹ H) by `fderiv_log_det`. We show
+M ↦ fderiv(log∘det)(M)(H) agrees with M ↦ Tr(M⁻¹ H) in a neighborhood of A
+(where det > 0), then differentiate the latter using the chain rule:
+- Ring.inverse is analytic at units, with fderiv K ↦ -A⁻¹ K A⁻¹ (`fderiv_inverse`)
+- Right-multiplication by H and trace are CLMs (fderiv = identity)
+- Trace cyclicity: Tr(A⁻¹ K A⁻¹ H) = Tr(A⁻¹ H A⁻¹ K).
+
 Reference: Magnus-Neudecker (2019), Theorem 8.6. -/
-axiom hessian_log_det (A : Matrix n n ℝ) (hA : 0 < A.det) (H K : Matrix n n ℝ) :
+theorem hessian_log_det (A : Matrix n n ℝ) (hA : 0 < A.det) (H K : Matrix n n ℝ) :
     fderiv ℝ (fun M => fderiv ℝ (fun M' : Matrix n n ℝ => Real.log M'.det) M H) A K =
-      -Matrix.trace (A⁻¹ * H * A⁻¹ * K)
+      -Matrix.trace (A⁻¹ * H * A⁻¹ * K) := by
+  -- Step 1: {M | det M > 0} is an open neighborhood of A; fderiv_log_det applies there
+  have hdet_cont : Continuous (Matrix.det : Matrix n n ℝ → ℝ) :=
+    contDiff_matrix_det.continuous
+  have hnh : ∀ᶠ M in nhds A, (0 : ℝ) < M.det :=
+    hdet_cont.continuousAt.eventually (IsOpen.eventually_mem isOpen_Ioi hA)
+  have heq : (fun M => (fderiv ℝ (fun M' => Real.log M'.det) M) H) =ᶠ[nhds A]
+      (fun M => Matrix.trace (M⁻¹ * H)) :=
+    hnh.mono (fun M hM => fderiv_log_det M hM H)
+  -- Step 2: Replace outer fderiv target using EventuallyEq
+  rw [Filter.EventuallyEq.fderiv_eq heq]
+  -- Step 3: Rewrite M⁻¹ as Ring.inverse M (needed for fderiv_inverse)
+  have hinv_eq : (fun M : Matrix n n ℝ => Matrix.trace (M⁻¹ * H)) =
+      (fun M => Matrix.trace (Ring.inverse M * H)) := by
+    ext M; rw [Matrix.nonsing_inv_eq_ringInverse]
+  rw [hinv_eq]
+  -- Step 4: Decompose as CLM ∘ Ring.inverse
+  have hU : IsUnit A := (Matrix.isUnit_iff_isUnit_det A).mpr (isUnit_iff_ne_zero.mpr hA.ne')
+  let u := hU.unit
+  have hAu : (↑u : Matrix n n ℝ) = A := by simp [u]
+  let L := traceCLM.comp (mulRightCLM H)
+  have hfun : (fun M => Matrix.trace (Ring.inverse M * H)) = (↑L) ∘ Ring.inverse := by
+    ext M
+    simp only [L, ContinuousLinearMap.comp_apply, traceCLM, ContinuousLinearMap.coe_mk',
+      Matrix.traceLinearMap_apply, mulRightCLM, ContinuousLinearMap.flip_apply,
+      ContinuousLinearMap.mul_apply', Function.comp_def]
+  rw [hfun]
+  have hdiff_inv : DifferentiableAt ℝ Ring.inverse A := by
+    rw [← hAu]; exact (analyticAt_inverse u).differentiableAt
+  -- Step 5: Chain rule + CLM fderiv
+  rw [fderiv_comp A L.differentiableAt hdiff_inv, ContinuousLinearMap.fderiv L]
+  simp only [ContinuousLinearMap.comp_apply]
+  -- Step 6: Derivative of Ring.inverse at A
+  rw [← hAu, fderiv_inverse u, ContinuousLinearMap.neg_apply,
+    ContinuousLinearMap.mulLeftRight_apply]
+  have huinv : (↑u⁻¹ : Matrix n n ℝ) = A⁻¹ := by
+    rw [← Ring.inverse_unit u, ← Matrix.nonsing_inv_eq_ringInverse, hAu]
+  -- Step 7: Unfold L and simplify
+  simp only [L, ContinuousLinearMap.comp_apply, traceCLM, ContinuousLinearMap.coe_mk',
+    Matrix.traceLinearMap_apply, mulRightCLM, ContinuousLinearMap.flip_apply,
+    ContinuousLinearMap.mul_apply', map_neg]
+  rw [show (↑u : Matrix n n ℝ)⁻¹ = A⁻¹ from by rw [hAu], huinv]
+  -- Step 8: Trace cyclicity: Tr(A⁻¹KA⁻¹H) = Tr(A⁻¹HA⁻¹K)
+  congr 1
+  rw [Matrix.mul_assoc (A⁻¹ * K) A⁻¹ H, Matrix.mul_assoc (A⁻¹ * H) A⁻¹ K]
+  exact Matrix.trace_mul_comm (A⁻¹ * K) (A⁻¹ * H)
 
 end MatrixCalculus
 
