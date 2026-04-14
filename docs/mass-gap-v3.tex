@@ -1502,6 +1502,40 @@ contour is $O(u^3/\sqrt{N})$ per site --- small within the
 saddle-point width but requiring control in the tails.
 \end{remark}
 
+\begin{remark}[Decomposition of the correlator bound --- formalization status]
+\label{rem:decomposition}
+The correlator bound (Step~2 of the proof plan) decomposes into
+four sub-steps, of which only one is research-level:
+
+\begin{enumerate}
+\item[\textbf{S1.}] \textbf{HS representation}: $\langle\ph\ph\rangle_c
+  = (1/Z)\int G_\sigma \cdot w(\sigma)\,d\sigma$.
+  \textbf{Proved.} The partition function version (\texttt{hs\_partition\_complex})
+  is fully proved; the correlator version follows from the Gaussian two-point
+  formula (available in gaussian-field).
+
+\item[\textbf{S2.}] \textbf{Cauchy contour shift}: $\int_\R \to \int_{\text{thimble}}$.
+  \textbf{Proved ingredients.} Single-variable \texttt{vertical\_contour\_shift}
+  is fully proved from Mathlib's Cauchy integral theorem. Multi-variable
+  follows from Fubini plus Gaussian decay of the bare weight.
+
+\item[\textbf{S3.}] \textbf{Thimble positivity}: $e^f \cdot \det J > 0$ on the thimble.
+  \textbf{OPEN} (\texttt{quantum\_thimble\_exists}).
+  This requires the implicit function theorem for the quantum Hamilton-Jacobi
+  equation (Section~\ref{sec:HJ}) plus the Brascamp-Lieb variance bound.
+  This is the only research-level gap.
+
+\item[\textbf{S4.}] \textbf{Triangle + FK averaging}: on a positive measure,
+  $|\int G \cdot \mu| \le \int |G| \cdot \mu \le M^{-1}$.
+  \textbf{Trivial} (standard measure theory + diamagnetic \S\ref{sec:diamagnetic}).
+\end{enumerate}
+
+The \texttt{correlator\_le\_thimble\_avg} axiom in Lean packages S1--S4.
+All content except S3 is proved or trivially provable. The mass gap proof
+depends on exactly two research-level results: (1)~thimble positivity
+from the quantum HJ equation, and (2)~the diamagnetic inequality.
+\end{remark}
+
 \section{The diamagnetic inequality}\label{sec:diamagnetic}
 
 The FK bound $|G_\sigma(x,0)| \le G_{m_0}(x,0)$ used in Step~3

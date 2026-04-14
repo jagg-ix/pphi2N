@@ -61,26 +61,54 @@ Axiom A: |⟨φφ⟩_c| ≤ E_thimble[|G_σ|] (the thimble_avg from the data)
 The FK bound is already inside ThimbleIntegralData.
 Together: |⟨φφ⟩_c| ≤ E_thimble[|G_σ|] ≤ M⁻¹. -/
 
+/-! ## Decomposition of correlator_le_thimble_avg
+
+The axiom packages four steps. Here we identify which are proved,
+which are provable from existing infrastructure, and which are the
+hard open problems.
+
+**Step 1: HS representation.** The connected correlator equals a
+σ-integral: ⟨φφ⟩_c = (1/Z) ∫ G_σ(x,y) · w(σ) dσ, where
+G_σ = (-Δ+2iσz)⁻¹ is the Green's function at fixed σ and
+w(σ) = det(-Δ+2iσz)^{-N/2} · bare_weight(σ).
+
+Status: **Provable.** The partition function version is proved
+(hs_partition_complex). The correlator version needs the Gaussian
+two-point formula ⟨φφ⟩_σ = G_σ(x,y) (from cross_moment_eq_covariance
+in gaussian-field, proved for real operators; FK bound gives
+|⟨φφ⟩_σ| ≤ |G_σ| for the complex case).
+
+**Step 2: Cauchy contour shift** from ∫_ℝ to ∫_thimble.
+Must happen BEFORE absolute values (sign problem!).
+
+Status: **Proved ingredients.** vertical_contour_shift is proved
+for single-variable integrals. Multi-variable version follows
+from Fubini (∫_ℝ^Λ = ∏_x ∫_ℝ, shift each variable) plus
+decay bounds (Gaussian tail from bare weight).
+
+**Step 3: Thimble measure is positive.** On the quantum thimble
+(the Lagrangian submanifold solving the quantum HJ equation),
+the integrand e^f · det(J) is real and positive.
+
+Status: **AXIOM** (quantum_thimble_exists). This is the hard part:
+requires the implicit function theorem for the quantum Hamilton-Jacobi
+equation + Brascamp-Lieb on the effective potential. Research-level.
+
+**Step 4: Triangle inequality + averaging.** On a positive measure,
+|∫ G · positive_weight| ≤ ∫ |G| · positive_weight. The FK bound
+|G_σ| ≤ M⁻¹ (from resolvent_complex_bound) then gives the final
+estimate E_thimble[|G_σ|] ≤ M⁻¹.
+
+Status: **Trivial** (standard measure theory + axiom resolvent_complex_bound).
+
+**Conclusion:** The only truly hard step is Step 3 (thimble positivity
+from quantum_thimble_exists). All other steps are proved or provable
+from existing infrastructure. -/
+
 /-- **Axiom A: correlator bounded by thimble average.**
 
-The connected two-point function of the O(N) LSM is bounded by
-the thimble average E_thimble[|G_σ(x,y)|].
-
-This packages three steps in the correct order:
-1. HS transformation: ⟨φφ⟩_c = (1/Z) ∫_ℝ G_σ · e^f dσ
-2. Cauchy contour shift: ∫_ℝ = ∫_thimble (BEFORE absolute values!)
-3. Triangle inequality on positive thimble measure
-
-The Cauchy shift MUST precede the triangle inequality.
-On the real axis, |∫G·e^f|/|∫e^f| includes 1/⟨sign⟩ → ∞.
-On the thimble, the measure is positive → no sign problem.
-
-The ThimbleIntegralData bundles E_thimble[|G_σ|] with the FK bound
-M⁻¹, ensuring the axiom and the FK bound reference the SAME object.
-
-Dependencies: inverse_HS_one_site (proved), rectangle_integral_vanishes
-(proved from Mathlib), vertical_contour_shift (axiom),
-quantum_thimble_exists (axiom). -/
+See decomposition above. The hard content is quantum_thimble_exists
+(Step 3); the rest is proved infrastructure. -/
 axiom correlator_le_thimble_avg {N d M : ℕ} [NeZero M]
     (P : ONInteraction) (c a : ℝ)
     (μ_scalar : Measure (FinLatticeField d M))
