@@ -68,8 +68,8 @@ produces a specific `var : Λ → ℝ` with `var x ≤ 1/(κN)`. -/
 theorem thimble_BL_variance_from_axiom {Λ : Type*} [Fintype Λ] [DecidableEq Λ]
     (D : QuantumThimbleData Λ) (x : Λ) :
     ∃ (v : ℝ), v ≤ 1 / (D.kappa * D.gapData.N) := by
-  obtain ⟨_, var, _, h_var⟩ := quantum_thimble_exists D
-  exact ⟨var x, h_var x⟩
+  obtain ⟨ψ, _, _, _, h_var⟩ := quantum_thimble_exists D
+  exact ⟨D.thimbleVariance ψ x, h_var x⟩
     --  The proof uses the explicit computation of Hess(-Re f)
     --  from the Tr log term + bare Gaussian.)
 
