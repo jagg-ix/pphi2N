@@ -52,6 +52,7 @@ For finite matrices, the proof follows these steps:
 -/
 
 import Pphi2N.Thimble.ShiftedOperator
+import MarkovSemigroups.Matrix.HeatKernel
 import Mathlib.Analysis.Normed.Algebra.MatrixExponential
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Analysis.Complex.Trigonometric
@@ -196,14 +197,14 @@ References:
 - Berman-Plemmons, *Nonnegative Matrices in the Mathematical Sciences*
 - Horn-Johnson, *Matrix Analysis*, §8.4
 -/
-axiom heat_kernel_entrywise_nonneg (M : Matrix n n ℝ)
-    -- M is "essentially nonnegative" negated: M_{ij} ≤ 0 for i ≠ j
+-- Proved in markov-semigroups (MatrixSemigroup.heat_kernel_entrywise_nonneg)
+-- via the Metzler shift: write -tM = -tαI + t(αI-M) with α large,
+-- then exp(-tM) = exp(-tα)·exp(t(αI-M)) ≥ 0 since αI-M ≥ 0 entrywise.
+theorem heat_kernel_entrywise_nonneg (M : Matrix n n ℝ)
     (hoff : ∀ i j, i ≠ j → M i j ≤ 0)
-    -- t ≥ 0
-    (t : ℝ) (ht : 0 ≤ t)
-    -- All entries of exp(-tM) are nonneg
-    (x y : n) :
-    0 ≤ (exp ((-t) • M) x y : ℝ)
+    (t : ℝ) (ht : 0 ≤ t) (x y : n) :
+    0 ≤ (exp ((-t) • M) x y : ℝ) :=
+  MatrixSemigroup.heat_kernel_entrywise_nonneg M hoff t ht x y
 
 /-- **Laplace transform of matrix semigroup gives inverse** (entry-wise):
 

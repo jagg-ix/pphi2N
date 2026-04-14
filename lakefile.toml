@@ -17,7 +17,7 @@ rev = "4d82a22"
 name = "MarkovSemigroups"
 scope = "mrdouglasny"
 git = "https://github.com/mrdouglasny/markov-semigroups.git"
-rev = "cd28df8"
+rev = "8a94f4a"
 
 [[lean_lib]]
 name = "Pphi2N"
