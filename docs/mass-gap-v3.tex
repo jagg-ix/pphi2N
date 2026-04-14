@@ -969,12 +969,27 @@ no residual phase. The three a priori bounds needed are:
 \item \textbf{Spectral gap}: $M(\psi) \ge m_0^2/2 > 0$
   (same bound, same proof).
 \item \textbf{Hessian of $V_{\rm eff}$}:
-  $\nabla^2 V_{\rm eff} \ge \kappa N$. This differs from the
-  classical case by the $\log|\det J|$ contribution, which
-  modifies the Hessian by $O(1)$ (from $\nabla^2\Tr\log
-  \sim \nabla^2\Tr(\nabla^2\Phi) \sim S'''$, the
-  triangle diagram derivative). For $N$ large, the
-  $\kappa N$ term dominates.
+  $\nabla^2 V_{\rm eff} \ge \kappa N$. At the constant shift
+  ($\Phi=0$), the Hessian is (in Fourier space):
+  \begin{equation}
+    \hat{H}(k) = \frac{1}{2\lambda} + 2B(k), \quad
+    B(k) = \frac{1}{|\La|}\sum_l G_0(l)\,G_0(k{-}l) \ge 0,
+  \end{equation}
+  which gives $H \ge 1/(2\lambda) > 0$. The $\Tr\log$ contributes
+  $+2B(k) \sim N \cdot O(1/N) = O(1)$ per site (the bubble diagram
+  is $O(1)$ in 2d), while the bare term scales as
+  $1/(2\lambda) \sim 1/(c/N) = N/c$ for the LSM coupling $\lambda
+  \sim c/N$. So $H \ge \kappa N$ with $\kappa = 1/(2c)$.
+
+  On the full thimble ($\Phi \ne 0$): $V_{\rm eff}$ includes
+  $-\log|\det(I+i\nabla^2\Phi)|$. At $\Phi = 0$: this is zero.
+  Its Hessian at $\Phi = 0$ involves
+  $\nabla^2\Tr\log(I+i\nabla^2\Phi)|_{\Phi=0}$, which gives
+  second derivatives of $\Phi$ --- i.e., it depends on the
+  thimble correction~$S$ from~\eqref{eq:S_fourier}. Since
+  $S = O(1/\sqrt{N})$, the correction is $O(1/N)$ relative
+  to the $O(N)$ bare Hessian. For $N$ sufficiently large,
+  $H \ge \kappa N/2 > 0$.
 \end{enumerate}
 
 The quantum $\Phi$ differs from the classical $\Phi$ by
@@ -1003,16 +1018,29 @@ For $N > N_0(m_0,\lambda)$ on a finite lattice~$\La$:
 
 \begin{proof}[Proof sketch]
 $F$ is smooth (from the analyticity of $f$ and $\arctan$).
-$F(0)$ is explicitly computable and small: $\im f(u+iv_*)$ is
-$O(u^3/\sqrt{N})$ per site (the cubic term from the $\Tr\log$),
-and $\Tr\arctan(0) = 0$. The Fr\'echet derivative $DF(0)$ maps
-$\delta\Phi \mapsto \partial(\im f)/\partial v \cdot \nabla(\delta\Phi)
-+ \Tr(\nabla^2(\delta\Phi))$. The first term involves the Hessian
-$H$ (positive definite), so $DF(0)$ is a bounded invertible operator
-on a space of smooth functionals. By the quantitative IFT:
-$\|\Phi\| \le C\,\|F(0)\|/\|DF(0)^{-1}\| = O(u^3/\sqrt{N})$.
-The spectral gap and Hessian bounds follow from proximity
-to the classical solution (which satisfies them).
+
+\textbf{Residual phase at $\Phi=0$}: $F(0)(u) = \im f(u+iv_*)$
+since $\Tr\arctan(0) = 0$. The expansion of $\im f$ in powers
+of~$u$: the linear term is $-\sum_x (u_x/2\lambda)\,v_*$ which
+is real (contributes to $\re f$, not $\im f$). The quadratic
+term $\im(u,Hu) = 0$ since $H$ is real. The leading imaginary
+term is cubic: $\im f \sim \frac{i}{6}R[u,u,u]$ where
+$R_{xyz} = (8/\sqrt{N})T(x,y,z)$ (the triangle diagram).
+Per site: $|F(0)(u)| \lesssim \|u\|_\infty^3/\sqrt{N}$.
+
+\textbf{Linearization}: $DF(0) \cdot \delta\Phi$ maps $\delta\Phi$
+to $\im[\partial f/\partial v \cdot \nabla(\delta\Phi)]
++ \Tr(\nabla^2(\delta\Phi)/(1+0))$. In Fourier space:
+$\widehat{DF(0)}(k) = \hat{H}(k)$ (the same Hessian as
+in~\eqref{eq:S_fourier}). Since $\hat{H}(k) \ge 1/(2\lambda)
+\sim N/c > 0$, $DF(0)$ is invertible with $\|DF(0)^{-1}\| \le c/N$.
+
+\textbf{IFT}: Since $\|F(0)(u)\| = O(\|u\|^3/\sqrt{N})$ and
+$\|DF(0)^{-1}\| \le c/N$, the quantitative IFT gives a solution
+$\Phi$ with $\|\nabla\Phi\| \le (c/N) \cdot O(\|u\|^3/\sqrt{N})
+= O(\|u\|^3\,c/(N\sqrt{N}))$. In the BL-relevant region
+$\|u\| \lesssim 1/\sqrt{\kappa N}$: $|\nabla\Phi| \lesssim
+c/(\kappa^{3/2} N^{5/2}) \ll m_0^2\sqrt{N}/2$ (singularity distance).
 \end{proof}
 
 \begin{remark}[Lean formalization]
