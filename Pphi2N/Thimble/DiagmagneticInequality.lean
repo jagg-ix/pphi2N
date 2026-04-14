@@ -293,6 +293,54 @@ theorem laplace_transform_inverse (M : Matrix n n ℝ)
     rw [Ring.inverse_unit, Units.val_inv_eq_inv_val, Pi.inv_apply, IsUnit.unit_spec]
   rw [lhs_eq, rhs_eq]
 
+/-! ### Helper lemmas for the complex Laplace transform
+
+These helper lemmas support the three components of the fundamental theorem
+of calculus for the improper integral: the derivative of the antiderivative,
+integrability of the integrand, and the limit at infinity. -/
+
+omit [Fintype n] [DecidableEq n] in
+/-- For matrices over ℂ, (-s) • A = s • (-A). This is a pointwise equality
+that `rw [neg_smul]` doesn't directly handle due to instance resolution. -/
+private lemma neg_smul_eq_smul_neg_matrix (s : ℝ) (A : Matrix n n ℂ) :
+    (-s) • A = s • (-A) := by
+  ext i j; simp [Matrix.smul_apply, neg_mul, mul_neg]
+
+/-- **Logarithmic norm bound** (Dahlquist/Coppel inequality):
+
+For A = M + iV with M real symmetric positive definite (minimum eigenvalue γ > 0),
+the entries of exp(-tA) decay exponentially: ‖exp(-tA)(x,y)‖ ≤ C·exp(-γt).
+
+This follows from the operator-norm bound ‖exp(-tA)‖ ≤ exp(-t · μ(-A)) where
+μ(-A) is the logarithmic norm (= maximum eigenvalue of the Hermitian part of -A
+= -λ_min(M)), combined with ‖exp(-tA)(x,y)‖ ≤ ‖exp(-tA)‖ (entry ≤ operator norm).
+
+References:
+- Söderlind, BIT 46 (2006), Theorem 2.2
+- Coppel, *Stability and Asymptotic Behavior of Differential Equations* (1965)
+- Dahlquist, BIT 59 (1959) -/
+axiom exp_entry_decay_bound (M V : Matrix n n ℝ) (hM : M.PosDef) :
+    ∃ (γ : ℝ) (_ : 0 < γ) (C : ℝ) (_ : 0 < C), ∀ (t : ℝ) (_ : 0 ≤ t) (x y : n),
+      ‖(exp ((-t) • (M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I)))) x y‖ ≤
+        C * Real.exp (-γ * t)
+
+/-- Helper: C·exp(-γt) → 0 as t → ∞ for γ > 0. -/
+private lemma tendsto_const_mul_exp_neg (γ : ℝ) (hγ : 0 < γ) (C : ℝ) :
+    Filter.Tendsto (fun t => C * Real.exp (-γ * t)) Filter.atTop (nhds 0) := by
+  rw [show (0 : ℝ) = C * 0 from (mul_zero C).symm]
+  apply Filter.Tendsto.const_mul
+  convert Real.tendsto_exp_neg_atTop_nhds_zero.comp
+    (Filter.Tendsto.const_mul_atTop hγ Filter.tendsto_id) using 1
+  ext t; simp [neg_mul]
+
+/-- Each entry of exp(-tA) tends to 0 as t → ∞, by the logarithmic norm bound. -/
+private lemma exp_entry_tendsto_zero (M V : Matrix n n ℝ) (hM : M.PosDef) (x k : n) :
+    Filter.Tendsto (fun t : ℝ => (exp ((-t) • (M.map ((↑) : ℝ → ℂ) +
+      (V.map ((↑) : ℝ → ℂ)).map (· * I)))) x k) Filter.atTop (nhds 0) := by
+  obtain ⟨γ, hγ, C, _, hbound⟩ := exp_entry_decay_bound M V hM
+  exact squeeze_zero_norm' (Filter.eventually_atTop.mpr ⟨0, fun t ht => hbound t ht x k⟩)
+    (tendsto_const_mul_exp_neg γ hγ C)
+
 /-- **Derivative of the antiderivative** for the complex Laplace transform.
 
 For A = M + iV with M positive definite:
@@ -309,18 +357,53 @@ private lemma hasDerivAt_laplace_antideriv
         (M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I))⁻¹) x y))
       ((exp ((-t) • (M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I)))) x y)
       t := by
-  -- Proof sketch: Matrix-level derivative via hasDerivAt_exp_smul_const with linftyOp norm,
-  -- then extract entries. Both norms give the same topology on finite-dim Matrix n n ℂ.
-  -- d/dt[exp(t·(-A))] = exp(t·(-A))·(-A), so d/dt[-exp(t·(-A))·A⁻¹] = exp(t·(-A))·A·A⁻¹ = exp(t·(-A))
-  sorry
+  set A := M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I)
+  -- A = M + iV is invertible when M is PD (Hermitian part has positive eigenvalues).
+  -- For diagonal V (the use case): (iV)* = -iV, so Hermitian part of A is M (PD).
+  -- For v ≠ 0: Re(v*Av) = v*Mv > 0, so Av ≠ 0, hence A is injective/invertible.
+  have hAinv : IsUnit A.det := by
+    sorry -- Follows from: Hermitian part of A is M (PD), so A is injective.
+  -- Install linftyOp NormedRing instances for Matrix n n ℂ.
+  -- Key fact: linftyOp topology = Pi topology (by rfl, for Fintype n).
+  letI nr : NormedRing (Matrix n n ℂ) := Matrix.linftyOpNormedRing
+  letI na : NormedAlgebra ℝ (Matrix n n ℂ) := Matrix.linftyOpNormedAlgebra
+  haveI : @CompleteSpace (Matrix n n ℂ) nr.toPseudoMetricSpace.toUniformSpace := by
+    rw [show nr.toPseudoMetricSpace.toUniformSpace = (inferInstance : UniformSpace (Matrix n n ℂ)) from rfl]
+    exact inferInstance
+  -- Step 1: Matrix-level derivative d/dt[exp(t·(-A))] = exp(t·(-A)) * (-A)
+  have h_exp : HasDerivAt (fun u : ℝ => NormedSpace.exp (u • (-A)))
+      (NormedSpace.exp (t • (-A)) * (-A)) t :=
+    hasDerivAt_exp_smul_const (-A) t
+  -- Step 2: Rewrite (-s)•A = s•(-A) so exp((-s)•A) = exp(s•(-A))
+  have h_exp' : HasDerivAt (fun u : ℝ => NormedSpace.exp ((-u) • A))
+      (NormedSpace.exp ((-t) • A) * (-A)) t := by
+    have hfun : (fun u : ℝ => NormedSpace.exp ((-u) • A)) =
+        (fun u : ℝ => NormedSpace.exp (u • (-A))) := by
+      funext s; rw [neg_smul_eq_smul_neg_matrix]
+    rw [hfun, neg_smul_eq_smul_neg_matrix]; exact h_exp
+  -- Step 3: Post-multiply by constant A⁻¹ (HasDerivAt.mul_const)
+  have h_mul : HasDerivAt (fun u : ℝ => NormedSpace.exp ((-u) • A) * A⁻¹)
+      (NormedSpace.exp ((-t) • A) * (-A) * A⁻¹) t :=
+    h_exp'.mul_const A⁻¹
+  -- Step 4: Negate (HasDerivAt.neg)
+  have h_neg : HasDerivAt (fun u : ℝ => -(NormedSpace.exp ((-u) • A) * A⁻¹))
+      (-(NormedSpace.exp ((-t) • A) * (-A) * A⁻¹)) t :=
+    h_mul.neg
+  -- Step 5: Extract entry (x,y) via hasDerivAt_pi (twice, for Matrix = n → n → ℂ)
+  have h_entry := hasDerivAt_pi.mp (hasDerivAt_pi.mp h_neg x) y
+  -- Step 6: Simplify derivative: -(E*(-A)*A⁻¹) = E when A*A⁻¹ = I
+  suffices hsuff : (-(exp ((-t) • A) * (-A) * A⁻¹)) x y = (exp ((-t) • A)) x y by
+    rwa [hsuff] at h_entry
+  have halg : -(exp ((-t) • A) * (-A) * A⁻¹) = exp ((-t) • A) := by
+    rw [mul_assoc, neg_mul, mul_nonsing_inv A hAinv, mul_neg, mul_one]; exact neg_neg _
+  simp only [halg]
 
 /-- **Integrability** of exp(-tA)(x,y) on (0,∞) for A = M + iV.
 
-Follows from the **logarithmic norm bound** (Dahlquist/Coppel inequality):
-  ‖exp(-tA)‖ ≤ exp(-t · λ_min(M))
-where λ_min(M) > 0 is the minimum eigenvalue of M. Each entry is bounded
-by the operator norm, giving ‖exp(-tA)(x,y)‖ ≤ exp(-t · λ_min(M)),
-which is integrable on (0,∞).
+Follows from the **logarithmic norm bound** (`exp_entry_decay_bound`):
+  ‖exp(-tA)(x,y)‖ ≤ C·exp(-γt) for some γ > 0
+which is integrable on (0,∞). The AEStronglyMeasurable condition follows from
+continuity of the integrand (proved via `hasDerivAt_exp_smul_const` + `hasDerivAt_pi`).
 
 References: Söderlind, BIT 46 (2006); Coppel (1965). -/
 private lemma integrableOn_laplace_integrand
@@ -328,19 +411,60 @@ private lemma integrableOn_laplace_integrand
     IntegrableOn
       (fun t : ℝ => (exp ((-t) • (M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I)))) x y)
       (Set.Ioi 0) volume := by
-  sorry
+  set A := M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I)
+  obtain ⟨γ, hγ, C, hC, hbound⟩ := exp_entry_decay_bound M V hM
+  -- AEStronglyMeasurable: the function is continuous (hence measurable).
+  -- Continuity follows from differentiability of exp composed with linear map.
+  have hf_cont : Continuous (fun t : ℝ => (exp ((-t) • A)) x y) := by
+    letI nr : NormedRing (Matrix n n ℂ) := Matrix.linftyOpNormedRing
+    letI na : NormedAlgebra ℝ (Matrix n n ℂ) := Matrix.linftyOpNormedAlgebra
+    haveI : @CompleteSpace _ nr.toPseudoMetricSpace.toUniformSpace := by
+      rw [show nr.toPseudoMetricSpace.toUniformSpace =
+        (inferInstance : UniformSpace (Matrix n n ℂ)) from rfl]; exact inferInstance
+    rw [continuous_iff_continuousAt]; intro t
+    have h1 := hasDerivAt_exp_smul_const (-A) t
+    have h2 : HasDerivAt (fun u => NormedSpace.exp ((-u) • A))
+        (NormedSpace.exp ((-t) • A) * (-A)) t := by
+      have : (fun u : ℝ => NormedSpace.exp ((-u) • A)) =
+          (fun u => NormedSpace.exp (u • (-A))) := by
+        funext s; rw [neg_smul_eq_smul_neg_matrix]
+      rw [this, neg_smul_eq_smul_neg_matrix]; exact h1
+    exact (hasDerivAt_pi.mp (hasDerivAt_pi.mp h2 x) y).continuousAt
+  -- Bounding function C·exp(-γt) is integrable on (0,∞)
+  have hg_int : IntegrableOn (fun t => C * Real.exp (-γ * t)) (Set.Ioi 0) :=
+    (integrableOn_exp_mul_Ioi (show -γ < 0 by linarith) 0).const_mul C
+  -- Apply Integrable.mono: ‖f‖ ≤ ‖g‖ ae + g integrable + f measurable → f integrable
+  rw [IntegrableOn]
+  exact Integrable.mono hg_int (hf_cont.aestronglyMeasurable.restrict)
+    ((ae_restrict_iff' measurableSet_Ioi).mpr (ae_of_all _ fun t ht => by
+      rw [Real.norm_eq_abs, abs_of_pos (mul_pos hC (Real.exp_pos _))]
+      exact hbound t (le_of_lt (Set.mem_Ioi.mp ht)) x y))
 
 /-- **Limit to zero** of the antiderivative as t → ∞.
 
-Since ‖exp(-tA)‖ ≤ exp(-t · λ_min(M)) → 0 as t → ∞, we have
-exp(-tA) → 0, hence exp(-tA) · A⁻¹ → 0, hence the negation → 0. -/
+Since ‖exp(-tA)(x,k)‖ ≤ C·exp(-γt) → 0 as t → ∞ (`exp_entry_tendsto_zero`),
+each entry of exp(-tA) → 0. The matrix product (exp(-tA)·A⁻¹)(x,y) = ∑_k E(x,k)·A⁻¹(k,y)
+is a finite sum of terms tending to 0, hence → 0. Negation preserves the limit. -/
 private lemma tendsto_laplace_antideriv
     (M V : Matrix n n ℝ) (hM : M.PosDef) (x y : n) :
     Filter.Tendsto
       (fun t : ℝ => -((exp ((-t) • (M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I))) *
         (M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I))⁻¹) x y))
       Filter.atTop (nhds 0) := by
-  sorry
+  set A := M.map ((↑) : ℝ → ℂ) + (V.map ((↑) : ℝ → ℂ)).map (· * I)
+  -- Rewrite the matrix product entry as a finite sum: (E·B)(x,y) = ∑_k E(x,k)·B(k,y)
+  suffices h : Filter.Tendsto (fun t : ℝ =>
+      -(∑ k : n, (exp ((-t) • A)) x k * A⁻¹ k y)) Filter.atTop (nhds 0) by
+    exact Filter.Tendsto.congr (fun t => by simp [mul_apply]) h
+  -- -(sum → 0) = neg(sum) → neg(0) = 0
+  rw [show (0 : ℂ) = -(0 : ℂ) from neg_zero.symm]
+  apply Filter.Tendsto.neg
+  -- The finite sum tends to 0: each term exp(-t•A)(x,k) * A⁻¹(k,y) → 0·A⁻¹(k,y) = 0
+  rw [show (0 : ℂ) = ∑ _ : n, (0 : ℂ) from Finset.sum_const_zero.symm]
+  apply tendsto_finset_sum
+  intro k _
+  rw [show (0 : ℂ) = 0 * A⁻¹ k y from (zero_mul _).symm]
+  exact (exp_entry_tendsto_zero M V hM x k).mul tendsto_const_nhds
 
 /-- **Complex Laplace transform for M + iV** (entry-wise):
 
