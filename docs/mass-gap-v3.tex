@@ -1081,21 +1081,21 @@ For Cauchy's theorem to justify $\int_{\R^{|\La|}} = \int_{\rm thimble}$:
 
 \begin{remark}[IFT domain size and global control]
 \label{rem:ift_domain}
-The quantitative IFT gives a solution $\Phi$ with
-$\|\nabla\Phi\| \le C\|F(0)\| \cdot \|DF(0)^{-1}\|$ in a ball
-around $u = 0$. For the mass gap, we need the bound to hold
-on the BL-relevant region $\|u\|_\infty \lesssim 1/\sqrt{\kappa N}$.
+The quantitative IFT gives a solution $\Phi$ in a ball of radius
+$r \sim \|DF(0)^{-1}\|^{-1}/\|D^2F\|$ in $u$-space.
+Since $\|DF(0)^{-1}\| \le c/N$ (from $H \ge N/(2c)$) and
+$\|D^2F\| = O(1)$ (the second derivative of the phase equation
+is bounded independently of~$N$), the IFT ball has radius
+$r \sim N/c = O(N)$ in $\|u\|_\infty$.
 
-The IFT ball radius is determined by $\|D^2F\| \cdot \|DF(0)^{-1}\|^2$:
-the solution exists for $\|u\|$ such that $\|F(0)(u)\|$ is within the
-IFT convergence radius. Since $\|F(0)(u)\| = O(\|u\|^3/\sqrt{N})$
-and the convergence radius is $O(N^2)$ (from $\|DF(0)^{-1}\| \le c/N$
-and $\|D^2F\| = O(1)$), the IFT ball contains the BL-relevant region
-for $N$ sufficiently large:
-\[
-  O(\|u\|^3/\sqrt{N}) \lesssim O(1/(\kappa N)^{3/2}\sqrt{N})
-  = O(1/(\kappa^{3/2}N^2)) \ll O(N^2).
-\]
+The BL measure $e^{-V_{\rm eff}}$ is concentrated in the region
+$\|u\|_\infty \lesssim 1/\sqrt{\kappa N} = O(N^{-1/2})$
+(from the Hessian $\nabla^2 V_{\rm eff} \ge \kappa N$).
+
+The comparison $R_{\rm IFT} \sim O(N) \gg R_{\rm BL} \sim O(N^{-1/2})$
+shows that the thimble is analytic throughout a region $O(N^{3/2})$
+times larger than the BL concentration scale. The overlap is
+extremely robust and improves with increasing~$N$.
 \end{remark}
 
 \begin{remark}[Lean formalization]
@@ -1155,12 +1155,34 @@ the time extent). The mass gap is then:
 \end{enumerate}
 
 \begin{remark}[Three routes to the thermodynamic limit]
+\label{rem:three_routes}
+The mass gap depends on the ratio of eigenvalues of the
+one-step transfer matrix. The sign problem for this matrix
+involves only $|\La_s|$ spatial sites --- decoupled from
+the temporal extent.
+
+\medskip\noindent
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Method} & \textbf{Phase problem} & \textbf{Condition} \\
+\hline
+Transfer matrix + spatial shift & $|\La_s|$ sites
+  & $N \gg \sqrt{L/a}$ \\
+Quantum HJ equation & None (exact) & $N > N_0(m_0,\lambda)$ \\
+Spacetime contour shift & $|\La|$ sites & $N \gg \sqrt{L^2/a^2}$ \\
+\hline
+\end{tabular}
+
+\medskip
 \begin{enumerate}
 \item[(a)] \textbf{Transfer matrix + spatial contour shift}:
   phase problem involves $|\La_s|$ only; $N \gg \sqrt{L/a}$.
-  This is the recommended approach.
+  This is the most robust approach because it decouples the
+  large-$N$ expansion from the temporal extent of the system.
 \item[(b)] \textbf{Quantum HJ equation}: eliminates phase
   exactly; requires second-order PDE existence theory.
+  The condition $N > N_0$ depends only on the coupling, not
+  on the volume.
 \item[(c)] \textbf{Spacetime contour shift with}
   $N \gg \sqrt{|\La|}$: simplest, but couples $N$ to the
   full spacetime volume.
