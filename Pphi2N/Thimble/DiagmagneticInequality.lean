@@ -36,11 +36,12 @@ For finite matrices, the proof follows these steps:
 - `exp_diagonal_norm_le` — |exp(diagonal(iv))(x,y)| ≤ δ_{xy} (step 3)
 - `exp_neg_diagonal_eq` — exp of real diagonal is diagonal of exp
 - `exp_imaginary_diagonal_norm` — norm of exp(i·diag(v)) entries
+- `laplace_transform_inverse` — A⁻¹ = ∫₀^∞ exp(-tA) dt for PD A
+  (via spectral theorem + ∫ e^{-λt} dt = 1/λ)
 
 **Axiomatized** (clean mathematical statements):
 - `heat_kernel_entrywise_nonneg` — exp(-tM) ≥ 0 entrywise for
   M with nonpositive off-diagonal (Z-matrix / Metzler theory)
-- `laplace_transform_inverse` — A⁻¹ = ∫₀^∞ exp(-tA) dt for PD A
 - `trotter_product_matrix` — Lie-Trotter for finite matrices
 - `diamagnetic_inequality` — the main result, assembled from above
 
@@ -57,6 +58,7 @@ import Mathlib.Analysis.Normed.Algebra.MatrixExponential
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Analysis.Complex.Trigonometric
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+import Mathlib.Algebra.Group.Pi.Units
 
 noncomputable section
 
@@ -211,16 +213,84 @@ theorem heat_kernel_entrywise_nonneg (M : Matrix n n ℝ)
 For a positive definite matrix M (all eigenvalues > 0):
   M⁻¹(x,y) = ∫₀^∞ exp(-tM)(x,y) dt
 
-This is the matrix version of ∫₀^∞ e^{-λt} dt = 1/λ applied
-to each eigenvalue via the spectral theorem. Stated entry-wise to
-avoid needing a normed space instance on matrices.
+Proof via spectral theorem: M = U * diag(λ) * Uᵀ, so both sides
+reduce to ∑ k, U(x,k) * (1/λ_k) * U(y,k) using the scalar identity
+∫₀^∞ exp(-λt) dt = 1/λ for λ > 0.
 
 References:
 - Horn-Johnson, *Matrix Analysis*, section 6.2
 - Higham, *Functions of Matrices*, Theorem 10.2 -/
-axiom laplace_transform_inverse (M : Matrix n n ℝ)
+-- Helper lemmas for the spectral proof
+private lemma mul_diagonal_star_entry_lt (A B : Matrix n n ℝ) (d : n → ℝ) (x y : n) :
+    (A * diagonal d * star B) x y = ∑ k, A x k * d k * B y k := by
+  simp [mul_apply, diagonal_apply, star_apply, Finset.sum_ite_eq', Finset.mem_univ, star_trivial]
+
+private lemma integral_exp_neg_pos_lt (lam : ℝ) (hlam : 0 < lam) :
+    ∫ t in Set.Ioi (0 : ℝ), Real.exp (-lam * t) = lam⁻¹ := by
+  have h1 := integral_exp_mul_Ioi (show -lam < 0 from by linarith) 0
+  simp at h1; convert h1 using 1; congr 1; ext t; ring
+
+theorem laplace_transform_inverse (M : Matrix n n ℝ)
     (hM : M.PosDef) (x y : n) :
-    M⁻¹ x y = ∫ t in Set.Ioi (0 : ℝ), (exp ((-t) • M)) x y
+    M⁻¹ x y = ∫ t in Set.Ioi (0 : ℝ), (exp ((-t) • M)) x y := by
+  set hH := hM.isHermitian
+  set U := hH.eigenvectorUnitary.val
+  set ev := hH.eigenvalues
+  have hev_pos : ∀ i, 0 < ev i := hM.eigenvalues_pos
+  -- Spectral decomposition: M = U * diag(eigenvalues) * Uᵀ
+  have hspec : M = U * diagonal ev * star U := by
+    have := hH.spectral_theorem
+    simp only [Unitary.conjStarAlgAut_apply] at this; convert this using 2
+  have hU_unit : IsUnit U :=
+    ⟨⟨U, star U, hH.eigenvectorUnitary.prop.2, hH.eigenvectorUnitary.prop.1⟩, rfl⟩
+  have hU_inv : U⁻¹ = star U := inv_eq_left_inv hH.eigenvectorUnitary.prop.1
+  have hstarU_inv : (star U)⁻¹ = U := inv_eq_left_inv hH.eigenvectorUnitary.prop.2
+  -- Summand: f k t = U(x,k) * exp(-t * λ_k) * U(y,k)
+  set f : n → ℝ → ℝ := fun k t => U x k * Real.exp (-t * ev k) * U y k
+  -- Step 1: exp(-t•M)(x,y) = ∑ k, f k t (via spectral decomposition + exp_conj)
+  have exp_sum : ∀ t : ℝ, (exp ((-t) • M)) x y = ∑ k, f k t := by
+    intro t; rw [hspec]
+    conv_lhs => rw [show (-t) • (U * diagonal ev * star U) =
+      U * ((-t) • diagonal ev) * star U from by simp]
+    rw [show U * ((-t) • diagonal ev) * star U =
+      U * ((-t) • diagonal ev) * U⁻¹ from by rw [hU_inv]]
+    rw [Matrix.exp_conj U _ hU_unit, hU_inv, ← diagonal_smul, Matrix.exp_diagonal,
+        mul_diagonal_star_entry_lt]
+    congr 1; ext k; congr 1; congr 1
+    rw [Pi.coe_exp, Real.exp_eq_exp_ℝ]; simp [Pi.smul_apply, smul_eq_mul]
+  -- Step 2: Each summand is integrable on (0,∞)
+  have hint : ∀ k ∈ Finset.univ,
+      Integrable (f k) (volume.restrict (Set.Ioi (0 : ℝ))) := by
+    intro k _
+    show IntegrableOn (f k) (Set.Ioi 0)
+    have : f k = fun t => (U x k * U y k) * Real.exp (-(ev k) * t) := by
+      ext t; simp [f]; ring
+    rw [this]
+    exact (integrableOn_exp_mul_Ioi (by linarith [hev_pos k]) 0).const_mul _
+  -- Step 3: Each integral evaluates to U(x,k) * (λ_k)⁻¹ * U(y,k)
+  have hint_eval : ∀ k, ∫ t in Set.Ioi (0 : ℝ), f k t =
+      U x k * (ev k)⁻¹ * U y k := by
+    intro k
+    have h : ∀ t, f k t = (U x k * U y k) * Real.exp (-(ev k) * t) := by
+      intro t; simp [f]; ring
+    simp_rw [h]
+    rw [integral_const_mul, integral_exp_neg_pos_lt (ev k) (hev_pos k)]; ring
+  -- Step 4: RHS = ∑ k, U(x,k) * (λ_k)⁻¹ * U(y,k)
+  have rhs_eq : (∫ t in Set.Ioi (0 : ℝ), (exp ((-t) • M)) x y) =
+      ∑ k, U x k * (ev k)⁻¹ * U y k := by
+    simp_rw [exp_sum]
+    rw [integral_finset_sum Finset.univ hint]
+    congr 1; ext k; exact hint_eval k
+  -- Step 5: LHS = ∑ k, U(x,k) * (λ_k)⁻¹ * U(y,k) (via M⁻¹ = U * D⁻¹ * Uᵀ)
+  have lhs_eq : M⁻¹ x y = ∑ k, U x k * (ev k)⁻¹ * U y k := by
+    rw [hspec, mul_inv_rev (U * diagonal ev) (star U), mul_inv_rev U (diagonal ev)]
+    rw [hU_inv, hstarU_inv, ← mul_assoc, inv_diagonal, mul_diagonal_star_entry_lt]
+    congr 1; ext k; congr 1; congr 1
+    have hunit : IsUnit ev :=
+      Pi.isUnit_iff.mpr (fun i => isUnit_iff_ne_zero.mpr (ne_of_gt (hev_pos i)))
+    conv_lhs => rw [← IsUnit.unit_spec hunit]
+    rw [Ring.inverse_unit, Units.val_inv_eq_inv_val, Pi.inv_apply, IsUnit.unit_spec]
+  rw [lhs_eq, rhs_eq]
 
 /-- **Complex Laplace transform for M + iV** (entry-wise):
 
@@ -423,25 +493,24 @@ theorem diamagnetic_diagonal (eigvals : n → ℝ) (h_pos : ∀ i, 0 < eigvals i
 
 /-! ## Summary of axiom dependencies
 
-The full proof of the diamagnetic inequality requires 5 axioms:
+The full proof of the diamagnetic inequality requires 4 axioms:
 
 1. `heat_kernel_entrywise_nonneg` — exp(-tM) ≥ 0 entrywise
-   (Metzler/Z-matrix theory; provable via "I - tM/n" Euler scheme)
+   (proved in markov-semigroups via Metzler shift)
 
-2. `laplace_transform_inverse` — M⁻¹ = ∫ exp(-tM) dt
-   (spectral theorem + ∫ e^{-λt} dt = 1/λ)
-
-3. `laplace_transform_inverse_complex` — same for M + iV
+2. `laplace_transform_inverse_complex` — (M+iV)⁻¹ = ∫ exp(-t(M+iV)) dt
    (eigenvalues have positive real part)
 
-4. `trotter_product_matrix` — Lie-Trotter product formula
+3. `trotter_product_matrix` — Lie-Trotter product formula
    (BCH series convergence for bounded operators)
 
-5. `diamagnetic_inequality` — the assembled result
+4. `diamagnetic_inequality` — the assembled result
 
 Plus `m_matrix_inverse_nonneg` for the FK bound connection.
 
 The PROVED components are:
+- `laplace_transform_inverse` — M⁻¹ = ∫ exp(-tM) dt
+  (spectral theorem + ∫ e^{-λt} dt = 1/λ)
 - `exp_imaginary_diagonal_entries` — |exp(iV)(x,y)| = δ_{xy}
 - `diagonal_mul_entry_norm_le` / `mul_diagonal_entry_norm_le` —
   diagonal contractions
