@@ -335,10 +335,14 @@ by `heat_kernel_entrywise_nonneg`, so the integral does too.
 References:
 - Berman-Plemmons, *Nonneg Matrices in Math Sciences*, Theorem 6.2.3
 -/
-axiom m_matrix_inverse_nonneg (M : Matrix n n ℝ)
+theorem m_matrix_inverse_nonneg (M : Matrix n n ℝ)
     (hM : M.PosDef)
     (hoff : ∀ i j, i ≠ j → M i j ≤ 0)
-    (x y : n) : 0 ≤ M⁻¹ x y
+    (x y : n) : 0 ≤ M⁻¹ x y := by
+  rw [laplace_transform_inverse M hM x y]
+  apply MeasureTheory.setIntegral_nonneg measurableSet_Ioi
+  intro t ht
+  exact heat_kernel_entrywise_nonneg M hoff t (le_of_lt (Set.mem_Ioi.mp ht)) x y
 
 /-! ## Commuting case: when M and V commute
 
