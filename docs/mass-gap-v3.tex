@@ -913,6 +913,16 @@ $N \gg \sqrt{|\La|}$.
 \subsubsection{The quantum Hamilton-Jacobi equation}
 \label{sec:quantum_HJ}
 
+The Jacobian phase $\Tr\arctan(\nabla^2\Phi)$ is the
+\textbf{residual sign problem} identified in the lattice
+QFT literature~\cite{CRS12,TNK15,Scorzato15,Fukuma20}:
+even on the steepest-descent thimble, the measure $\det J$
+introduces a complex phase that must be handled. Previous
+approaches treat this phase as a computational obstacle
+(reweighting, worldvolume methods). We instead treat it as a
+\textbf{solvable equation}: by adjusting $\Phi$ to cancel both
+the action phase and the Jacobian phase simultaneously.
+
 To eliminate \emph{both} phases, we must solve the
 \textbf{quantum HJ equation}:
 \begin{equation}\label{eq:quantum_HJ}
@@ -2026,9 +2036,20 @@ proved content:
 \bibitem{LY24} S.~Lawrence and S.~Yamauchi,
   ``Convex optimization and contour deformations,''
   Phys.~Rev.~D~\textbf{110} (2024); arXiv:2311.13002.
+\bibitem{CRS12} M.~Cristoforetti, F.~Di~Renzo, and L.~Scorzato,
+  ``New approach to the sign problem in quantum field theories:
+  High density QCD on a Lefschetz thimble,''
+  Phys.~Rev.~D~\textbf{86} (2012) 074506; arXiv:1205.3996.
+\bibitem{Scorzato15} L.~Scorzato,
+  ``The Lefschetz thimble and the sign problem,''
+  PoS LATTICE2015 (2016) 015; arXiv:1512.08039.
 \bibitem{Simon1979} B.~Simon,
   \emph{Functional Integration and Quantum Physics},
   Academic Press (1979); 2nd ed., AMS Chelsea (2005).
+\bibitem{TNK15} Y.~Tanizaki, H.~Nishimura, and K.~Kashiwa,
+  ``Evading the sign problem in the mean-field approximation
+  through Lefschetz-thimble path integral,''
+  Phys.~Rev.~D~\textbf{91} (2015) 101701; arXiv:1504.02979.
 \bibitem{Witten10} E.~Witten,
   ``A new look at the path integral of quantum mechanics,''
   in \emph{Surveys in Differential Geometry XV} (2010); arXiv:1009.6032.
