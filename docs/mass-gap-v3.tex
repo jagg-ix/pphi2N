@@ -982,14 +982,24 @@ no residual phase. The three a priori bounds needed are:
   \sim c/N$. So $H \ge \kappa N$ with $\kappa = 1/(2c)$.
 
   On the full thimble ($\Phi \ne 0$): $V_{\rm eff}$ includes
-  $-\log|\det(I+i\nabla^2\Phi)|$. At $\Phi = 0$: this is zero.
-  Its Hessian at $\Phi = 0$ involves
-  $\nabla^2\Tr\log(I+i\nabla^2\Phi)|_{\Phi=0}$, which gives
-  second derivatives of $\Phi$ --- i.e., it depends on the
-  thimble correction~$S$ from~\eqref{eq:S_fourier}. Since
-  $S = O(1/\sqrt{N})$, the correction is $O(1/N)$ relative
-  to the $O(N)$ bare Hessian. For $N$ sufficiently large,
-  $H \ge \kappa N/2 > 0$.
+  $-\log|\det(I+i\nabla^2\Phi)|$. Using the proved Hessian formula
+  (the proved \texttt{hessian\_log\_det} theorem):
+  \begin{equation}
+    \frac{\partial^2}{\partial u_x\,\partial u_y}
+      \log|\det(I+iJ)|_{u=0}
+    = \Tr(S_x\,S_y)
+    = \sum_{z,w} S_{zwx}\,S_{wzy}
+  \end{equation}
+  where $S_x$ denotes the slice of the 3-tensor~$S$
+  from~\eqref{eq:S_fourier} at index~$x$, and the formula
+  follows from $d^2(\log\det A)(H,K) = -\Tr(A^{-1}HA^{-1}K)$
+  evaluated at $A = I$, $H = iS_x$, $K = iS_y$.
+
+  In Fourier: $|\hat{S}(p,q)| \le 16c\,|T(p,q)|/(3N^{3/2})$
+  (from $|\hat{R}| = (8/\sqrt{N})|T|$ and
+  $\hat{H} \ge N/(2c)$). So $\Tr(S_x S_y)$ is $O(1/N^3)$
+  per momentum mode --- negligible compared to the $O(N)$ bare
+  Hessian. For $N$ sufficiently large, $H \ge \kappa N/2 > 0$.
 \end{enumerate}
 
 The quantum $\Phi$ differs from the classical $\Phi$ by
@@ -1043,13 +1053,60 @@ $\|u\| \lesssim 1/\sqrt{\kappa N}$: $|\nabla\Phi| \lesssim
 c/(\kappa^{3/2} N^{5/2}) \ll m_0^2\sqrt{N}/2$ (singularity distance).
 \end{proof}
 
+\begin{remark}[Contour deformation validity]
+\label{rem:contour_validity}
+For Cauchy's theorem to justify $\int_{\R^{|\La|}} = \int_{\rm thimble}$:
+\begin{enumerate}
+\item \textbf{Holomorphy}: The integrand $e^f$ is holomorphic in each
+  $\sigma_x$ away from the zeros of $\det(-\Delta+2i\sigma z)$.
+  Singularity avoidance: in the BL-relevant region
+  ($|u| \lesssim 1/\sqrt{\kappa N}$), the thimble displacement
+  $|\psi| \lesssim c/(\kappa^{3/2}N^{5/2})$ is exponentially
+  smaller than the singularity distance~$m_0^2\sqrt{N}/2$.
+\item \textbf{Decay on connecting walls}: At $|u_x| \to \infty$
+  with other $u_y$ fixed, the Gaussian factor $e^{-u_x^2/(4\lambda)}$
+  dominates the $\Tr\log$ growth (which is polynomial in~$u_x$:
+  $|\Tr\log(-\Delta+m_0^2+2iuz)| \le C_1 + C_2\log(1+|u|)$ per site).
+  So the integrand decays as $e^{-u_x^2/(4\lambda)+O(\log|u|)}
+  \to 0$ on the side walls. This justifies the single-variable
+  contour shift (\texttt{vertical\_contour\_shift}, proved);
+  the multi-variable version follows by Fubini applied $|\La|$ times.
+\item \textbf{Multi-variable Cauchy}: The proved
+  \texttt{vertical\_contour\_shift} shifts one variable at a time.
+  By Fubini (iterated integrals over a product), the $|\La|$-fold
+  composition shifts all variables simultaneously. Each step uses
+  the holomorphy and decay from~(1)--(2).
+\end{enumerate}
+\end{remark}
+
+\begin{remark}[IFT domain size and global control]
+\label{rem:ift_domain}
+The quantitative IFT gives a solution $\Phi$ with
+$\|\nabla\Phi\| \le C\|F(0)\| \cdot \|DF(0)^{-1}\|$ in a ball
+around $u = 0$. For the mass gap, we need the bound to hold
+on the BL-relevant region $\|u\|_\infty \lesssim 1/\sqrt{\kappa N}$.
+
+The IFT ball radius is determined by $\|D^2F\| \cdot \|DF(0)^{-1}\|^2$:
+the solution exists for $\|u\|$ such that $\|F(0)(u)\|$ is within the
+IFT convergence radius. Since $\|F(0)(u)\| = O(\|u\|^3/\sqrt{N})$
+and the convergence radius is $O(N^2)$ (from $\|DF(0)^{-1}\| \le c/N$
+and $\|D^2F\| = O(1)$), the IFT ball contains the BL-relevant region
+for $N$ sufficiently large:
+\[
+  O(\|u\|^3/\sqrt{N}) \lesssim O(1/(\kappa N)^{3/2}\sqrt{N})
+  = O(1/(\kappa^{3/2}N^2)) \ll O(N^2).
+\]
+\end{remark}
+
 \begin{remark}[Lean formalization]
 For the initial formalization, we \textbf{axiomatize}
 Proposition~\ref{prop:quantum_thimble} (existence of $\Phi$
 with bounds). The IFT proof is a realistic future target:
-Mathlib has implicit function theorems, and the hypotheses
-(smoothness from \texttt{contDiffAt\_log\_det}, invertibility
-from $H > 0$) are available.
+Mathlib has implicit function theorems (both finite-dimensional
+and Banach-space versions), and the key hypotheses are available:
+smoothness from \texttt{contDiff\_matrix\_det} (proved),
+invertibility from $H > 0$ (proved: \texttt{bare\_hessian\_pos}),
+and the Hessian formula from \texttt{hessian\_log\_det} (proved).
 \end{remark}
 
 \subsubsection{The transfer matrix resolution}
