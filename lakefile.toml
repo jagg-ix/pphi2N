@@ -15,7 +15,8 @@ rev = "4d82a22"
 
 [[require]]
 name = "MarkovSemigroups"
-path = "../markov-semigroups"
+git = "https://github.com/jagg-ix/markov-semigroups.git"
+rev = "2c4e1f843535ff4bc9016563515ab271abce621f"
 
 [[lean_lib]]
 name = "Pphi2N"
